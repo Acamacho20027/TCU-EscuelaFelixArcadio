@@ -500,7 +500,7 @@ body {
 
 /* ===== FOOTER - MINIMALISTA ===== */
 .main-footer {
-    background: #f8fafc;
+    background: #ffffff;
     color: #0f172a;
     padding: 3rem 0 2rem;
     margin-top: 4rem;
@@ -509,13 +509,15 @@ body {
 
 .footer-brand {
     margin-bottom: 2rem;
+    padding-top: 2.5rem;
 }
 
 .footer-icon {
-    width: 56px;
-    height: 56px;
+    width: 72px;
+    height: 72px;
     object-fit: contain;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    margin-left: 2.5rem;
 }
 
 .footer-brand h5 {
