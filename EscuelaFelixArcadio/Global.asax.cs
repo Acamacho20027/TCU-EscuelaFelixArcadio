@@ -1,3 +1,4 @@
+using EscuelaFelixArcadio.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace EscuelaFelixArcadio
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+            //Se agrega para poder inicializar los roles en la base de datos
+            RolInitialize.Inicializar();
         }
     }
 }
