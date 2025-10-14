@@ -18,6 +18,23 @@ namespace EscuelaFelixArcadio.Models
             // Agregar reclamaciones de usuario personalizadas aquí
             return userIdentity;
         }
+
+        public int IntentosFallidos { get; set; } = 0;
+
+        public bool EstaBloqueado { get; set; } = false;
+
+        public DateTime? FechaBloqueo { get; set; }
+
+        // Relación con tablas 
+        public ICollection<Documento> Documento { get; set; } = new List<Documento>();
+        public ICollection<MantenimientoEspacio> MantenimientoEspacio { get; set; } = new List<MantenimientoEspacio>();
+        public ICollection<MovimientoInventario> MovimientoInventario { get; set; } = new List<MovimientoInventario>();
+
+        public ICollection<Prestamo> Prestamo { get; set; } = new List<Prestamo>();
+        public ICollection<RecuperacionContrasena> RecuperacionContrasena { get; set; } = new List<RecuperacionContrasena>();
+        public ICollection<Reserva> Reserva { get; set; } = new List<Reserva>();
+        public ICollection<ReservaEspacio> ReservaEspacio { get; set; } = new List<ReservaEspacio>();
+        public ICollection<Sancion> Sancion { get; set; } = new List<Sancion>();
     }
 
 }
