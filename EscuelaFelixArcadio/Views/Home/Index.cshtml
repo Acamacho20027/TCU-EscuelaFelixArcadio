@@ -1,33 +1,228 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Inicio";
 }
 
-<main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
-    </section>
-
-    <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="hero-title">Formando Campeones del Futuro</h1>
+                    <h2 class="hero-subtitle">Escuela Félix Arcadio</h2>
+                    <p class="hero-description">
+                        Descubre tu potencial deportivo con nosotros. Ofrecemos entrenamiento profesional, 
+                        instalaciones modernas y un ambiente que fomenta la excelencia tanto en el deporte 
+                        como en la educación.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="@Url.Action("Register", "Account")" class="btn btn-primary-custom">
+                            <i class="fas fa-user-plus me-2"></i>Registrarse Ahora
+                        </a>
+                        <a href="@Url.Action("About", "Home")" class="btn btn-secondary-custom">
+                            <i class="fas fa-info-circle me-2"></i>Conocer Más
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image-container">
+                    <div class="sports-icons-grid">
+                        <div class="sport-icon-large">
+                            <i class="fas fa-futbol"></i>
+                        </div>
+                        <div class="sport-icon-large">
+                            <i class="fas fa-basketball-ball"></i>
+                        </div>
+                        <div class="sport-icon-large">
+                            <i class="fas fa-volleyball-ball"></i>
+                        </div>
+                        <div class="sport-icon-large">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <div class="sport-icon-large">
+                            <i class="fas fa-swimmer"></i>
+                        </div>
+                        <div class="sport-icon-large">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</main>
+</section>
+
+<!-- Sports Section -->
+<section id="nuestros-deportes" class="sports-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="section-title">Nuestros Deportes</h2>
+                <p class="section-subtitle">Descubre las disciplinas deportivas que ofrecemos</p>
+            </div>
+        </div>
+        
+        <div class="sports-grid">
+            <div class="sport-card">
+                <div class="sport-icon">
+                    <i class="fas fa-futbol"></i>
+                </div>
+                <h3 class="sport-title">Fútbol</h3>
+                <p class="sport-description">
+                    Entrenamiento completo en fútbol desde categorías infantiles hasta juveniles. 
+                    Técnica, táctica y desarrollo físico.
+                </p>
+                <a href="#" class="btn btn-primary-custom">Más Información</a>
+            </div>
+            
+            <div class="sport-card">
+                <div class="sport-icon">
+                    <i class="fas fa-basketball-ball"></i>
+                </div>
+                <h3 class="sport-title">Básquetbol</h3>
+                <p class="sport-description">
+                    Desarrolla habilidades técnicas y tácticas en una de las disciplinas más 
+                    dinámicas y emocionantes del deporte.
+                </p>
+                <a href="#" class="btn btn-primary-custom">Más Información</a>
+            </div>
+            
+            <div class="sport-card">
+                <div class="sport-icon">
+                    <i class="fas fa-volleyball-ball"></i>
+                </div>
+                <h3 class="sport-title">Voleibol</h3>
+                <p class="sport-description">
+                    Trabajo en equipo, coordinación y agilidad. Perfecto para desarrollar 
+                    habilidades de cooperación y liderazgo.
+                </p>
+                <a href="#" class="btn btn-primary-custom">Más Información</a>
+            </div>
+            
+            <div class="sport-card">
+                <div class="sport-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h3 class="sport-title">Atletismo</h3>
+                <p class="sport-description">
+                    Disciplina base que mejora la resistencia, velocidad y coordinación. 
+                    Fundamento para cualquier deporte.
+                </p>
+                <a href="#" class="btn btn-primary-custom">Más Información</a>
+            </div>
+            
+            <div class="sport-card">
+                <div class="sport-icon">
+                    <i class="fas fa-table-tennis"></i>
+                </div>
+                <h3 class="sport-title">Badminton</h3>
+                <p class="sport-description">
+                    Deporte de raqueta que combina velocidad, agilidad y estrategia. 
+                    Desarrolla reflejos, coordinación y resistencia física.
+                </p>
+                <a href="#" class="btn btn-primary-custom">Más Información</a>
+            </div>
+            
+            <div class="sport-card">
+                <div class="sport-icon">
+                    <i class="fas fa-dumbbell"></i>
+                </div>
+                <h3 class="sport-title">Fitness</h3>
+                <p class="sport-description">
+                    Programa de acondicionamiento físico adaptado a todas las edades 
+                    y niveles de condición física.
+                </p>
+                <a href="#" class="btn btn-primary-custom">Más Información</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="section-title">¿Por qué elegirnos?</h2>
+                <p class="section-subtitle">Ventajas de entrenar en la Escuela Félix Arcadio</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-medal"></i>
+                    </div>
+                    <h4>Entrenadores Certificados</h4>
+                    <p>Nuestro equipo de entrenadores cuenta con certificaciones profesionales y amplia experiencia.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h4>Instalaciones Modernas</h4>
+                    <p>Canchas, piscinas y gimnasios equipados con la última tecnología deportiva.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4>Ambiente Familiar</h4>
+                    <p>Creemos en el deporte como herramienta de formación integral y valores humanos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Facilities Section -->
+<section id="instalaciones" class="facilities-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="section-title">Nuestras Instalaciones</h2>
+                <p class="section-subtitle">Conoce las instalaciones deportivas de las que disponemos</p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="facility-card">
+                    <div class="facility-icon">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <div class="facility-content">
+                        <h3 class="facility-title">Gimnasio</h3>
+                        <p class="facility-description">
+                            Contamos con un gimnasio completamente equipado para el entrenamiento y desarrollo físico de nuestros estudiantes. 
+                            Nuestras instalaciones están diseñadas para fomentar la práctica deportiva en un ambiente seguro y moderno.
+                        </p>
+                        <div class="facility-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Equipamiento moderno y seguro</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Espacio amplio y ventilado</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Supervisión profesional</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

@@ -4,36 +4,118 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - Mi aplicación ASP.NET</title>
+    <title>@ViewBag.Title - Escuela Félix Arcadio Montero Monge</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+    <!-- Header -->
+    <header class="main-header">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <!-- Logo -->
+                <div class="navbar-brand">
+                    <div class="logo-container">
+                        <img src="~/Content/images/escudo_escuela_felix_arcadio.jpg" alt="Escudo Escuela Félix Arcadio Montero Monge" class="logo-icon" />
+                        <div class="logo-text">
+                            <span class="school-name">Escuela Félix Arcadio<br>Montero Monge</span>
+                            <span class="tagline">Gestión Deportiva</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Toggle -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Navigation Menu -->
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            @Html.ActionLink("Inicio", "Index", "Home", new { area = "" }, new { @class = "nav-link" })
+                        </li>
+                        <li class="nav-item">
+                            <a href="#nuestros-deportes" class="nav-link">Deportes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#instalaciones" class="nav-link">Instalaciones</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#contacto" class="nav-link">Contacto</a>
+                        </li>
+                    </ul>
+                    
+                    <!-- Auth Buttons -->
+                    <div class="auth-buttons">
+                        @Html.Partial("_LoginPartial")
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer id="contacto" class="main-footer">
         <div class="container">
-            @Html.ActionLink("Nombre de la aplicación", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Alternar navegación" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li>@Html.ActionLink("Inicio", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Acerca de", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Contacto", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                </ul>
-                 @Html.Partial("_LoginPartial")
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="footer-brand">
+                        <img src="~/Content/images/escudo_escuela_felix_arcadio.jpg" alt="Escudo Escuela Félix Arcadio Montero Monge" class="footer-icon" />
+                        <h5>Escuela Félix Arcadio<br>Montero Monge</h5>
+                        <p>Formando campeones del futuro a través del deporte y la educación.</p>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="follow-section">
+                        <h6>Contáctanos</h6>
+                        <div class="contact-grid">
+                            <div class="contact-item-footer">
+                                <div class="contact-icon-footer">
+                                    <i class="fab fa-facebook-f"></i>
+                                </div>
+                                <div class="contact-info-footer">
+                                    <span class="contact-label">Facebook</span>
+                                    <a href="https://www.facebook.com/ESCFAMM?locale=es_LA" target="_blank" class="contact-link">@@ESCFAMM</a>
+                                </div>
+                            </div>
+                            
+                            <div class="contact-item-footer">
+                                <div class="contact-icon-footer">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <div class="contact-info-footer">
+                                    <span class="contact-label">Teléfono</span>
+                                    <a href="tel:+50621028716" class="contact-link">2102 8716</a>
+                                </div>
+                            </div>
+                            
+                            <div class="contact-item-footer">
+                                <div class="contact-icon-footer">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="contact-info-footer">
+                                    <span class="contact-label">Email</span>
+                                    <a href="mailto:esc.felixarcadiomontero@mep.go.cr" class="contact-link">esc.felixarcadiomontero@mep.go.cr</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="footer-divider">
+            <div class="footer-bottom">
+                <p>&copy; @DateTime.Now.Year Escuela Félix Arcadio Montero Monge. Todos los derechos reservados.</p>
             </div>
         </div>
-    </nav>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - Mi aplicación ASP.NET</p>
-        </footer>
-    </div>
+    </footer>
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
