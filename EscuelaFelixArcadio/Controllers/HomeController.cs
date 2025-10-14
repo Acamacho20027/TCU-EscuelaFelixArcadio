@@ -10,20 +10,19 @@ namespace EscuelaFelixArcadio.Controllers
     {
         public ActionResult Index()
         {
+            ViewBag.Message = "Bienvenido a la Escuela Félix Arcadio - Gestión Deportiva";
             return View();
         }
 
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
-
+            ViewBag.Message = "Conoce nuestros deportes y programas deportivos.";
             return View();
         }
 
         public ActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
-
+            ViewBag.Message = "Contáctanos para más información sobre nuestros servicios deportivos.";
             return View();
         }
     }

@@ -1,20 +1,851 @@
-﻿/* Set padding to keep content from hitting the edges */
+﻿/* ===== ESCUELA FÉLIX ARCADIO - GESTIÓN DEPORTIVA ===== */
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #0f172a;
+    background-color: #ffffff;
+    font-weight: 400;
+}
+
+/* ===== HEADER STYLES - MINIMALISTA ===== */
+.main-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar {
+    padding: 1.5rem 0;
+}
+
+/* Logo Styles - Minimalista */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-icon {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.school-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.school-name br {
+    display: block;
+}
+
+.tagline {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 400;
+    margin: 0;
+}
+
+/* Navigation Styles - Minimalista */
+.navbar-nav .nav-link {
+    color: #0f172a !important;
+    font-weight: 500;
+    padding: 0.75rem 1rem !important;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    margin: 0 0.25rem;
+    font-size: 0.95rem;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #1e40af !important;
+    background-color: #f8fafc;
+}
+
+/* Auth Buttons - Minimalista */
+.auth-buttons {
+    margin-left: 2rem;
+}
+
+.auth-buttons .navbar-nav {
+    flex-direction: row;
+}
+
+.auth-buttons .nav-link {
+    background-color: transparent !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500;
+    margin-left: 0.5rem;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.auth-buttons .nav-link:hover {
+    background-color: #1e40af !important;
+    color: #ffffff !important;
+    border-color: #1e40af;
+}
+
+.auth-buttons .nav-link:first-child {
+    background-color: #1e40af !important;
+    color: #ffffff !important;
+    border-color: #1e40af;
+}
+
+.auth-buttons .nav-link:first-child:hover {
+    background-color: #0f172a !important;
+    border-color: #0f172a;
+    color: #ffffff !important;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+    min-height: calc(100vh - 200px);
+}
+
+/* ===== HERO SECTION - MINIMALISTA ===== */
+.hero-section {
+    background: #ffffff;
+    padding: 4rem 0;
+    position: relative;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    color: #0f172a;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    color: #1e40af;
+}
+
+.hero-description {
+    font-size: 1.125rem;
+    margin-bottom: 2.5rem;
+    color: #64748b;
+    max-width: 600px;
+    line-height: 1.7;
+}
+
+/* Hero Buttons */
+.hero-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Sports Icons Grid - Minimalista */
+.hero-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.sports-icons-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 300px;
+}
+
+.sport-icon-large {
+    width: 60px;
+    height: 60px;
+    background: #1e40af;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.sport-icon-large i {
+    position: relative;
+    z-index: 2;
+}
+
+.sport-icon-large:hover {
+    background: #1e40af;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+}
+
+/* Section Styles */
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1rem;
+}
+
+.section-subtitle {
+    font-size: 1.25rem;
+    color: #64748b;
+    margin-bottom: 2rem;
+}
+
+.sports-section {
+    background: #ffffff;
+}
+
+/* ===== SPORTS CARDS - MINIMALISTAS ===== */
+.sports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 3rem 0;
+}
+
+.sport-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 2rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.sport-card:hover {
+    border-color: #1e40af;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.sport-icon {
+    font-size: 2.5rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    width: 60px;
+    height: 60px;
+    background: #1e40af;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.sport-icon i {
+    position: relative;
+    z-index: 2;
+}
+
+.sport-title {
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #0f172a;
+}
+
+.sport-description {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+/* ===== BUTTONS - MINIMALISTAS ===== */
+.btn-primary-custom {
+    background: #1e40af;
+    border: 1px solid #1e40af;
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary-custom i {
+    /* Iconos limpios sin efecto glitch */
+}
+
+.btn-primary-custom:hover {
+    background: #1e40af;
+    border-color: #1e40af;
+    color: #ffffff;
+    text-decoration: none;
+    opacity: 0.9;
+}
+
+.btn-secondary-custom {
+    background: #1e40af;
+    border: 1px solid #1e40af;
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-secondary-custom i {
+    /* Iconos limpios sin efecto glitch */
+}
+
+.btn-secondary-custom:hover {
+    background: #1e40af;
+    border-color: #1e40af;
+    color: #ffffff;
+    text-decoration: none;
+    opacity: 0.9;
+}
+
+/* Feature Cards - Minimalistas */
+.feature-card {
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.feature-card:hover {
+    border-color: #1e40af;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    background: #1e40af;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 1.5rem;
+    color: #ffffff;
+}
+
+.feature-icon i {
+    position: relative;
+    z-index: 2;
+}
+
+.feature-card h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 1rem;
+}
+
+.feature-card p {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* CTA Section - Minimalista */
+.cta-section {
+    background: #f8fafc;
+    padding: 3rem 0;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.cta-section h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #0f172a;
+}
+
+.cta-section p {
+    font-size: 1rem;
+    color: #64748b;
+    margin-bottom: 0;
+}
+
+/* Features Section Background */
+.features-section {
+    background-color: #f8fafc !important;
+}
+
+/* ===== FACILITIES SECTION ===== */
+.facilities-section {
+    background: #ffffff;
+    padding: 4rem 0;
+}
+
+.facility-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 3rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.facility-card:hover {
+    border-color: #1e40af;
+    box-shadow: 0 8px 25px rgba(30, 64, 175, 0.1);
+    transform: translateY(-2px);
+}
+
+.facility-icon {
+    width: 80px;
+    height: 80px;
+    background: #1e40af;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.facility-icon i {
+    position: relative;
+    z-index: 2;
+}
+
+.facility-content {
+    flex: 1;
+}
+
+.facility-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1rem;
+}
+
+.facility-description {
+    font-size: 1.125rem;
+    color: #64748b;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+}
+
+.facility-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.feature-item i {
+    color: #ffffff;
+    font-size: 1.25rem;
+    width: 24px;
+    height: 24px;
+    background: #1e40af;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.feature-item span {
+    color: #0f172a;
+    font-weight: 500;
+}
+
+
+/* ===== FOOTER - MINIMALISTA ===== */
+.main-footer {
+    background: #f8fafc;
+    color: #0f172a;
+    padding: 3rem 0 2rem;
+    margin-top: 4rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.footer-brand {
+    margin-bottom: 2rem;
+}
+
+.footer-icon {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    margin-bottom: 1rem;
+}
+
+.footer-brand h5 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #0f172a;
+}
+
+.footer-brand p {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.75rem;
+}
+
+.footer-links a {
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    font-weight: 500;
+}
+
+.footer-links a:hover {
+    color: #1e40af;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: #ffffff;
+    color: #64748b;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+}
+
+.social-link:hover {
+    background: #1e40af;
+    color: #ffffff;
+    border-color: #1e40af;
+}
+
+.footer-divider {
+    border-color: #e2e8f0;
+    margin: 2rem 0 1rem;
+}
+
+.footer-bottom {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* ===== NEW FOOTER CONTACT SECTION ===== */
+.follow-section {
+    padding: 0 2rem;
+}
+
+.follow-section h6 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 1.5rem;
+}
+
+.contact-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contact-item-footer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.contact-item-footer:hover {
+    border-color: #1e40af;
+    box-shadow: 0 2px 8px rgba(30, 64, 175, 0.1);
+}
+
+.contact-icon-footer {
+    width: 40px;
+    height: 40px;
+    background: #1e40af;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.contact-icon-footer i {
+    position: relative;
+    z-index: 2;
+}
+
+.contact-info-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.contact-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.contact-link {
+    font-size: 0.95rem;
+    color: #1e40af;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.contact-link:hover {
+    color: #0f172a;
+    text-decoration: none;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+    }
+    
+    .sports-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .logo-container {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .school-name {
+        font-size: 1.25rem;
+    }
+    
+    .auth-buttons {
+        margin-left: 0;
+        margin-top: 1rem;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+    
+    .follow-section {
+        padding: 0 1rem;
+        margin-top: 2rem;
+    }
+    
+    .contact-grid {
+        gap: 1rem;
+    }
+    
+    .contact-item-footer {
+        padding: 0.75rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .hero-buttons .btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .sports-icons-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .sport-icon-large {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .feature-card {
+        padding: 1.5rem;
+    }
+    
+    .cta-section {
+        text-align: center;
+    }
+    
+    .cta-section .btn-primary-custom {
+        width: 100%;
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-section {
+        padding: 3rem 0;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .sport-card {
+        padding: 1.5rem;
+    }
+    
+    .btn-primary-custom,
+    .btn-secondary-custom {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .sports-icons-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .sport-icon-large {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+    
+    .hero-image-container {
+        padding: 1rem;
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+}
+
+/* ===== OVERRIDE BOOTSTRAP DEFAULTS ===== */
 .body-content {
-    margin-top: 15px;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding: 0;
+    margin: 0;
 }
 
-/* Override the default bootstrap behavior where horizontal description lists 
-   will truncate terms that are too long to fit in the left column 
-*/
-.dl-horizontal dt {
-    white-space: normal;
+.container {
+    max-width: 1200px;
 }
 
-/* Set width on the form input elements since they're 100% wide by default */
+.navbar-toggler {
+    border: none;
+    color: #0f172a;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+
+/* Form inputs */
 input,
 select,
 textarea {
-    max-width: 280px;
+    max-width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    padding: 0.75rem;
+    transition: border-color 0.3s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #1e40af;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    outline: none;
+}
+
+/* ===== FACILITIES RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .facility-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem;
+    }
+    
+    .facility-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+    
+    .facility-title {
+        font-size: 1.5rem;
+    }
+    
+    .facility-description {
+        font-size: 1rem;
+    }
 }
