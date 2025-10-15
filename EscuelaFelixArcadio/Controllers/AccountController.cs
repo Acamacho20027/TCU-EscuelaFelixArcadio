@@ -155,6 +155,9 @@ namespace EscuelaFelixArcadio.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    // Asignar automáticamente el rol "Estudiante" a todos los usuarios nuevos
+                    await UserManager.AddToRoleAsync(user.Id, "Estudiante");
+                    
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
                     
                     // Para obtener más información sobre cómo habilitar la confirmación de cuentas y el restablecimiento de contraseña, visite https://go.microsoft.com/fwlink/?LinkID=320771
@@ -371,6 +374,9 @@ namespace EscuelaFelixArcadio.Controllers
                 var result = await UserManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
+                    // Asignar automáticamente el rol "Estudiante" a usuarios registrados externamente
+                    await UserManager.AddToRoleAsync(user.Id, "Estudiante");
+                    
                     result = await UserManager.AddLoginAsync(user.Id, info.Login);
                     if (result.Succeeded)
                     {
