@@ -38,10 +38,10 @@
                             @Html.ActionLink("Inicio", "Index", "Home", new { area = "" }, new { @class = "nav-link" })
                         </li>
                         <li class="nav-item">
-                            <a href="#nuestros-deportes" class="nav-link">Deportes</a>
+                            <a href="@Url.Action("Index", "Home")#nuestros-deportes" class="nav-link">Deportes</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#instalaciones" class="nav-link">Instalaciones</a>
+                            <a href="@Url.Action("Index", "Home")#instalaciones" class="nav-link">Instalaciones</a>
                         </li>
                         <li class="nav-item">
                             <a href="#contacto" class="nav-link">Contacto</a>
