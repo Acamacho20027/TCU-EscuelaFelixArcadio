@@ -109,4 +109,35 @@ namespace EscuelaFelixArcadio.Models
         [Display(Name = "Correo electrónico")]
         public string Email { get; set; }
     }
+
+    public class RecuperarContrasenaViewModel
+    {
+        [Required(ErrorMessage = "El correo electrónico es requerido")]
+        [EmailAddress(ErrorMessage = "Ingrese un correo electrónico válido")]
+        [Display(Name = "Correo electrónico")]
+        public string Email { get; set; }
+    }
+
+    public class CambiarContrasenaTemporal
+    {
+        [Required(ErrorMessage = "El correo electrónico es requerido")]
+        [EmailAddress(ErrorMessage = "Ingrese un correo electrónico válido")]
+        [Display(Name = "Correo electrónico")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "La contraseña temporal es requerida")]
+        [Display(Name = "Contraseña Temporal")]
+        public string ContrasenaTemporal { get; set; }
+
+        [Required(ErrorMessage = "La nueva contraseña es requerida")]
+        [StringLength(100, ErrorMessage = "La {0} debe tener al menos {2} caracteres.", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        [Display(Name = "Nueva Contraseña")]
+        public string NuevaContrasena { get; set; }
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirmar Nueva Contraseña")]
+        [Compare("NuevaContrasena", ErrorMessage = "Las contraseñas no coinciden.")]
+        public string ConfirmarContrasena { get; set; }
+    }
 }

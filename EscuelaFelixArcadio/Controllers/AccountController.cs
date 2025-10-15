@@ -409,6 +409,160 @@ namespace EscuelaFelixArcadio.Controllers
             return View();
         }
 
+        //
+        // GET: /Account/RecuperarContrasena
+        [AllowAnonymous]
+        public ActionResult RecuperarContrasena()
+        {
+            return View();
+        }
+
+        //
+        // POST: /Account/RecuperarContrasena
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> RecuperarContrasena(RecuperarContrasenaViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await UserManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // No revelar que el usuario no existe
+                ViewBag.Mensaje = "Si el correo existe en nuestro sistema, recibirás un email con una contraseña temporal.";
+                return View("RecuperarContrasenaConfirmacion");
+            }
+
+            // Generar contraseña temporal
+            string contrasenaTemporal = GenerarContrasenaTemporal();
+
+            // Guardar registro de recuperación en la base de datos
+            using (var db = new ApplicationDbContext())
+            {
+                var recuperacion = new RecuperacionContrasena
+                {
+                    Id = user.Id,
+                    Token = contrasenaTemporal,
+                    Expira = DateTime.Now.AddHours(24),
+                    Usado = false,
+                    FechaCreacion = DateTime.Now
+                };
+                db.RecuperacionContrasena.Add(recuperacion);
+                await db.SaveChangesAsync();
+            }
+
+            // Enviar email con contraseña temporal
+            string subject = "Recuperación de Contraseña - Escuela Félix Arcadio";
+            string body = $@"
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <div style='background-color: #1e3a8a; color: white; padding: 20px; text-align: center;'>
+                        <h1 style='margin: 0;'>Escuela Félix Arcadio Montero Monge</h1>
+                    </div>
+                    <div style='padding: 30px; background-color: #f8fafc;'>
+                        <h2 style='color: #1e3a8a;'>Recuperación de Contraseña</h2>
+                        <p>Hola,</p>
+                        <p>Has solicitado recuperar tu contraseña. Tu contraseña temporal es:</p>
+                        <div style='background-color: #fff; padding: 15px; border-left: 4px solid #1e3a8a; margin: 20px 0;'>
+                            <h3 style='margin: 0; color: #1e3a8a; font-size: 24px; letter-spacing: 2px;'>{contrasenaTemporal}</h3>
+                        </div>
+                        <p><strong>Importante:</strong></p>
+                        <ul>
+                            <li>Esta contraseña temporal expira en 24 horas</li>
+                            <li>Debes cambiarla por una nueva contraseña después de iniciar sesión</li>
+                            <li>Si no solicitaste este cambio, ignora este correo</li>
+                        </ul>
+                        <p style='margin-top: 30px;'>
+                            <a href='{Url.Action("CambiarContrasenaTemporal", "Account", null, Request.Url.Scheme)}' 
+                               style='background-color: #1e3a8a; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;'>
+                                Cambiar Contraseña
+                            </a>
+                        </p>
+                    </div>
+                    <div style='background-color: #e2e8f0; padding: 15px; text-align: center; color: #64748b;'>
+                        <p style='margin: 0; font-size: 12px;'>Escuela Félix Arcadio Montero Monge - {DateTime.Now.Year}</p>
+                    </div>
+                </div>";
+
+            await UserManager.SendEmailAsync(user.Id, subject, body);
+
+            ViewBag.Mensaje = "Se ha enviado un correo con tu contraseña temporal. Por favor revisa tu bandeja de entrada.";
+            return View("RecuperarContrasenaConfirmacion");
+        }
+
+        //
+        // GET: /Account/CambiarContrasenaTemporal
+        [AllowAnonymous]
+        public ActionResult CambiarContrasenaTemporal()
+        {
+            return View();
+        }
+
+        //
+        // POST: /Account/CambiarContrasenaTemporal
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> CambiarContrasenaTemporal(CambiarContrasenaTemporal model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await UserManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Usuario no encontrado.");
+                return View(model);
+            }
+
+            // Verificar la contraseña temporal en la base de datos
+            using (var db = new ApplicationDbContext())
+            {
+                var recuperacion = db.RecuperacionContrasena
+                    .Where(r => r.Id == user.Id && r.Token == model.ContrasenaTemporal && !r.Usado && r.Expira > DateTime.Now)
+                    .OrderByDescending(r => r.FechaCreacion)
+                    .FirstOrDefault();
+
+                if (recuperacion == null)
+                {
+                    ModelState.AddModelError("", "La contraseña temporal es inválida o ha expirado.");
+                    return View(model);
+                }
+
+                // Cambiar la contraseña
+                var token = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
+                var result = await UserManager.ResetPasswordAsync(user.Id, token, model.NuevaContrasena);
+
+                if (result.Succeeded)
+                {
+                    // Marcar el token como usado
+                    recuperacion.Usado = true;
+                    await db.SaveChangesAsync();
+
+                    ViewBag.Mensaje = "Tu contraseña ha sido cambiada exitosamente. Ahora puedes iniciar sesión con tu nueva contraseña.";
+                    return View("CambiarContrasenaConfirmacion");
+                }
+
+                AddErrors(result);
+            }
+
+            return View(model);
+        }
+
+        // Método auxiliar para generar contraseña temporal
+        private string GenerarContrasenaTemporal()
+        {
+            const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 8)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
