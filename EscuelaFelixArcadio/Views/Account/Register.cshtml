@@ -3,40 +3,55 @@
     ViewBag.Title = "Registrarse";
 }
 
-<main aria-labelledby="title">
-    <h2 id="title">@ViewBag.Title.</h2>
-
-    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form" }))
-    {
-        @Html.AntiForgeryToken()
-        <h4>Cree una cuenta nueva.</h4>
-        <hr />
-        @Html.ValidationSummary("", new { @class = "text-danger" })
-        <div class="row">
-            @Html.LabelFor(m => m.Email, new { @class = "col-md-2 col-form-label" })
-            <div class="col-md-10">
-                @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="auth-header-content">
+                <img src="~/Content/images/escudo_escuela_felix_arcadio.jpg" alt="Escudo Escuela Félix Arcadio" class="auth-logo" />
+                <h1 class="auth-title">Registrar Cuenta</h1>
+                <p class="auth-subtitle">Únete a la comunidad deportiva de la Escuela Félix Arcadio Montero Monge</p>
             </div>
         </div>
-        <div class="row">
-            @Html.LabelFor(m => m.Password, new { @class = "col-md-2 col-form-label" })
-            <div class="col-md-10">
-                @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+        
+        <div class="auth-body">
+            <div class="auth-form">
+                @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    
+                    @Html.ValidationSummary("", new { @class = "validation-summary-errors" })
+                    
+                    <div class="form-group-custom">
+                        @Html.LabelFor(m => m.Email, new { @class = "form-label-custom" })
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control-custom", placeholder = "Ingresa tu correo electrónico" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "field-validation-error" })
+                    </div>
+                    
+                    <div class="form-group-custom">
+                        @Html.LabelFor(m => m.Password, new { @class = "form-label-custom" })
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control-custom", placeholder = "Crea una contraseña segura" })
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-validation-error" })
+                    </div>
+                    
+                    <div class="form-group-custom">
+                        @Html.LabelFor(m => m.ConfirmPassword, new { @class = "form-label-custom" })
+                        @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control-custom", placeholder = "Confirma tu contraseña" })
+                        @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "field-validation-error" })
+                    </div>
+                    
+                    <button type="submit" class="btn-auth">
+                        <i class="fas fa-user-plus me-2"></i>Registrar Cuenta
+                    </button>
+                }
+                
+                <div class="auth-links">
+                    <p>¿Ya tienes una cuenta? @Html.ActionLink("Iniciar sesión aquí", "Login", new { }, new { @class = "auth-link" })</p>
+                </div>
             </div>
+            
         </div>
-        <div class="row">
-            @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 col-form-label" })
-            <div class="col-md-10">
-                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
-            </div>
-        </div>
-        <div class="row">
-            <div class="offset-md-2 col-md-10">
-                <input type="submit" value="Registrarse" class="btn btn-outline-dark" />
-            </div>
-        </div>
-    }
-</main>
+    </div>
+</div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
