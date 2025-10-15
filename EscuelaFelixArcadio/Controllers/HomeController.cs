@@ -25,5 +25,13 @@ namespace EscuelaFelixArcadio.Controllers
             ViewBag.Message = "Contáctanos para más información sobre nuestros servicios deportivos.";
             return View();
         }
+
+        // Página de prueba solo para administradores
+        [Authorize(Roles = "Administrador")]
+        public ActionResult AdminPanel()
+        {
+            ViewBag.Message = "Panel de Administración - Solo para administradores";
+            return View();
+        }
     }
 }
