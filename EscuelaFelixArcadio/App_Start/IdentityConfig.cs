@@ -11,15 +11,47 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using EscuelaFelixArcadio.Models;
+using System.Net;
+using System.Net.Mail;
+using System.Configuration;
 
 namespace EscuelaFelixArcadio
 {
     public class EmailService : IIdentityMessageService
     {
-        public Task SendAsync(IdentityMessage message)
+        public async Task SendAsync(IdentityMessage message)
         {
-            // Conecte el servicio de correo electrónico aquí para enviar un correo electrónico.
-            return Task.FromResult(0);
+            // Configuración de Gmail SMTP
+            var smtpClient = new SmtpClient("smtp.gmail.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential(
+                    ConfigurationManager.AppSettings["EmailFrom"],
+                    ConfigurationManager.AppSettings["EmailPassword"]
+                ),
+                EnableSsl = true,
+            };
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(ConfigurationManager.AppSettings["EmailFrom"], "Escuela Félix Arcadio Montero Monge"),
+                Subject = message.Subject,
+                Body = message.Body,
+                IsBodyHtml = true,
+            };
+
+            mailMessage.To.Add(message.Destination);
+
+            try
+            {
+                await smtpClient.SendMailAsync(mailMessage);
+            }
+            catch (Exception ex)
+            {
+                // Log el error
+                System.Diagnostics.Debug.WriteLine($"Error enviando email: {ex.Message}");
+                throw;
+            }
         }
     }
 

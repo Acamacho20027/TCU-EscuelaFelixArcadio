@@ -1,0 +1,257 @@
+@model EscuelaFelixArcadio.Models.CambiarContrasenaTemporal
+@{
+    ViewBag.Title = "Cambiar Clave";
+}
+
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="auth-header-content">
+                <div class="auth-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h1 class="auth-title">Cambiar Contrase&ntilde;a</h1>
+                <p class="auth-subtitle">Usa tu contrase&ntilde;a temporal para crear una nueva contrase&ntilde;a</p>
+            </div>
+        </div>
+        
+        <div class="auth-body">
+            @using (Html.BeginForm("CambiarContrasenaTemporal", "Account", FormMethod.Post, new { role = "form" }))
+            {
+                @Html.AntiForgeryToken()
+                
+                @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors" })
+                
+                <div class="info-message">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Ingresa la contrase&ntilde;a temporal que recibiste por correo y crea tu nueva contrase&ntilde;a.</p>
+                </div>
+                
+                <div class="form-group-custom">
+                    @Html.LabelFor(m => m.Email, new { @class = "form-label-custom" })
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control-custom", placeholder = "tucorreo@ejemplo.com", autofocus = "autofocus" })
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "field-validation-error" })
+                </div>
+                
+                <div class="form-group-custom">
+                    @Html.LabelFor(m => m.ContrasenaTemporal, new { @class = "form-label-custom" })
+                    <div class="password-input-wrapper">
+                        @Html.TextBoxFor(m => m.ContrasenaTemporal, new { @class = "form-control-custom", placeholder = "XXXXXXXX", style = "text-transform: uppercase; letter-spacing: 2px;" })
+                        <small class="form-text">La contrase&ntilde;a temporal que recibiste por correo (8 caracteres)</small>
+                    </div>
+                    @Html.ValidationMessageFor(m => m.ContrasenaTemporal, "", new { @class = "field-validation-error" })
+                </div>
+                
+                <hr style="margin: 30px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                
+                <div class="form-group-custom">
+                    @Html.LabelFor(m => m.NuevaContrasena, new { @class = "form-label-custom" })
+                    <input type="password" id="NuevaContrasena" name="NuevaContrasena" class="form-control-custom" />
+                    @Html.ValidationMessageFor(m => m.NuevaContrasena, "", new { @class = "field-validation-error" })
+                </div>
+                
+                <div class="form-group-custom">
+                    @Html.LabelFor(m => m.ConfirmarContrasena, new { @class = "form-label-custom" })
+                    <input type="password" id="ConfirmarContrasena" name="ConfirmarContrasena" class="form-control-custom" />
+                    @Html.ValidationMessageFor(m => m.ConfirmarContrasena, "", new { @class = "field-validation-error" })
+                </div>
+                
+                <div class="password-requirements">
+                    <h4><i class="fas fa-shield-alt"></i> Requisitos de la contrase&ntilde;a:</h4>
+                    <ul>
+                        <li><i class="fas fa-check"></i> M&iacute;nimo 6 caracteres</li>
+                        <li><i class="fas fa-check"></i> Al menos una letra may&uacute;scula</li>
+                        <li><i class="fas fa-check"></i> Al menos una letra min&uacute;scula</li>
+                        <li><i class="fas fa-check"></i> Al menos un n&uacute;mero</li>
+                        <li><i class="fas fa-check"></i> Al menos un car&aacute;cter especial</li>
+                    </ul>
+                </div>
+                
+                <button type="submit" class="btn-auth">
+                    <i class="fas fa-save me-2"></i>Guardar Nueva Contrase&ntilde;a
+                </button>
+            }
+            
+            <div class="auth-links">
+                <div class="auth-links-text">
+                    <p>&iquest;No tienes una contrase&ntilde;a temporal?</p>
+                </div>
+                <div class="action-buttons">
+                    <div class="button-container">
+                        @Html.ActionLink("Solicitar una aqu\u00ed", "RecuperarContrasena", new { }, new { @class = "btn-auth" })
+                    </div>
+                    <div class="button-container">
+                        @Html.ActionLink("Volver al inicio de sesi\u00f3n", "Login", new { }, new { @class = "btn-auth-secondary" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function() {
+            $('#NuevaContrasena').attr('placeholder', 'Ingresa tu nueva contrase\u00f1a');
+            $('#ConfirmarContrasena').attr('placeholder', 'Confirma tu nueva contrase\u00f1a');
+        });
+    </script>
+    <style>
+.info-message {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    padding: 15px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    display: flex;
+    align-items: start;
+    gap: 12px;
+}
+
+.info-message i {
+    color: #3b82f6;
+    font-size: 20px;
+    margin-top: 2px;
+}
+
+.info-message p {
+    margin: 0;
+    color: #1e40af;
+    line-height: 1.6;
+}
+
+.password-input-wrapper small {
+    display: block;
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.password-requirements {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 25px 0;
+}
+
+.password-requirements h4 {
+    color: #1e3a8a;
+    font-size: 14px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.password-requirements ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.password-requirements li {
+    color: #475569;
+    font-size: 13px;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.password-requirements li i {
+    color: #10b981;
+    font-size: 12px;
+}
+
+.auth-links-text {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-links-text p {
+    color: #64748b;
+    font-size: 16px;
+    margin: 0;
+    font-weight: 500;
+}
+
+.action-buttons {
+    display: flex;
+    width: 100%;
+    margin: 0 auto;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 15px;
+}
+
+.button-container {
+    flex: 1;
+    padding: 0 7.5px;
+}
+
+.action-buttons .btn-auth,
+.action-buttons .btn-auth-secondary {
+    text-align: center;
+    text-decoration: none;
+    height: 48px;
+    line-height: 24px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.action-buttons .btn-auth {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: -2px;
+}
+
+.action-buttons .btn-auth:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(30, 58, 138, 0.3);
+    text-decoration: none;
+    color: white;
+}
+
+.action-buttons .btn-auth-secondary {
+    background: #64748b;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: -1px;
+}
+
+.action-buttons .btn-auth-secondary:hover {
+    background: #475569;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(100, 116, 139, 0.3);
+    text-decoration: none;
+    color: white;
+}
+
+@@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .action-buttons .btn-auth,
+    .action-buttons .btn-auth-secondary {
+        width: 100%;
+        min-width: 180px;
+        height: 48px;
+    }
+}
+</style>
+}
+

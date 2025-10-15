@@ -1,6 +1,6 @@
-﻿@model EscuelaFelixArcadio.Models.RegisterViewModel
+@model EscuelaFelixArcadio.Models.RecuperarContrasenaViewModel
 @{
-    ViewBag.Title = "Registrarse";
+    ViewBag.Title = "Recuperar Cuenta";
 }
 
 <div class="auth-page">
@@ -8,49 +8,42 @@
         <div class="auth-header">
             <div class="auth-header-content">
                 <div class="auth-icon">
-                    <i class="fas fa-user-plus"></i>
+                    <i class="fas fa-key"></i>
                 </div>
-                <h1 class="auth-title">Registrar Cuenta</h1>
-                <p class="auth-subtitle">Únete a la comunidad deportiva de la Escuela Félix Arcadio Montero Monge</p>
+                <h1 class="auth-title">Recuperar Contrase&ntilde;a</h1>
+                <p class="auth-subtitle">Ingresa tu correo electr&oacute;nico y te enviaremos una contrase&ntilde;a temporal</p>
             </div>
         </div>
         
         <div class="auth-body">
-            @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form" }))
+            @using (Html.BeginForm("RecuperarContrasena", "Account", FormMethod.Post, new { role = "form" }))
             {
                 @Html.AntiForgeryToken()
                 
-                @Html.ValidationSummary("", new { @class = "validation-summary-errors" })
+                @Html.ValidationSummary(true, "", new { @class = "validation-summary-errors" })
+                
+                <div class="info-message">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Te enviaremos un correo electr&oacute;nico con una contrase&ntilde;a temporal que podr&aacute;s usar para cambiar tu contrase&ntilde;a.</p>
+                </div>
                 
                 <div class="form-group-custom">
                     @Html.LabelFor(m => m.Email, new { @class = "form-label-custom" })
-                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control-custom", placeholder = "Ingresa tu correo electrónico" })
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control-custom", placeholder = "tucorreo@ejemplo.com", autofocus = "autofocus" })
                     @Html.ValidationMessageFor(m => m.Email, "", new { @class = "field-validation-error" })
                 </div>
                 
-                <div class="form-group-custom">
-                    @Html.LabelFor(m => m.Password, new { @class = "form-label-custom" })
-                    @Html.PasswordFor(m => m.Password, new { @class = "form-control-custom", placeholder = "Crea una contraseña segura" })
-                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-validation-error" })
-                </div>
-                
-                <div class="form-group-custom">
-                    @Html.LabelFor(m => m.ConfirmPassword, new { @class = "form-label-custom" })
-                    @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control-custom", placeholder = "Confirma tu contraseña" })
-                    @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "field-validation-error" })
-                </div>
-                
                 <button type="submit" class="btn-auth-full">
-                    <i class="fas fa-user-plus me-2"></i>Registrar Cuenta
+                    <i class="fas fa-envelope me-2"></i>Enviar Contrase&ntilde;a Temporal
                 </button>
             }
             
             <div class="auth-links">
                 <div class="auth-links-text">
-                    <p>¿Ya tienes una cuenta?</p>
+                    <p>&iquest;Recordaste tu contrase&ntilde;a?</p>
                 </div>
                 <div class="auth-button-center">
-                    @Html.ActionLink("Iniciar sesión aquí", "Login", new { }, new { @class = "btn-auth" })
+                    @Html.ActionLink("Iniciar sesi\u00f3n aqu\u00ed", "Login", new { }, new { @class = "btn-auth" })
                 </div>
             </div>
         </div>
@@ -74,6 +67,31 @@
 
         .auth-button-center {
             text-align: center;
+        }
+
+        .info-message {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .info-message i {
+            color: #3b82f6;
+            font-size: 20px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .info-message p {
+            margin: 0;
+            color: #1e40af;
+            line-height: 1.6;
+            font-size: 14px;
         }
 
         .btn-auth-full {
@@ -116,9 +134,9 @@
             text-decoration: none;
             display: inline-block;
             text-align: center;
-            width: 220px;
-            height: 64px;
-            line-height: 40px;
+            width: 320px;
+            height: 56px;
+            line-height: 32px;
             box-sizing: border-box;
         }
 
@@ -134,6 +152,16 @@
             .btn-auth {
                 width: 100%;
                 max-width: 300px;
+            }
+            
+            .info-message {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .info-message i {
+                margin-top: 0;
             }
         }
     </style>

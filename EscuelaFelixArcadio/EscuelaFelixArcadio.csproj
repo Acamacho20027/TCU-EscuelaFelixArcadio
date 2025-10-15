@@ -280,6 +280,10 @@
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Home\AdminPanel.cshtml" />
+    <Content Include="Views\Account\CambiarContrasenaConfirmacion.cshtml" />
+    <Content Include="Views\Account\CambiarContrasenaTemporal.cshtml" />
+    <Content Include="Views\Account\RecuperarContrasena.cshtml" />
+    <Content Include="Views\Account\RecuperarContrasenaConfirmacion.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
