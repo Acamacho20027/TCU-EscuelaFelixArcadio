@@ -17,7 +17,7 @@
         </div>
         
         <div class="auth-body">
-            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form", id = "loginForm" }))
             {
                 @Html.AntiForgeryToken()
                 
@@ -45,6 +45,31 @@
                 </button>
             }
             
+            <!-- Contador regresivo para cuenta bloqueada -->
+            <div id="lockoutCounter" class="lockout-counter" style="display: none;">
+                <div class="lockout-message">
+                    <i class="fas fa-lock"></i>
+                    <h3>Cuenta Bloqueada</h3>
+                    <p>Su cuenta ha sido bloqueada debido a múltiples intentos fallidos.</p>
+                    <div class="countdown-timer">
+                        <span id="countdownText">Puede intentar nuevamente en: <strong id="timeRemaining">--:--</strong></span>
+                    </div>
+                </div>
+                
+                <!-- Mensaje adicional en el espacio blanco -->
+                <div class="wait-message">
+                    <div class="wait-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h4>Tiempo de Espera</h4>
+                    <p>Tiene que esperar 5 minutos para poder utilizar de nuevo las funcionalidades de la página web.</p>
+                    <div class="info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Durante este tiempo, todas las funciones están temporalmente deshabilitadas por seguridad.</span>
+                    </div>
+                </div>
+            </div>
+            
             <div class="auth-links">
                 <div class="auth-links-text">
                     <p>¿No tienes una cuenta?</p>
@@ -64,6 +89,67 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function() {
+            // Verificar si hay mensajes de error de bloqueo al cargar la página
+            var errorMessages = $('.validation-summary-errors ul li');
+            var hasLockoutMessage = false;
+            
+            errorMessages.each(function() {
+                var message = $(this).text();
+                if (message.includes('bloqueada') || message.includes('bloqueado')) {
+                    hasLockoutMessage = true;
+                    
+                    // Extraer tiempo del mensaje
+                    var timeMatch = message.match(/(\d+)\s+minuto/);
+                    if (timeMatch) {
+                        var minutes = parseInt(timeMatch[1]);
+                        startCountdown(minutes);
+                    }
+                }
+            });
+            
+            function startCountdown(minutes) {
+                // Ocultar el formulario y mostrar el contador
+                $('.auth-body form').hide();
+                $('.auth-links').hide(); // Ocultar también los enlaces de registro y recuperación
+                $('#lockoutCounter').show();
+                
+                // Deshabilitar todos los elementos interactivos de la página
+                $('a, button, input, select, textarea').prop('disabled', true).css('pointer-events', 'none');
+                
+                var totalSeconds = minutes * 60;
+                var timer = setInterval(function() {
+                    var hours = Math.floor(totalSeconds / 3600);
+                    var mins = Math.floor((totalSeconds % 3600) / 60);
+                    var secs = totalSeconds % 60;
+                    
+                    var timeString = '';
+                    if (hours > 0) {
+                        timeString += hours + 'h ';
+                    }
+                    timeString += mins + 'm ' + secs + 's';
+                    
+                    $('#timeRemaining').text(timeString);
+                    
+                    if (totalSeconds <= 0) {
+                        clearInterval(timer);
+                        $('#countdownText').html('<strong>¡Ya puede intentar iniciar sesión nuevamente!</strong>');
+                        $('#timeRemaining').text('');
+                        
+                        // Reactivar elementos
+                        $('a, button, input, select, textarea').prop('disabled', false).css('pointer-events', 'auto');
+                        
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2000);
+                    }
+                    
+                    totalSeconds--;
+                }, 1000);
+            }
+        });
+    </script>
     <style>
         .auth-links-text {
             text-align: center;
@@ -143,6 +229,113 @@
             box-shadow: 0 8px 20px rgba(30, 58, 138, 0.3);
             text-decoration: none;
             color: white;
+        }
+
+        /* Estilos para el contador de bloqueo */
+        .lockout-counter {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 2px solid #f87171;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(248, 113, 113, 0.15);
+        }
+
+        .lockout-message i {
+            font-size: 48px;
+            color: #dc2626;
+            margin-bottom: 16px;
+        }
+
+        .lockout-message h3 {
+            color: #dc2626;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .lockout-message p {
+            color: #7f1d1d;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .countdown-timer {
+            background: #ffffff;
+            border: 2px solid #fca5a5;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        #timeRemaining {
+            color: #dc2626;
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        #countdownText {
+            color: #7f1d1d;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Estilos para el mensaje de espera */
+        .wait-message {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(203, 213, 225, 0.15);
+        }
+
+        .wait-icon {
+            margin-bottom: 16px;
+        }
+
+        .wait-icon i {
+            font-size: 48px;
+            color: #1e40af;
+        }
+
+        .wait-message h4 {
+            color: #1e40af;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .wait-message p {
+            color: #475569;
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            border: 1px solid #93c5fd;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .info-box i {
+            color: #1e40af;
+            font-size: 16px;
+        }
+
+        .info-box span {
+            color: #1e40af;
+            font-size: 14px;
+            font-weight: 500;
         }
 
         @@media (max-width: 768px) {

@@ -73,21 +73,69 @@ namespace EscuelaFelixArcadio.Controllers
                 return View(model);
             }
 
-            // No cuenta los errores de inicio de sesión para el bloqueo de la cuenta
-            // Para permitir que los errores de contraseña desencadenen el bloqueo de la cuenta, cambie a shouldLockout: true
-            var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
-            switch (result)
+            // Buscar el usuario por email
+            var user = await UserManager.FindByEmailAsync(model.Email);
+            
+            // Si el usuario no existe, mostrar mensaje genérico
+            if (user == null)
             {
-                case SignInStatus.Success:
-                    return RedirectToLocal(returnUrl);
-                case SignInStatus.LockedOut:
-                    return View("Lockout");
-                case SignInStatus.RequiresVerification:
-                    return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
-                case SignInStatus.Failure:
-                default:
-                    ModelState.AddModelError("", "Intento de inicio de sesión no válido.");
+                ModelState.AddModelError("", "Correo electrónico o contraseña incorrectos.");
+                return View(model);
+            }
+
+            // Verificar si la cuenta está bloqueada
+            if (await UserManager.IsLockedOutAsync(user.Id))
+            {
+                var lockoutEnd = await UserManager.GetLockoutEndDateAsync(user.Id);
+                var tiempoRestante = lockoutEnd.ToLocalTime().Subtract(DateTimeOffset.Now);
+                if (tiempoRestante.TotalSeconds > 0)
+                {
+                    int minutosRestantes = (int)Math.Ceiling(tiempoRestante.TotalMinutes);
+                    ModelState.AddModelError("", $"Su cuenta ha sido bloqueada debido a múltiples intentos fallidos de inicio de sesión. Por favor, intente nuevamente en {minutosRestantes} minuto(s).");
                     return View(model);
+                }
+            }
+
+            // Verificar la contraseña
+            var passwordValid = await UserManager.CheckPasswordAsync(user, model.Password);
+            
+            if (passwordValid)
+            {
+                // Contraseña correcta - resetear contador de intentos fallidos
+                await UserManager.ResetAccessFailedCountAsync(user.Id);
+                
+                // Iniciar sesión
+                await SignInManager.SignInAsync(user, model.RememberMe, model.RememberMe);
+                return RedirectToLocal(returnUrl);
+            }
+            else
+            {
+                // Contraseña incorrecta - incrementar contador de intentos fallidos
+                await UserManager.AccessFailedAsync(user.Id);
+                
+                // Obtener el número actual de intentos fallidos
+                int intentosFallidos = await UserManager.GetAccessFailedCountAsync(user.Id);
+                int intentosRestantes = 5 - intentosFallidos;
+                
+                // Si alcanzó los 5 intentos, bloquear la cuenta
+                if (intentosFallidos >= 5)
+                {
+                    // Bloquear la cuenta por 5 minutos
+                    await UserManager.SetLockoutEndDateAsync(user.Id, DateTimeOffset.UtcNow.AddMinutes(5));
+                    ModelState.AddModelError("", "Su cuenta ha sido bloqueada debido a múltiples intentos fallidos de inicio de sesión. Por favor, intente nuevamente en 5 minuto(s).");
+                }
+                else if (intentosRestantes <= 2)
+                {
+                    // Mostrar advertencia cuando quedan 2 intentos o menos
+                    ModelState.AddModelError("", $"Correo electrónico o contraseña incorrectos. Le quedan {intentosRestantes} intento(s) antes de que su cuenta sea bloqueada.");
+                }
+                else
+                {
+                    // Mensaje genérico para los primeros intentos
+                    ModelState.AddModelError("", "Correo electrónico o contraseña incorrectos.");
+                }
+                
+                return View(model);
             }
         }
 
@@ -155,6 +203,9 @@ namespace EscuelaFelixArcadio.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    // Habilitar bloqueo de cuenta para este usuario
+                    await UserManager.SetLockoutEnabledAsync(user.Id, true);
+                    
                     // Asignar automáticamente el rol "Estudiante" a todos los usuarios nuevos
                     await UserManager.AddToRoleAsync(user.Id, "Estudiante");
                     
@@ -374,6 +425,9 @@ namespace EscuelaFelixArcadio.Controllers
                 var result = await UserManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
+                    // Habilitar bloqueo de cuenta para este usuario
+                    await UserManager.SetLockoutEnabledAsync(user.Id, true);
+                    
                     // Asignar automáticamente el rol "Estudiante" a usuarios registrados externamente
                     await UserManager.AddToRoleAsync(user.Id, "Estudiante");
                     
