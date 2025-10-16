@@ -169,8 +169,17 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AdministrativoController.cs" />
+    <Compile Include="Controllers\CategoriaController.cs" />
+    <Compile Include="Controllers\DeportivoController.cs" />
+    <Compile Include="Controllers\EspaciosController.cs" />
+    <Compile Include="Controllers\EstadisticasController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\InventarioController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\PrestamosController.cs" />
+    <Compile Include="Controllers\ReportesController.cs" />
+    <Compile Include="Controllers\SancionesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -208,6 +217,8 @@
     <Content Include="Base de Datos\CambiardeUsuarioaAdmin.sql" />
     <Content Include="Base de Datos\HabilitarBloqueoUsuarios.sql" />
     <Content Include="Base de Datos\ResetearIntentosBloqueo.sql" />
+    <Content Include="Content\admin-layout.css" />
+    <Content Include="Content\auth-pages.css" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
     <Content Include="Content\bootstrap-grid.rtl.css" />
@@ -227,6 +238,7 @@
     <Content Include="Content\images\escudo_escuela_felix_arcadio.jpg" />
     <Content Include="Content\images\escuela_parque.jpg" />
     <Content Include="Content\images\herramientas-deportivas.jpg" />
+    <Content Include="Content\sports-buttons-fix.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
@@ -286,6 +298,16 @@
     <Content Include="Views\Account\CambiarContrasenaTemporal.cshtml" />
     <Content Include="Views\Account\RecuperarContrasena.cshtml" />
     <Content Include="Views\Account\RecuperarContrasenaConfirmacion.cshtml" />
+    <Content Include="Views\Administrativo\Index.cshtml" />
+    <Content Include="Views\Categoria\Index.cshtml" />
+    <Content Include="Views\Deportivo\Index.cshtml" />
+    <Content Include="Views\Espacios\Index.cshtml" />
+    <Content Include="Views\Estadisticas\Index.cshtml" />
+    <Content Include="Views\Inventario\Index.cshtml" />
+    <Content Include="Views\Prestamos\Index.cshtml" />
+    <Content Include="Views\Reportes\Index.cshtml" />
+    <Content Include="Views\Sanciones\Index.cshtml" />
+    <Content Include="Views\Shared\_AdminLayout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

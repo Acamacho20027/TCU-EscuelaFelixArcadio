@@ -1,0 +1,586 @@
+/* ===== ADMIN LAYOUT STYLES ===== */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8fafc;
+}
+
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ===== SIDEBAR STYLES ===== */
+.admin-sidebar {
+    width: 320px;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header {
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.sidebar-logo {
+    cursor: default;
+}
+
+.sidebar-logo-icon {
+    width: 60px;
+    height: 60px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #1e40af;
+    box-shadow: 0 2px 8px rgba(30, 64, 175, 0.2);
+}
+
+.sidebar-logo-icon::before {
+    display: none;
+}
+
+.sidebar-logo-icon i {
+    display: none;
+}
+
+.escudo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+.sidebar-logo-text {
+    flex: 1;
+}
+
+.sidebar-logo-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.sidebar-logo-subtitle {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* ===== NAVIGATION MENU ===== */
+.sidebar-nav {
+    padding: 1rem 0;
+}
+
+.nav-section {
+    margin-bottom: 2rem;
+}
+
+.nav-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 1.5rem 1rem;
+    padding: 0;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-item {
+    margin: 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+    background-color: #f8fafc;
+    color: #1e40af;
+    text-decoration: none;
+    border-left-color: #1e40af;
+}
+
+.nav-link.active {
+    background-color: #f8fafc;
+    color: #1e40af;
+    border-left-color: #1e40af;
+    font-weight: 600;
+}
+
+.nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+/* ===== MAIN CONTENT AREA ===== */
+.admin-main {
+    flex: 1;
+    margin-left: 320px;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-header {
+    background: #1e40af;
+    color: #ffffff;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-header-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.admin-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #ffffff;
+}
+
+.admin-user-name {
+    font-weight: 500;
+}
+
+.logout-form {
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+}
+
+.admin-user-logout {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.admin-user-logout:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+/* Quitar scrollbars */
+html, body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+.admin-container {
+    overflow-x: hidden !important;
+}
+
+.admin-main {
+    overflow-x: hidden !important;
+}
+
+/* Botón Logout Nuevo */
+.logout-btn {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.logout-btn i {
+    font-size: 1rem;
+}
+
+.logout-btn span {
+    color: inherit;
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+.logout-btn span::after {
+    content: "Cerrar Sesión";
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.logout-btn:hover span::after {
+    color: #ffffff;
+}
+
+.admin-content {
+    flex: 1;
+    padding: 2rem;
+    background-color: #f8fafc;
+    min-height: calc(100vh - 80px);
+}
+
+/* ===== WATERMARK/PLACEHOLDER ===== */
+.admin-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 400px;
+    text-align: center;
+    color: #cbd5e1;
+}
+
+.admin-placeholder-icon {
+    font-size: 8rem;
+    margin-bottom: 2rem;
+    opacity: 0.3;
+}
+
+.admin-placeholder-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #94a3b8;
+}
+
+.admin-placeholder-subtitle {
+    font-size: 1rem;
+    color: #cbd5e1;
+    max-width: 400px;
+    line-height: 1.6;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .admin-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .admin-main {
+        margin-left: 0;
+    }
+
+    .admin-header {
+        padding: 1rem;
+    }
+
+    .admin-content {
+        padding: 1rem;
+    }
+
+    .sidebar-header {
+        padding: 1.5rem 1rem;
+    }
+
+    .nav-link {
+        padding: 1rem;
+    }
+}
+
+/* ===== NAVIGATION SEPARATOR ===== */
+.nav-separator {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 1rem 1.5rem;
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+.admin-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ===== SOLUCIÓN PARA CODIFICACIÓN UTF-8 ===== */
+/* Asegurar que todos los caracteres especiales se muestren correctamente */
+.sidebar-logo-title,
+.sidebar-logo-subtitle,
+.nav-section-title,
+.nav-link span,
+.admin-header-title,
+.admin-user-name,
+.admin-placeholder-text,
+.admin-placeholder-subtitle {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    text-rendering: optimizeLegibility !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Forzar codificación UTF-8 en todos los elementos */
+* {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+/* Asegurar que el contenido se renderice correctamente */
+html {
+    -webkit-text-size-adjust: 100% !important;
+    -ms-text-size-adjust: 100% !important;
+}
+
+body {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
+}
+
+/* ===== ARREGLAR ICONOS FONT AWESOME ===== */
+.fas, .far, .fab {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+}
+
+.fa-school:before { content: "\f549" !important; }
+.fa-home:before { content: "\f015" !important; }
+.fa-boxes:before { content: "\f468" !important; }
+.fa-tags:before { content: "\f02c" !important; }
+.fa-hand-holding:before { content: "\f4bd" !important; }
+.fa-exclamation-triangle:before { content: "\f071" !important; }
+.fa-chart-line:before { content: "\f201" !important; }
+.fa-users-cog:before { content: "\f509" !important; }
+.fa-chart-bar:before { content: "\f080" !important; }
+.fa-running:before { content: "\f70c" !important; }
+.fa-building:before { content: "\f1ad" !important; }
+.fa-sign-out-alt:before { content: "\f2f5" !important; }
+
+/* ===== CORRECCIÓN DE TEXTOS ESPECÍFICOS ===== */
+.sidebar-logo-title::after {
+    content: "Escuela Félix Arcadio Montero Monge";
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.sidebar-logo-title {
+    font-size: 0;
+    color: transparent;
+}
+
+.sidebar-logo-subtitle::after {
+    content: "Panel de Administración";
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.sidebar-logo-subtitle {
+    font-size: 0;
+    color: transparent;
+}
+
+/* ===== CORRECCIÓN FORZADA DEL TÍTULO PRINCIPAL ===== */
+.admin-header-title {
+    position: relative;
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+.admin-header-title::before {
+    content: "Panel de Administración";
+    position: absolute;
+    left: 0;
+    top: -15px;
+    font-size: 1.5rem !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    white-space: nowrap;
+}
+
+/* ===== CORRECCIÓN FORZADA DE TEXTOS DEL MENÚ ===== */
+
+/* Categorías - Forzar reemplazo completo */
+.nav-section:first-of-type .nav-menu li:nth-child(2) .nav-link span {
+    position: relative;
+    font-size: 0 !important;
+    color: transparent !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+.nav-section:first-of-type .nav-menu li:nth-child(2) .nav-link span::before {
+    content: "Categorías";
+    position: absolute;
+    left: 0;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+}
+
+/* LIMPIAR TODO Y EMPEZAR DE NUEVO */
+/* Ocultar solo Reportes (elemento 5) */
+.nav-section:first-of-type .nav-menu li:nth-child(5) {
+    display: none !important;
+}
+
+/* Corregir Préstamos - elemento 3 */
+.nav-section:first-of-type .nav-menu li:nth-child(3) .nav-link span {
+    position: relative;
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+.nav-section:first-of-type .nav-menu li:nth-child(3) .nav-link span::before {
+    content: "Préstamos";
+    position: absolute;
+    left: 0;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+}
+
+/* Corregir Sanciones - elemento 4 */
+.nav-section:first-of-type .nav-menu li:nth-child(4) .nav-link span {
+    position: relative;
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+.nav-section:first-of-type .nav-menu li:nth-child(4) .nav-link span::before {
+    content: "Sanciones";
+    position: absolute;
+    left: 0;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+}
+
+/* Corregir Reportes - elemento 2 en sección ADMINISTRACIÓN */
+.nav-section:last-of-type .nav-menu li:nth-child(2) .nav-link span {
+    position: relative;
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+.nav-section:last-of-type .nav-menu li:nth-child(2) .nav-link span::before {
+    content: "Reportes";
+    position: absolute;
+    left: 0;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+}
+/* Corregir Estadísticas - elemento 3 en sección ADMINISTRACIÓN */
+.nav-section:last-of-type .nav-menu li:nth-child(3) .nav-link span {
+    position: relative;
+    font-size: 0 !important;
+    color: transparent !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+.nav-section:last-of-type .nav-menu li:nth-child(3) .nav-link span::before {
+    content: "Estadísticas";
+    position: absolute;
+    left: 0;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+}
+
+
+/* ADMINISTRACIÓN - Forzar reemplazo completo */
+.nav-section:last-of-type .nav-section-title {
+    position: relative;
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+.nav-section:last-of-type .nav-section-title::before {
+    content: "ADMINISTRACIÓN";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 0.75rem !important;
+    color: #64748b !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    white-space: nowrap;
+}

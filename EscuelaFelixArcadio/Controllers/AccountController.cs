@@ -110,11 +110,14 @@ namespace EscuelaFelixArcadio.Controllers
             }
             else
             {
-                // Contraseña incorrecta - incrementar contador de intentos fallidos
+                // Obtener el número actual de intentos fallidos ANTES de incrementar
+                int intentosFallidosActuales = await UserManager.GetAccessFailedCountAsync(user.Id);
+                
+                // Incrementar contador de intentos fallidos
                 await UserManager.AccessFailedAsync(user.Id);
                 
-                // Obtener el número actual de intentos fallidos
-                int intentosFallidos = await UserManager.GetAccessFailedCountAsync(user.Id);
+                // Calcular intentos restantes basado en el contador actual
+                int intentosFallidos = intentosFallidosActuales + 1;
                 int intentosRestantes = 5 - intentosFallidos;
                 
                 // Si alcanzó los 5 intentos, bloquear la cuenta
@@ -124,15 +127,20 @@ namespace EscuelaFelixArcadio.Controllers
                     await UserManager.SetLockoutEndDateAsync(user.Id, DateTimeOffset.UtcNow.AddMinutes(5));
                     ModelState.AddModelError("", "Su cuenta ha sido bloqueada debido a múltiples intentos fallidos de inicio de sesión. Por favor, intente nuevamente en 5 minuto(s).");
                 }
-                else if (intentosRestantes <= 2)
+                else if (intentosRestantes == 0)
                 {
-                    // Mostrar advertencia cuando quedan 2 intentos o menos
-                    ModelState.AddModelError("", $"Correo electrónico o contraseña incorrectos. Le quedan {intentosRestantes} intento(s) antes de que su cuenta sea bloqueada.");
+                    // Mensaje especial para cuando quedan 0 intentos
+                    ModelState.AddModelError("", $"Correo electrónico o contraseña incorrectos. Le quedan 0 intentos antes de que su cuenta sea bloqueada.");
+                }
+                else if (intentosRestantes == 1)
+                {
+                    // Mensaje especial para el último intento
+                    ModelState.AddModelError("", $"Correo electrónico o contraseña incorrectos. Le queda 1 intento antes de que su cuenta sea bloqueada.");
                 }
                 else
                 {
-                    // Mensaje genérico para los primeros intentos
-                    ModelState.AddModelError("", "Correo electrónico o contraseña incorrectos.");
+                    // Mostrar mensaje con intentos restantes para todos los intentos fallidos
+                    ModelState.AddModelError("", $"Correo electrónico o contraseña incorrectos. Le quedan {intentosRestantes} intento(s) antes de que su cuenta sea bloqueada.");
                 }
                 
                 return View(model);
@@ -663,6 +671,13 @@ namespace EscuelaFelixArcadio.Controllers
             {
                 return Redirect(returnUrl);
             }
+            
+            // Si el usuario es administrador, redirigir al dashboard de administración
+            if (User.IsInRole("Administrador"))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            
             return RedirectToAction("Index", "Home");
         }
 

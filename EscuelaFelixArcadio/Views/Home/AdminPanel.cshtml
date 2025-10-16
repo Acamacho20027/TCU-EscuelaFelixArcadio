@@ -1,135 +1,16 @@
 @{
     ViewBag.Title = "Panel de Administración";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<!-- Hero Section -->
-<section class="admin-hero-section">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center">
-                <div class="admin-hero-content">
-                    <div class="admin-icon">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <h1 class="admin-title">Panel de Administración</h1>
-                    <p class="admin-subtitle">¡Bienvenido, Administrador!</p>
-                    <p class="admin-description">
-                        Esta es una página de prueba que solo puede ver el administrador. 
-                        Si puedes ver esto, significa que el sistema de roles funciona correctamente.
-                    </p>
-                </div>
-            </div>
-        </div>
+<!-- Welcome Dashboard -->
+<div class="admin-placeholder">
+    <div class="admin-placeholder-icon">
+        <i class="fas fa-school"></i>
     </div>
-</section>
-
-<!-- Admin Info Section -->
-<section class="admin-info-section py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="admin-info-card">
-                    <h3 class="info-title">Información del Usuario</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label">Email:</div>
-                            <div class="info-value">@User.Identity.Name</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Rol:</div>
-                            <div class="info-value admin-role">Administrador</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Estado:</div>
-                            <div class="info-value success">Activo</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="admin-placeholder-text">Escuela Félix Arcadio Montero Monge</div>
+    <div class="admin-placeholder-subtitle">
+        Sistema de Gestión Deportiva<br>
+        Bienvenido al panel de administración
     </div>
-</section>
-
-<!-- Admin Actions Section -->
-<section class="admin-actions-section py-5 bg-light">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center mb-4">
-                <h2 class="section-title">Acciones de Administración</h2>
-                <p class="section-subtitle">Funciones disponibles solo para administradores</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="admin-action-card">
-                    <div class="action-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h4>Gestionar Usuarios</h4>
-                    <p>Administrar roles y permisos de usuarios del sistema.</p>
-                    <button class="btn-admin-action" disabled>
-                        <i class="fas fa-tools me-2"></i>Próximamente
-                    </button>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="admin-action-card">
-                    <div class="action-icon">
-                        <i class="fas fa-chart-bar"></i>
-                    </div>
-                    <h4>Reportes</h4>
-                    <p>Ver estadísticas y reportes del sistema deportivo.</p>
-                    <button class="btn-admin-action" disabled>
-                        <i class="fas fa-tools me-2"></i>Próximamente
-                    </button>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="admin-action-card">
-                    <div class="action-icon">
-                        <i class="fas fa-cog"></i>
-                    </div>
-                    <h4>Configuración</h4>
-                    <p>Configurar parámetros del sistema y deportes.</p>
-                    <button class="btn-admin-action" disabled>
-                        <i class="fas fa-tools me-2"></i>Próximamente
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Success Message -->
-<section class="success-section py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
-                <div class="success-card">
-                    <div class="success-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h3 class="success-title">¡Sistema de Roles Funcionando!</h3>
-                    <p class="success-message">
-                        El sistema de autenticación y autorización está funcionando correctamente. 
-                        Solo los usuarios con rol "Administrador" pueden acceder a esta página.
-                    </p>
-                    <div class="success-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">✅</span>
-                            <span class="stat-label">Autenticación</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">✅</span>
-                            <span class="stat-label">Autorización</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">✅</span>
-                            <span class="stat-label">Roles</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+</div>
