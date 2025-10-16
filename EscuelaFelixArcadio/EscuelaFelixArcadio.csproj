@@ -206,6 +206,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Base de Datos\CambiardeUsuarioaAdmin.sql" />
+    <Content Include="Base de Datos\HabilitarBloqueoUsuarios.sql" />
+    <Content Include="Base de Datos\ResetearIntentosBloqueo.sql" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
     <Content Include="Content\bootstrap-grid.rtl.css" />
