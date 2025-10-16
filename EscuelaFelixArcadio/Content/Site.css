@@ -304,6 +304,18 @@ body {
     padding: 2rem;
     border: 1px solid #e2e8f0;
     transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    height: 350px;
+    position: relative;
+    align-items: center;
+}
+
+.sport-card > a {
+    display: block !important;
+    text-align: center !important;
+    margin: 0 auto !important;
+    width: 160px !important;
 }
 
 .sport-card:hover {
@@ -323,6 +335,7 @@ body {
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem;
+    text-align: center;
 }
 
 .sport-icon i {
@@ -335,27 +348,37 @@ body {
     font-weight: 600;
     margin-bottom: 1rem;
     color: #0f172a;
+    text-align: center;
 }
 
 .sport-description {
     color: #64748b;
     margin-bottom: 1.5rem;
     line-height: 1.6;
+    text-align: center;
+    flex-grow: 1;
 }
 
 /* ===== BUTTONS - MINIMALISTAS ===== */
-.btn-primary-custom {
-    background: #1e40af;
-    border: 1px solid #1e40af;
-    color: #ffffff;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+.sport-card .btn-primary-custom {
+    background: #1e40af !important;
+    border: 1px solid #1e40af !important;
+    color: #ffffff !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+    text-decoration: none !important;
+    display: block !important;
+    text-align: center !important;
+    width: 160px !important;
+    margin: 0 auto !important;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    top: auto !important;
+    transform: none !important;
 }
 
 .btn-primary-custom i {
@@ -1980,3 +2003,34 @@ textarea:focus {
         font-size: 1rem;
     }
 }
+
+/* ===== CENTRADO FORZADO DE BOTONES DEPORTIVOS ===== */
+.sports-grid .sport-card a.btn-primary-custom,
+.sports-grid .sport-card .btn-primary-custom,
+.sport-card a[class*="btn-primary"],
+.sport-card .btn-primary-custom {
+    display: block !important;
+    width: 160px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    top: auto !important;
+    transform: none !important;
+    float: none !important;
+}/ *   F O R Z A R   C E N T R A D O   D E   B O T O N E S   * /  
+ a . b t n - p r i m a r y - c u s t o m   {   d i s p l a y :   b l o c k   ! i m p o r t a n t ;   w i d t h :   1 6 0 p x   ! i m p o r t a n t ;   m a r g i n :   0   a u t o   ! i m p o r t a n t ;   t e x t - a l i g n :   c e n t e r   ! i m p o r t a n t ;   }  
+ . s p o r t - c a r d   a . b t n . b t n - p r i m a r y - c u s t o m   {   d i s p l a y :   b l o c k   ! i m p o r t a n t ;   w i d t h :   1 6 0 p x   ! i m p o r t a n t ;   m a r g i n :   0   a u t o   ! i m p o r t a n t ;   t e x t - a l i g n :   c e n t e r   ! i m p o r t a n t ;   p o s i t i o n :   r e l a t i v e   ! i m p o r t a n t ;   l e f t :   a u t o   ! i m p o r t a n t ;   r i g h t :   a u t o   ! i m p o r t a n t ;   b o t t o m :   a u t o   ! i m p o r t a n t ;   t o p :   a u t o   ! i m p o r t a n t ;   t r a n s f o r m :   n o n e   ! i m p o r t a n t ;   }  
+ . s p o r t s - g r i d   . s p o r t - c a r d   a . b t n . b t n - p r i m a r y - c u s t o m   {   d i s p l a y :   b l o c k   ! i m p o r t a n t ;   w i d t h :   1 6 0 p x   ! i m p o r t a n t ;   m a r g i n :   0   a u t o   ! i m p o r t a n t ;   t e x t - a l i g n :   c e n t e r   ! i m p o r t a n t ;   }  
+  
+ / *   = = = = =   S O L U C I Ã  
+ N  
+ P A R A  
+ C O D I F I C A C I Ã N   U T F - 8   = = = = =   * /  
+ *   {   f o n t - f a m i l y :   ' I n t e r ' ,   - a p p l e - s y s t e m ,   B l i n k M a c S y s t e m F o n t ,   ' S e g o e   U I ' ,   R o b o t o ,   s a n s - s e r i f   ! i m p o r t a n t ;   }  
+ h t m l   {   - w e b k i t - t e x t - s i z e - a d j u s t :   1 0 0 %   ! i m p o r t a n t ;   - m s - t e x t - s i z e - a d j u s t :   1 0 0 %   ! i m p o r t a n t ;   }  
+ b o d y   {   - w e b k i t - f o n t - s m o o t h i n g :   a n t i a l i a s e d   ! i m p o r t a n t ;   - m o z - o s x - f o n t - s m o o t h i n g :   g r a y s c a l e   ! i m p o r t a n t ;   t e x t - r e n d e r i n g :   o p t i m i z e L e g i b i l i t y   ! i m p o r t a n t ;   }  
+ 

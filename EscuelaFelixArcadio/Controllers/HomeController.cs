@@ -10,6 +10,14 @@ namespace EscuelaFelixArcadio.Controllers
     {
         public ActionResult Index()
         {
+            // Si el usuario está autenticado y es administrador, mostrar el dashboard de administración
+            if (User.Identity.IsAuthenticated && User.IsInRole("Administrador"))
+            {
+                ViewBag.Title = "Panel de Administración";
+                return View("AdminPanel");
+            }
+            
+            // Para usuarios no autenticados o no administradores, mostrar la página principal
             ViewBag.Message = "Bienvenido a la Escuela Félix Arcadio - Gestión Deportiva";
             return View();
         }
@@ -26,12 +34,5 @@ namespace EscuelaFelixArcadio.Controllers
             return View();
         }
 
-        // Página de prueba solo para administradores
-        [Authorize(Roles = "Administrador")]
-        public ActionResult AdminPanel()
-        {
-            ViewBag.Message = "Panel de Administración - Solo para administradores";
-            return View();
-        }
     }
 }
