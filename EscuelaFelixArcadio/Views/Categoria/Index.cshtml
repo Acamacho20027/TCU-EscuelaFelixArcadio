@@ -1,14 +1,379 @@
+@model IEnumerable<EscuelaFelixArcadio.Models.Categoria>
+
 @{
     ViewBag.Title = "Categorias";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="admin-placeholder">
-    <div class="admin-placeholder-icon">
-        <i class="fas fa-tags"></i>
+@section Styles {
+    <link href="~/Content/categoria.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Variables globales
+            let currentPage = @ViewBag.CurrentPage;
+            let isLoading = false;
+
+            // Búsqueda con debounce
+            let searchTimeout;
+            $('#searchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    currentPage = 1;
+                    loadCategorias();
+                }, 500);
+            });
+
+            // Filtros
+            $('#estadoFilter, #sortBy, #sortOrder').on('change', function() {
+                currentPage = 1;
+                loadCategorias();
+            });
+
+            // Limpiar filtros
+            $('#clearFilters').on('click', function() {
+                $('#searchInput').val('');
+                $('#estadoFilter').val('');
+                $('#sortBy').val('nombre');
+                $('#sortOrder').val('asc');
+                currentPage = 1;
+                loadCategorias();
+            });
+
+            // Cargar categorías con AJAX
+            function loadCategorias() {
+                if (isLoading) return;
+                
+                isLoading = true;
+                showLoading();
+
+                const params = {
+                    search: $('#searchInput').val(),
+                    estado: $('#estadoFilter').val(),
+                    sortBy: $('#sortBy').val(),
+                    sortOrder: $('#sortOrder').val(),
+                    page: currentPage,
+                    pageSize: 12
+                };
+
+                $.get('@Url.Action("SearchCategoria", "Categoria")', params)
+                    .done(function(data) {
+                        updateCategoriasGrid(data.items);
+                        updatePagination(data);
+                        hideLoading();
+                    })
+                    .fail(function() {
+                        hideLoading();
+                        alert('Error al cargar las categorías');
+                    })
+                    .always(function() {
+                        isLoading = false;
+                    });
+            }
+
+            // Actualizar grid de categorías
+            function updateCategoriasGrid(items) {
+                const grid = $('.categoria-cards-grid');
+                grid.empty();
+
+                if (items.length === 0) {
+                    grid.html('<div class="categoria-alert categoria-alert-warning"><i class="fas fa-info-circle"></i> No se encontraron categorías que coincidan con los filtros.</div>');
+                    return;
+                }
+
+                items.forEach(function(item) {
+                    const card = createCategoriaCard(item);
+                    grid.append(card);
+                });
+            }
+
+            // Crear card de categoría
+            function createCategoriaCard(item) {
+                const statusClass = getStatusClass(item.EstadoDescripcion);
+                const statusText = item.EstadoDescripcion;
+
+                return `
+                    <div class="categoria-card">
+                        <div class="categoria-card-status ${statusClass}">${statusText}</div>
+                        <div class="categoria-card-header">
+                            <h3 class="categoria-card-name">${item.Nombre}</h3>
+                            <p class="categoria-card-description">${item.Descripcion}</p>
+                        </div>
+                        <div class="categoria-card-details">
+                            <div class="categoria-card-detail">
+                                <span class="categoria-card-detail-label">Fecha de Creación:</span>
+                                <span class="categoria-card-detail-value">${item.FechaCreacion}</span>
+                            </div>
+                        </div>
+                        <div class="categoria-card-footer">
+                            <div class="categoria-card-id">
+                                <i class="fas fa-tag"></i>
+                                <span>ID: ${item.IdCategoria}</span>
+                            </div>
+                            <div class="categoria-card-actions">
+                                <a href="/Categoria/Details/${item.IdCategoria}" class="btn-categoria-action btn-categoria-details">
+                                    <i class="fas fa-eye"></i> Detalle
+                                </a>
+                                <a href="/Categoria/Delete/${item.IdCategoria}" class="btn-categoria-action btn-categoria-delete">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Obtener clase de estado
+            function getStatusClass(estado) {
+                const estadoLower = estado.toLowerCase();
+                if (estadoLower.includes('activo') && !estadoLower.includes('inactivo')) {
+                    return 'activo';
+                }
+                return 'inactivo'; // Por defecto inactivo
+            }
+
+            // Actualizar paginación
+            function updatePagination(data) {
+                const pagination = $('.categoria-pagination');
+                pagination.empty();
+
+                // Si hay solo 1 página, mostrar solo el número de página
+                if (data.totalPages <= 1) {
+                    pagination.append(`<span class="categoria-pagination-btn active">1</span>`);
+                    return;
+                }
+
+                // Botones de navegación
+                if (data.currentPage > 1) {
+                    pagination.append(`<a href="#" class="categoria-pagination-btn" onclick="changePage(1)">Primera</a>`);
+                    pagination.append(`<a href="#" class="categoria-pagination-btn" onclick="changePage(${data.currentPage - 1})">Anterior</a>`);
+                } else {
+                    pagination.append(`<span class="categoria-pagination-btn" disabled>Primera</span>`);
+                    pagination.append(`<span class="categoria-pagination-btn" disabled>Anterior</span>`);
+                }
+
+                // Números de página
+                const startPage = Math.max(1, data.currentPage - 2);
+                const endPage = Math.min(data.totalPages, data.currentPage + 2);
+
+                if (startPage > 1) {
+                    pagination.append(`<span class="categoria-pagination-dots">...</span>`);
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    if (i === data.currentPage) {
+                        pagination.append(`<span class="categoria-pagination-btn active">${i}</span>`);
+                    } else {
+                        pagination.append(`<a href="#" class="categoria-pagination-btn" onclick="changePage(${i})">${i}</a>`);
+                    }
+                }
+
+                if (endPage < data.totalPages) {
+                    pagination.append(`<span class="categoria-pagination-dots">...</span>`);
+                }
+
+                if (data.currentPage < data.totalPages) {
+                    pagination.append(`<a href="#" class="categoria-pagination-btn" onclick="changePage(${data.currentPage + 1})">Siguiente</a>`);
+                    pagination.append(`<a href="#" class="categoria-pagination-btn" onclick="changePage(${data.totalPages})">Ultima</a>`);
+                } else {
+                    pagination.append(`<span class="categoria-pagination-btn" disabled>Siguiente</span>`);
+                    pagination.append(`<span class="categoria-pagination-btn" disabled>Ultima</span>`);
+                }
+            }
+
+            // Cambiar página
+            window.changePage = function(page) {
+                currentPage = page;
+                loadCategorias();
+            };
+
+            // Mostrar loading
+            function showLoading() {
+                $('.categoria-cards-grid').html('<div class="categoria-loading"><div class="categoria-spinner"></div>Cargando categorías...</div>');
+            }
+
+            // Ocultar loading
+            function hideLoading() {
+                $('.categoria-loading').remove();
+            }
+        });
+    </script>
+}
+
+<div class="categoria-container">
+    <!-- Header con título y botón crear -->
+    <div class="categoria-header">
+        <h1 class="categoria-title">Categor&#237;as</h1>
+        <a href="/Categoria/Create" class="btn-create-categoria">Crear Categoria</a>
     </div>
-    <div class="admin-placeholder-text">Escuela Felix Arcadio Montero Monge</div>
-    <div class="admin-placeholder-subtitle">
-        Organiza y gestiona las categorias de equipos deportivos y materiales.
+
+    <!-- Mensajes de éxito/error -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="categoria-alert categoria-alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="categoria-alert categoria-alert-error">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Panel de Filtros y Búsqueda -->
+    <div class="categoria-filters-panel">
+        <!-- Barra de Búsqueda -->
+        <div class="categoria-search-bar">
+            <div style="position: relative;">
+                <i class="fas fa-search categoria-search-icon"></i>
+                <input type="text" id="searchInput" class="categoria-search-input" 
+                       placeholder="Buscar por nombre o descripcion de la categoria..." 
+                       value="@ViewBag.CurrentSearch">
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="categoria-filters-row">
+            <div class="categoria-filter-group">
+                <label class="categoria-filter-label">Estado:</label>
+                @Html.DropDownList("estadoFilter", ViewBag.Estados as SelectList, "Todos los estados", new { @class = "categoria-filter-select", @id = "estadoFilter" })
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="categoria-controls-row">
+            <div class="categoria-sort-group">
+                <label class="categoria-sort-label">Ordenar por:</label>
+                <select id="sortBy" class="categoria-filter-select">
+                    <option value="nombre" @(ViewBag.CurrentSortBy == "nombre" ? "selected" : "")>Nombre</option>
+                    <option value="estado" @(ViewBag.CurrentSortBy == "estado" ? "selected" : "")>Estado</option>
+                    <option value="fecha" @(ViewBag.CurrentSortBy == "fecha" ? "selected" : "")>Fecha</option>
+                </select>
+                <select id="sortOrder" class="categoria-filter-select">
+                    <option value="asc" @(ViewBag.CurrentSortOrder == "asc" ? "selected" : "")>Ascendente</option>
+                    <option value="desc" @(ViewBag.CurrentSortOrder == "desc" ? "selected" : "")>Descendente</option>
+                </select>
+            </div>
+            <button type="button" id="clearFilters" class="categoria-clear-filters">
+                <i class="fas fa-times"></i> Limpiar Filtros
+            </button>
+        </div>
     </div>
+
+    <!-- Grid de cards de categorías -->
+    <div class="categoria-cards-grid">
+        @foreach (var item in Model)
+        {
+            <div class="categoria-card">
+                <!-- Badge de estado -->
+                @{
+                    string statusClass = "inactivo"; // Por defecto inactivo
+                    string estadoLower = item.Estado.Descripcion.ToLower();
+                    if (estadoLower.Contains("activo") && !estadoLower.Contains("inactivo"))
+                    {
+                        statusClass = "activo";
+                    }
+                    else
+                    {
+                        statusClass = "inactivo";
+                    }
+                }
+                <div class="categoria-card-status @statusClass">@item.Estado.Descripcion</div>
+
+                <!-- Header de la categoría -->
+                <div class="categoria-card-header">
+                    <h3 class="categoria-card-name">@item.Nombre</h3>
+                    <p class="categoria-card-description">@(item.Descripcion ?? "Sin descripción")</p>
+                </div>
+
+                <!-- Detalles de la categoría -->
+                <div class="categoria-card-details">
+                            <div class="categoria-card-detail">
+                                <span class="categoria-card-detail-label">Fecha de Creacion:</span>
+                                <span class="categoria-card-detail-value">@item.FechaCreacion.ToString("dd/MM/yyyy")</span>
+                            </div>
+                </div>
+
+                <!-- Footer con ID y acciones -->
+                <div class="categoria-card-footer">
+                    <div class="categoria-card-id">
+                        <i class="fas fa-tag"></i>
+                        <span>ID: @item.IdCategoria</span>
+                    </div>
+                    <div class="categoria-card-actions">
+                        @Html.ActionLink("Detalle", "Details", new { id = item.IdCategoria }, new { @class = "btn-categoria-action btn-categoria-details" })
+                        @Html.ActionLink("Eliminar", "Delete", new { id = item.IdCategoria }, new { @class = "btn-categoria-action btn-categoria-delete" })
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Mensaje si no hay items -->
+    @if (!Model.Any())
+    {
+        <div class="categoria-alert categoria-alert-warning">
+            <i class="fas fa-info-circle"></i> No hay categorías registradas. 
+            <a href="/Categoria/Create" class="btn-create-categoria" style="margin-left: 1rem;">Crear la primera categoria</a>
+        </div>
+    }
+
+    <!-- Paginación -->
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="categoria-pagination">
+            
+            @if (ViewBag.CurrentPage > 1)
+            {
+                <a href="#" class="categoria-pagination-btn" onclick="changePage(1)">Primera</a>
+                <a href="#" class="categoria-pagination-btn" onclick="changePage(@(ViewBag.CurrentPage - 1))">Anterior</a>
+            }
+            else
+            {
+                <span class="categoria-pagination-btn" disabled>Primera</span>
+                <span class="categoria-pagination-btn" disabled>Anterior</span>
+            }
+
+            @{
+                int startPage = Math.Max(1, ViewBag.CurrentPage - 2);
+                int endPage = Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2);
+            }
+
+            @if (startPage > 1)
+            {
+                <span class="categoria-pagination-dots">...</span>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                if (i == ViewBag.CurrentPage)
+                {
+                    <span class="categoria-pagination-btn active">@i</span>
+                }
+                else
+                {
+                    <a href="#" class="categoria-pagination-btn" onclick="changePage(@i)">@i</a>
+                }
+            }
+
+            @if (endPage < ViewBag.TotalPages)
+            {
+                <span class="categoria-pagination-dots">...</span>
+            }
+
+            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+            {
+                <a href="#" class="categoria-pagination-btn" onclick="changePage(@(ViewBag.CurrentPage + 1))">Siguiente</a>
+                <a href="#" class="categoria-pagination-btn" onclick="changePage(@ViewBag.TotalPages)">Ultima</a>
+            }
+            else
+            {
+                <span class="categoria-pagination-btn" disabled>Siguiente</span>
+                <span class="categoria-pagination-btn" disabled>Ultima</span>
+            }
+        </div>
+    }
 </div>

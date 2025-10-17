@@ -1,0 +1,86 @@
+﻿@model EscuelaFelixArcadio.Models.Categoria
+
+@{
+    ViewBag.Title = "Crear Categoria";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/categoria.css" rel="stylesheet" />
+}
+
+<div class="categoria-container">
+    <div class="categoria-form-container">
+        <h1 class="categoria-form-title">Crear Categoria</h1>
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <!-- Mensajes de validación -->
+            @Html.ValidationSummary(true, "", new { @class = "categoria-alert categoria-alert-error" })
+
+            <!-- Sección: Información Básica -->
+            <div class="categoria-form-section">
+                <h2 class="categoria-form-section-title">Información de la Categoría</h2>
+                <div class="categoria-form-grid">
+                    <div class="categoria-form-group">
+                        @Html.LabelFor(model => model.Nombre, htmlAttributes: new { @class = "categoria-form-label" })
+                        @Html.EditorFor(model => model.Nombre, new { htmlAttributes = new { @class = "categoria-form-control", @placeholder = "Ingrese el nombre de la categoría" } })
+                        @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="categoria-form-group">
+                        @Html.LabelFor(model => model.IdEstado, "Estado", htmlAttributes: new { @class = "categoria-form-label" })
+                        @Html.DropDownList("IdEstado", null, "Seleccione un estado", htmlAttributes: new { @class = "categoria-form-control" })
+                        @Html.ValidationMessageFor(model => model.IdEstado, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="categoria-form-group" style="grid-column: 1 / -1;">
+                        @Html.LabelFor(model => model.Descripcion, htmlAttributes: new { @class = "categoria-form-label" })
+                        @Html.TextAreaFor(model => model.Descripcion, new { @class = "categoria-form-control", @placeholder = "Ingrese una descripción de la categoría (opcional)", @rows = "4" })
+                        @Html.ValidationMessageFor(model => model.Descripcion, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="categoria-form-buttons">
+                <button type="submit" class="btn-categoria-save">
+                    <i class="fas fa-plus"></i>
+                    Crear Categoría
+                </button>
+                @Html.ActionLink("Regresar a la Lista", "Index", "Categoria", null, new { @class = "btn-categoria-cancel" })
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script>
+        $(document).ready(function() {
+            // Validación para campo nombre - solo letras y espacios
+            $('#Nombre').on('input', function() {
+                var value = $(this).val();
+                // Remover números y caracteres especiales, mantener solo letras y espacios
+                var cleanValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                $(this).val(cleanValue);
+            });
+            
+            // Validación adicional al enviar el formulario
+            $('form').on('submit', function(e) {
+                var nombre = $('#Nombre').val();
+                var nombreRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+                
+                if (!nombreRegex.test(nombre)) {
+                    e.preventDefault();
+                    alert('El nombre de la categoría solo puede contener letras y espacios.');
+                    $('#Nombre').focus();
+                    return false;
+                }
+            });
+        });
+    </script>
+}
