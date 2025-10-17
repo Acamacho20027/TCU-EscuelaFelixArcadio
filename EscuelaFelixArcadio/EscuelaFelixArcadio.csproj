@@ -187,6 +187,10 @@
     <Compile Include="Migrations\202510140632185_MigracionDeTablas.Designer.cs">
       <DependentUpon>202510140632185_MigracionDeTablas.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202510172107255_AgregarCamposAvanzadosPrestamo.cs" />
+    <Compile Include="Migrations\202510172107255_AgregarCamposAvanzadosPrestamo.Designer.cs">
+      <DependentUpon>202510172107255_AgregarCamposAvanzadosPrestamo.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
@@ -359,6 +363,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202510140632185_MigracionDeTablas.resx">
       <DependentUpon>202510140632185_MigracionDeTablas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202510172107255_AgregarCamposAvanzadosPrestamo.resx">
+      <DependentUpon>202510172107255_AgregarCamposAvanzadosPrestamo.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
