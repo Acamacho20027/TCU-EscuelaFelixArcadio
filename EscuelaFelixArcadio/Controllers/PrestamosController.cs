@@ -193,6 +193,78 @@ namespace EscuelaFelixArcadio.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
+        // GET: Prestamos/GetAlertasRetraso - Obtener préstamos vencidos para alertas
+        public ActionResult GetAlertasRetraso()
+        {
+            try
+            {
+                var prestamosVencidos = db.Prestamo
+                    .Include(p => p.ApplicationUser)
+                    .Include(p => p.Estado)
+                    .Where(p => p.FechaVencimiento.HasValue && 
+                               p.FechaVencimiento < DateTime.Now && 
+                               !p.Devolucion)
+                    .OrderBy(p => p.FechaVencimiento)
+                    .Take(10) // Máximo 10 alertas
+                    .ToList();
+
+                var alertas = prestamosVencidos.Select(p => new
+                {
+                    IdPrestamo = p.IdPrestamo,
+                    NumeroPrestamo = p.NumeroPrestamo,
+                    UsuarioNombre = p.ApplicationUser?.UserName ?? "Usuario no encontrado",
+                    UsuarioEmail = p.ApplicationUser?.Email ?? "No disponible",
+                    FechaVencimiento = p.FechaVencimiento.Value.ToString("dd/MM/yyyy"),
+                    DiasRetraso = (DateTime.Now - p.FechaVencimiento.Value).Days,
+                    MotivoPrestamo = p.MotivoPrestamo ?? "Sin motivo especificado",
+                    EsUrgente = p.EsUrgente
+                }).ToList();
+
+                return Json(new { 
+                    success = true, 
+                    alertas = alertas,
+                    total = alertas.Count 
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = "Error al obtener alertas: " + ex.Message 
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // POST: Prestamos/MarcarDevuelto - Marcar préstamo como devuelto desde alerta
+        [HttpPost]
+        public ActionResult MarcarDevuelto(long id)
+        {
+            try
+            {
+                var prestamo = db.Prestamo.Find(id);
+                if (prestamo == null)
+                {
+                    return Json(new { success = false, message = "Préstamo no encontrado" });
+                }
+
+                prestamo.Devolucion = true;
+                prestamo.FechaDevolucion = DateTime.UtcNow;
+                db.SaveChanges();
+
+                return Json(new { 
+                    success = true, 
+                    message = "Préstamo marcado como devuelto exitosamente" 
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { 
+                    success = false, 
+                    message = "Error al marcar como devuelto: " + ex.Message 
+                });
+            }
+        }
+
         // GET: Prestamos/Details/5 - Ver detalles de un préstamo
         public ActionResult Details(long id)
         {
