@@ -122,69 +122,67 @@
     text-align: center;
 }
 
-/* Ocultar validation summary cuando está vacío */
+/* Ocultar validation summary en páginas de autenticación para quitar línea roja */
 .auth-page .validation-summary-errors {
     display: none !important;
-    border: none !important;
-    background: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
 }
 
-/* Sobrescribir estilos de alert-danger para validation-summary */
-.auth-page .validation-summary-errors.alert-danger {
-    display: none !important;
-    border: none !important;
-    background: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    color: transparent !important;
+/* Estilos para formularios de autenticación */
+.form-group-custom {
+    margin-bottom: 1.5rem;
 }
 
-/* Forzar ocultación de cualquier elemento con borde rojo */
-.auth-page *[style*="border"] {
-    border: none !important;
+.form-label-custom {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
 }
 
-.auth-page *[style*="background"] {
-    background: none !important;
+.form-control-custom {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #111827;
+    background-color: #ffffff;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-/* Ocultar cualquier elemento que pueda tener color rojo */
-.auth-page .alert,
-.auth-page .alert-danger,
-.auth-page [class*="danger"],
-.auth-page [class*="error"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
+.form-control-custom:focus {
+    border-color: #3b82f6;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Forzar ocultación de cualquier elemento con color rojo */
-.auth-page *[style*="red"],
-.auth-page *[style*="#dc3545"],
-.auth-page *[style*="#f8d7da"],
-.auth-page *[style*="#f5c2c7"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-    border: none !important;
-    background: none !important;
+.form-control-custom::placeholder {
+    color: #9ca3af;
 }
 
-/* Ocultar cualquier elemento que pueda estar causando la línea roja */
-.auth-page .auth-body > *:first-child {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-    border: none !important;
-    background: none !important;
+.checkbox-custom {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.checkbox-custom input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.checkbox-custom label {
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+}
+
+.field-validation-error {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
 }
 
 .btn-auth-full {
@@ -596,3 +594,4 @@
         gap: 10px;
     }
 }
+

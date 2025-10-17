@@ -1,0 +1,48 @@
+﻿@model EscuelaFelixArcadio.Models.Inventario
+
+@{
+    ViewBag.Title = "Eliminar Inventario";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/inventario.css" rel="stylesheet" />
+}
+
+<div class="inventario-container">
+    <div class="inventario-delete-container">
+        <h1 class="inventario-delete-title">Eliminar Inventario</h1>
+        
+        <p class="inventario-delete-message">
+            ¿Está seguro de que desea eliminar este item del inventario? Esta acción no se puede deshacer.
+        </p>
+
+        <!-- Información del item a eliminar -->
+        <div class="inventario-delete-info">
+            <h3 class="inventario-delete-info-title">Item a Eliminar:</h3>
+            <div class="inventario-delete-info-details">
+                <strong>Producto:</strong> @Model.Producto.Nombre<br>
+                <strong>Código:</strong> @Model.Producto.Codigo<br>
+                <strong>Categoría:</strong> @Model.Producto.Categoria.Nombre<br>
+                <strong>Variante:</strong> @(Model.Variante?.NombreVariante ?? "Sin variante")<br>
+                <strong>Cantidad Actual:</strong> @Model.Cantidad<br>
+                <strong>Estado:</strong> @Model.Estado.Descripcion<br>
+                <strong>ID de Inventario:</strong> @Model.IdInventario
+            </div>
+        </div>
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            
+            <!-- Botones de acción -->
+            <div class="inventario-form-buttons">
+                <button type="submit" class="btn-inventario-delete-confirm">
+                    <i class="fas fa-trash"></i>
+                    Eliminar Definitivamente
+                </button>
+                @Html.ActionLink("Regresar a la Lista", "Index", "Inventario", null, new { @class = "btn-inventario-cancel" })
+            </div>
+        }
+    </div>
+</div>

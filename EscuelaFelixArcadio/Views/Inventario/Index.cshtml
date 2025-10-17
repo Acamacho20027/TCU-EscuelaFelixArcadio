@@ -1,14 +1,610 @@
+@model IEnumerable<EscuelaFelixArcadio.Models.Inventario>
+
 @{
     ViewBag.Title = "Inventario";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="admin-placeholder">
-    <div class="admin-placeholder-icon">
-        <i class="fas fa-boxes"></i>
+@section Styles {
+    <link href="~/Content/inventario.css" rel="stylesheet" />
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Variables globales
+            let currentPage = @ViewBag.CurrentPage;
+            let isLoading = false;
+
+            // Búsqueda con debounce
+            let searchTimeout;
+            $('#searchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    currentPage = 1;
+                    loadInventario();
+                }, 500);
+            });
+
+            // Filtros
+            $('#categoriaFilter, #estadoFilter, #marcaFilter, #sortBy, #sortOrder').on('change', function() {
+                currentPage = 1;
+                loadInventario();
+            });
+
+            // Limpiar filtros
+            $('#clearFilters').on('click', function() {
+                $('#searchInput').val('');
+                $('#categoriaFilter').val('');
+                $('#estadoFilter').val('');
+                $('#marcaFilter').val('');
+                $('#sortBy').val('nombre');
+                $('#sortOrder').val('asc');
+                currentPage = 1;
+                loadInventario();
+            });
+
+            // Cargar inventario con AJAX
+            function loadInventario() {
+                if (isLoading) return;
+                
+                isLoading = true;
+                showLoading();
+
+                const params = {
+                    search: $('#searchInput').val(),
+                    categoria: $('#categoriaFilter').val(),
+                    estado: $('#estadoFilter').val(),
+                    marca: $('#marcaFilter').val(),
+                    sortBy: $('#sortBy').val(),
+                    sortOrder: $('#sortOrder').val(),
+                    page: currentPage,
+                    pageSize: 12
+                };
+
+                $.get('@Url.Action("SearchInventario", "Inventario")', params)
+                    .done(function(data) {
+                        updateInventarioGrid(data.items);
+                        updatePagination(data);
+                        hideLoading();
+                    })
+                    .fail(function() {
+                        hideLoading();
+                        alert('Error al cargar el inventario');
+                    })
+                    .always(function() {
+                        isLoading = false;
+                    });
+            }
+
+            // Actualizar grid de inventario
+            function updateInventarioGrid(items) {
+                const grid = $('.inventario-cards-grid');
+                grid.empty();
+
+                if (items.length === 0) {
+                    grid.html('<div class="inventario-alert inventario-alert-warning"><i class="fas fa-info-circle"></i> No se encontraron elementos que coincidan con los filtros.</div>');
+                    return;
+                }
+
+                items.forEach(function(item) {
+                    const card = createInventarioCard(item);
+                    grid.append(card);
+                });
+            }
+
+            // Crear card de inventario
+            function createInventarioCard(item) {
+                const statusClass = getStatusClass(item.EstadoDescripcion, item.Cantidad, item.Minimo);
+                const statusText = getStatusText(item.EstadoDescripcion, item.Cantidad, item.Minimo);
+
+                return `
+                    <div class="inventario-card">
+                        <div class="inventario-card-status ${statusClass}">${statusText}</div>
+                        <div class="inventario-card-header">
+                            <h3 class="inventario-card-product">${item.ProductoNombre}</h3>
+                            <p class="inventario-card-category">${item.CategoriaNombre}</p>
+                        </div>
+                        <div class="inventario-card-quantity">${item.Cantidad}</div>
+                        <div class="inventario-card-details">
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Estado:</span>
+                                <span class="inventario-card-detail-value">${item.EstadoDescripcion}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Variante:</span>
+                                <span class="inventario-card-detail-value">${item.VarianteNombre}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Minimo:</span>
+                                <span class="inventario-card-detail-value">${item.Minimo}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Maximo:</span>
+                                <span class="inventario-card-detail-value">${item.Maximo}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Codigo:</span>
+                                <span class="inventario-card-detail-value">${item.ProductoCodigo}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Marca:</span>
+                                <span class="inventario-card-detail-value">${item.Marca}</span>
+                            </div>
+                        </div>
+                        <div class="inventario-card-footer">
+                            <div class="inventario-card-id">
+                                <i class="fas fa-user"></i>
+                                <span>ID: ${item.IdInventario}</span>
+                            </div>
+                            <div class="inventario-card-actions">
+                                <button type="button" class="btn-inventario-action btn-inventario-details" onclick="showSerialNumbers(${item.IdProducto || 0}, ${item.IdVariante || 0}, '${item.ProductoNombre || 'Sin nombre'}')">
+                                    <i class="fas fa-barcode"></i> Series
+                                </button>
+                                <a href="/Inventario/Details/${item.IdInventario}" class="btn-inventario-action btn-inventario-details">Detalle</a>
+                                <a href="/Inventario/Delete/${item.IdInventario}" class="btn-inventario-action btn-inventario-delete">Eliminar</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Obtener clase de estado
+            function getStatusClass(estado, cantidad, minimo) {
+                if (estado.toLowerCase().includes('inactivo')) return 'no-disponible';
+                if (cantidad <= minimo) return 'bajo-stock';
+                if (cantidad == 0) return 'agotado';
+                if (estado.toLowerCase().includes('mantenimiento')) return 'mantenimiento';
+                return 'disponible';
+            }
+
+            // Obtener texto de estado
+            function getStatusText(estado, cantidad, minimo) {
+                if (estado.toLowerCase().includes('inactivo')) return 'No Disponible';
+                if (cantidad <= minimo) return 'Bajo Stock';
+                if (cantidad == 0) return 'Agotado';
+                if (estado.toLowerCase().includes('mantenimiento')) return 'Mantenimiento';
+                return 'Disponible';
+            }
+
+            // Actualizar paginación
+            function updatePagination(data) {
+                const pagination = $('.inventario-pagination');
+                pagination.empty();
+
+                // Si hay solo 1 página, mostrar solo el número de página
+                if (data.totalPages <= 1) {
+                    pagination.append(`<span class="inventario-pagination-btn active">1</span>`);
+                    return;
+                }
+
+                // Botones de navegación
+                if (data.currentPage > 1) {
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(1)">Primera</a>`);
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${data.currentPage - 1})">Anterior</a>`);
+                } else {
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Primera</span>`);
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Anterior</span>`);
+                }
+
+                // Números de página
+                const startPage = Math.max(1, data.currentPage - 2);
+                const endPage = Math.min(data.totalPages, data.currentPage + 2);
+
+                if (startPage > 1) {
+                    pagination.append(`<span class="inventario-pagination-dots">...</span>`);
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    if (i === data.currentPage) {
+                        pagination.append(`<span class="inventario-pagination-btn active">${i}</span>`);
+                    } else {
+                        pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${i})">${i}</a>`);
+                    }
+                }
+
+                if (endPage < data.totalPages) {
+                    pagination.append(`<span class="inventario-pagination-dots">...</span>`);
+                }
+
+                if (data.currentPage < data.totalPages) {
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${data.currentPage + 1})">Siguiente</a>`);
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${data.totalPages})">Ultima</a>`);
+                } else {
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Siguiente</span>`);
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Ultima</span>`);
+                }
+            }
+
+            // Cambiar página
+            window.changePage = function(page) {
+                currentPage = page;
+                loadInventario();
+            };
+
+            // Mostrar loading
+            function showLoading() {
+                $('.inventario-cards-grid').html('<div class="inventario-loading"><div class="inventario-spinner"></div>Cargando inventario...</div>');
+            }
+
+            // Ocultar loading
+            function hideLoading() {
+                $('.inventario-loading').remove();
+            }
+        });
+
+        // Mostrar números de serie
+        window.showSerialNumbers = function(idProducto, idVariante, nombreProducto) {
+            console.log('=== INICIO showSerialNumbers ===');
+            console.log('Parámetros recibidos:', {idProducto, idVariante, nombreProducto});
+            
+            // Validar parámetros antes de continuar
+            if (idProducto === undefined || idProducto === null || idProducto === '') {
+                console.error('ERROR: idProducto es inválido:', idProducto);
+                $('#serialContent').html('<div class="inventario-alert inventario-alert-error">Error: ID de producto inválido o faltante</div>');
+                $('#serialModal').show();
+                return;
+            }
+            
+            // Validar si el ID es 0 (producto sin asignar)
+            if (idProducto === 0) {
+                console.warn('ADVERTENCIA: idProducto es 0 (producto sin asignar):', idProducto);
+                $('#serialContent').html('<div class="inventario-alert inventario-alert-warning">Este producto no tiene un ID valido asignado. Contacte al administrador.</div>');
+                $('#serialModal').show();
+                return;
+            }
+            
+            $('#serialModal .inventario-modal-title').text(`Numeros de Serie - ${nombreProducto}`);
+            $('#serialContent').html('<div class="inventario-loading"><div class="inventario-spinner"></div>Cargando números de serie...</div>');
+            $('#serialModal').show();
+
+            // Preparar parámetros
+            var params = { idProducto: idProducto };
+            if (idVariante && idVariante > 0) {
+                params.idVariante = idVariante;
+            }
+            
+            console.log('Parámetros enviados:', params);
+            console.log('URL:', '@Url.Action("GetNumerosSerie", "Inventario")');
+            console.log('idProducto:', idProducto, 'tipo:', typeof idProducto);
+            console.log('idVariante:', idVariante, 'tipo:', typeof idVariante);
+            
+            $.ajax({
+                url: '@Url.Action("GetNumerosSerie", "Inventario")',
+                type: 'GET',
+                data: params,
+                dataType: 'json',
+                timeout: 15000,
+                success: function(data) {
+                    console.log('SUCCESS callback ejecutado');
+                    console.log('Datos recibidos:', data);
+                    if (data && data.error) {
+                        console.log('Error en datos:', data.error);
+                        $('#serialContent').html(`<div class="inventario-alert inventario-alert-error">${data.error}</div>`);
+                    } else {
+                        console.log('Llamando displaySerialNumbers');
+                        displaySerialNumbers(data);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('ERROR callback ejecutado');
+                    console.log('Status:', status);
+                    console.log('Error:', error);
+                    console.log('XHR status:', xhr.status);
+                    console.log('Response text:', xhr.responseText);
+                    
+                    var errorMessage = 'Error al cargar los numeros de serie.';
+                    
+                    if (xhr.status === 404) {
+                        errorMessage = 'Metodo no encontrado. Verifique la URL.';
+                    } else if (xhr.status === 500) {
+                        errorMessage = 'Error interno del servidor. Verifique los logs del servidor.';
+                    } else if (status === 'timeout') {
+                        errorMessage = 'Tiempo de espera agotado.';
+                    } else if (status === 'parsererror') {
+                        errorMessage = 'Error al procesar la respuesta del servidor.';
+                    }
+                    
+                    $('#serialContent').html(`<div class="inventario-alert inventario-alert-error">${errorMessage}</div>`);
+                }
+            });
+        };
+
+        // Mostrar números de serie en el modal
+        function displaySerialNumbers(serialNumbers) {
+            const content = $('#serialContent');
+            content.empty();
+
+            if (!serialNumbers || !Array.isArray(serialNumbers)) {
+                content.html('<div class="inventario-alert inventario-alert-error"><i class="fas fa-exclamation-circle"></i> Error: Datos de numeros de serie no validos.</div>');
+                return;
+            }
+
+            if (serialNumbers.length === 0) {
+                content.html('<div class="inventario-alert inventario-alert-warning"><i class="fas fa-info-circle"></i> No hay numeros de serie registrados para este producto.</div>');
+                return;
+            }
+
+            const grid = $('<div class="inventario-serial-grid"></div>');
+            
+            serialNumbers.forEach(function(serie) {
+                if (!serie || !serie.NumeroSerie) {
+                    return;
+                }
+
+                const estadoClass = serie.EstadoDescripcion && serie.EstadoDescripcion.toLowerCase().includes('activo') ? 'disponible' : 'no-disponible';
+                
+                const card = $(`
+                    <div class="inventario-serial-card">
+                        <div class="inventario-serial-number">${serie.NumeroSerie || 'Sin numero'}</div>
+                        <div class="inventario-serial-details">
+                            <strong>Estado:</strong> ${serie.EstadoDescripcion || 'Sin estado'}<br>
+                            <strong>Ubicacion:</strong> ${serie.Ubicacion || 'Sin ubicacion'}<br>
+                            <strong>Fecha:</strong> ${serie.FechaCreacion || 'Sin fecha'}
+                        </div>
+                        <span class="inventario-serial-status ${estadoClass}">${serie.EstadoDescripcion || 'Sin estado'}</span>
+                    </div>
+                `);
+                grid.append(card);
+            });
+
+            content.append(grid);
+        }
+
+        // Cerrar modal de números de serie
+        window.closeSerialModal = function() {
+            $('#serialModal').hide();
+        };
+
+        // Cerrar modal al hacer clic fuera
+        $('#serialModal').on('click', function(e) {
+            if (e.target === this) {
+                closeSerialModal();
+            }
+        });
+    </script>
+}
+
+<div class="inventario-container">
+    <!-- Header con título y botón crear -->
+    <div class="inventario-header">
+        <h1 class="inventario-title">Inventario</h1>
+        @Html.ActionLink("Crear Inventario", "Create", "Inventario", null, new { @class = "btn-create-inventario" })
     </div>
-    <div class="admin-placeholder-text">Escuela Felix Arcadio Montero Monge</div>
-    <div class="admin-placeholder-subtitle">
-        Administra el inventario de equipos deportivos, materiales y recursos de la escuela.
+
+    <!-- Mensajes de éxito/error -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="inventario-alert inventario-alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="inventario-alert inventario-alert-error">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Panel de Filtros y Búsqueda -->
+    <div class="inventario-filters-panel">
+        <!-- Barra de Búsqueda -->
+        <div class="inventario-search-bar">
+            <div style="position: relative;">
+                <i class="fas fa-search inventario-search-icon"></i>
+                <input type="text" id="searchInput" class="inventario-search-input" 
+                       placeholder="Buscar por nombre, codigo o descripcion del producto..." 
+                       value="@ViewBag.CurrentSearch">
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="inventario-filters-row">
+            <div class="inventario-filter-group">
+                <label class="inventario-filter-label">Categoria:</label>
+                @Html.DropDownList("categoriaFilter", ViewBag.Categorias as SelectList, "Todas las categorias", new { @class = "inventario-filter-select", @id = "categoriaFilter" })
+            </div>
+            <div class="inventario-filter-group">
+                <label class="inventario-filter-label">Estado:</label>
+                @Html.DropDownList("estadoFilter", ViewBag.Estados as SelectList, "Todos los estados", new { @class = "inventario-filter-select", @id = "estadoFilter" })
+            </div>
+            <div class="inventario-filter-group">
+                <label class="inventario-filter-label">Marca:</label>
+                @Html.DropDownList("marcaFilter", ViewBag.Marcas as SelectList, "Todas las marcas", new { @class = "inventario-filter-select", @id = "marcaFilter" })
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="inventario-controls-row">
+            <div class="inventario-sort-group">
+                <label class="inventario-sort-label">Ordenar por:</label>
+                <select id="sortBy" class="inventario-filter-select">
+                    <option value="nombre" @(ViewBag.CurrentSortBy == "nombre" ? "selected" : "")>Nombre</option>
+                    <option value="cantidad" @(ViewBag.CurrentSortBy == "cantidad" ? "selected" : "")>Cantidad</option>
+                    <option value="categoria" @(ViewBag.CurrentSortBy == "categoria" ? "selected" : "")>Categoria</option>
+                    <option value="estado" @(ViewBag.CurrentSortBy == "estado" ? "selected" : "")>Estado</option>
+                    <option value="fecha" @(ViewBag.CurrentSortBy == "fecha" ? "selected" : "")>Fecha</option>
+                </select>
+                <select id="sortOrder" class="inventario-filter-select">
+                    <option value="asc" @(ViewBag.CurrentSortOrder == "asc" ? "selected" : "")>Ascendente</option>
+                    <option value="desc" @(ViewBag.CurrentSortOrder == "desc" ? "selected" : "")>Descendente</option>
+                </select>
+            </div>
+            <button type="button" id="clearFilters" class="inventario-clear-filters">
+                <i class="fas fa-times"></i> Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Grid de cards del inventario -->
+    <div class="inventario-cards-grid">
+        @foreach (var item in Model)
+        {
+            <div class="inventario-card">
+                <!-- Badge de estado -->
+                @{
+                    string statusClass = "disponible";
+                    string statusText = "Disponible";
+                    
+                    // Verificar si el estado es Inactivo
+                    if (item.Estado.Descripcion.ToLower().Contains("inactivo"))
+                    {
+                        statusClass = "no-disponible";
+                        statusText = "No Disponible";
+                    }
+                    else if (item.Cantidad <= item.Minimo)
+                    {
+                        statusClass = "bajo-stock";
+                        statusText = "Bajo Stock";
+                    }
+                    else if (item.Cantidad == 0)
+                    {
+                        statusClass = "agotado";
+                        statusText = "Agotado";
+                    }
+                    else if (item.Estado.Descripcion.ToLower().Contains("mantenimiento"))
+                    {
+                        statusClass = "mantenimiento";
+                        statusText = "Mantenimiento";
+                    }
+                }
+                <div class="inventario-card-status @statusClass">@statusText</div>
+
+                <!-- Header del producto -->
+                <div class="inventario-card-header">
+                    <h3 class="inventario-card-product">@item.Producto.Nombre</h3>
+                    <p class="inventario-card-category">@item.Producto.Categoria.Nombre</p>
+                </div>
+
+                <!-- Cantidad principal -->
+                <div class="inventario-card-quantity">@item.Cantidad</div>
+
+                <!-- Detalles del inventario -->
+                <div class="inventario-card-details">
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Estado:</span>
+                        <span class="inventario-card-detail-value">@item.Estado.Descripcion</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Variante:</span>
+                        <span class="inventario-card-detail-value">@(item.Variante?.NombreVariante ?? "Sin variante")</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Minimo:</span>
+                        <span class="inventario-card-detail-value">@item.Minimo</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Maximo:</span>
+                        <span class="inventario-card-detail-value">@item.Maximo</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Codigo:</span>
+                        <span class="inventario-card-detail-value">@item.Producto.Codigo</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Marca:</span>
+                        <span class="inventario-card-detail-value">@item.Producto.Marca</span>
+                    </div>
+                </div>
+
+                <!-- Footer con ID y acciones -->
+                <div class="inventario-card-footer">
+                    <div class="inventario-card-id">
+                        <i class="fas fa-user"></i>
+                        <span>ID: @item.IdInventario</span>
+                    </div>
+                    <div class="inventario-card-actions">
+                        <button type="button" class="btn-inventario-action btn-inventario-details" onclick="showSerialNumbers(@item.IdProducto, @(item.IdVariante.HasValue ? item.IdVariante.Value : 0), '@Html.Raw(item.Producto.Nombre.Replace("'", "\\'"))')">
+                            <i class="fas fa-barcode"></i> Series
+                        </button>
+                        @Html.ActionLink("Detalle", "Details", new { id = item.IdInventario }, new { @class = "btn-inventario-action btn-inventario-details" })
+                        @Html.ActionLink("Eliminar", "Delete", new { id = item.IdInventario }, new { @class = "btn-inventario-action btn-inventario-delete" })
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Mensaje si no hay items -->
+    @if (!Model.Any())
+    {
+        <div class="inventario-alert inventario-alert-warning">
+            <i class="fas fa-info-circle"></i> No hay items en el inventario. 
+            @Html.ActionLink("Crear el primer item", "Create", "Inventario", null, new { @class = "btn-create-inventario", @style = "margin-left: 1rem;" })
+        </div>
+    }
+
+    <!-- Paginación -->
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="inventario-pagination">
+            
+            @if (ViewBag.CurrentPage > 1)
+            {
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(1)">Primera</a>
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(@(ViewBag.CurrentPage - 1))">Anterior</a>
+            }
+            else
+            {
+                <span class="inventario-pagination-btn" disabled>Primera</span>
+                <span class="inventario-pagination-btn" disabled>Anterior</span>
+            }
+
+            @{
+                int startPage = Math.Max(1, ViewBag.CurrentPage - 2);
+                int endPage = Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2);
+            }
+
+            @if (startPage > 1)
+            {
+                <span class="inventario-pagination-dots">...</span>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                if (i == ViewBag.CurrentPage)
+                {
+                    <span class="inventario-pagination-btn active">@i</span>
+                }
+                else
+                {
+                    <a href="#" class="inventario-pagination-btn" onclick="changePage(@i)">@i</a>
+                }
+            }
+
+            @if (endPage < ViewBag.TotalPages)
+            {
+                <span class="inventario-pagination-dots">...</span>
+            }
+
+            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+            {
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(@(ViewBag.CurrentPage + 1))">Siguiente</a>
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(@ViewBag.TotalPages)">Ultima</a>
+            }
+            else
+            {
+                <span class="inventario-pagination-btn" disabled>Siguiente</span>
+                <span class="inventario-pagination-btn" disabled>Ultima</span>
+            }
+        </div>
+    }
+</div>
+
+<!-- Modal de Números de Serie -->
+<div id="serialModal" class="inventario-modal-overlay">
+    <div class="inventario-modal">
+        <div class="inventario-modal-header">
+            <h2 class="inventario-modal-title">Numeros de Serie</h2>
+            <button type="button" class="inventario-modal-close" onclick="closeSerialModal()">&times;</button>
+        </div>
+        <div class="inventario-modal-body">
+            <div id="serialContent">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+        <div class="inventario-modal-footer">
+            <button type="button" class="inventario-modal-btn inventario-modal-btn-secondary" onclick="closeSerialModal()">Cerrar</button>
+        </div>
     </div>
 </div>
