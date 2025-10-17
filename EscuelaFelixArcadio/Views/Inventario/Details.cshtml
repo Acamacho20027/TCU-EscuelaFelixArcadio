@@ -1,0 +1,147 @@
+﻿@model EscuelaFelixArcadio.Models.Inventario
+
+@{
+    ViewBag.Title = "Detalles Inventario";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/inventario.css" rel="stylesheet" />
+}
+
+<div class="inventario-container">
+    <div class="inventario-details-container">
+        <h1 class="inventario-details-title">Detalles de Inventario</h1>
+
+        <!-- Card: Información del Producto -->
+        <div class="inventario-details-card">
+            <h2 class="inventario-details-card-title">Información del Producto</h2>
+            <div class="inventario-details-grid">
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Nombre del Producto:</span>
+                    <div class="inventario-details-value">@Model.Producto.Nombre</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Código:</span>
+                    <div class="inventario-details-value">@Model.Producto.Codigo</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Categoría:</span>
+                    <div class="inventario-details-value">@Model.Producto.Categoria.Nombre</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Marca:</span>
+                    <div class="inventario-details-value">@Model.Producto.Marca</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Descripción:</span>
+                    <div class="inventario-details-value">@(Model.Producto.Descripcion ?? "Sin descripción")</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Tipo:</span>
+                    <div class="inventario-details-value">@(Model.Producto.EsServicio ? "Servicio" : "Producto")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Información de Inventario -->
+        <div class="inventario-details-card">
+            <h2 class="inventario-details-card-title">Información de Inventario</h2>
+            <div class="inventario-details-grid">
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">ID de Inventario:</span>
+                    <div class="inventario-details-value">@Model.IdInventario</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Estado:</span>
+                    <div class="inventario-details-value">@Model.Estado.Descripcion</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Variante:</span>
+                    <div class="inventario-details-value">@(Model.Variante?.NombreVariante ?? "Sin variante")</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Código de Variante:</span>
+                    <div class="inventario-details-value">@(Model.Variante?.CodigoVariante ?? "N/A")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Cantidades -->
+        <div class="inventario-details-card">
+            <h2 class="inventario-details-card-title">Cantidades</h2>
+            <div class="inventario-details-grid">
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Cantidad Actual:</span>
+                    <div class="inventario-details-value">@Model.Cantidad</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Cantidad Mínima:</span>
+                    <div class="inventario-details-value">@Model.Minimo</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Cantidad Máxima:</span>
+                    <div class="inventario-details-value">@Model.Maximo</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Estado de Stock:</span>
+                    <div class="inventario-details-value inventario-stock-value">
+                        @{
+                            string stockStatus = "";
+                            string stockClass = "";
+                            
+                            // Verificar si el estado del inventario es inactivo
+                            if (Model.Estado.Descripcion.ToLower().Contains("inactivo"))
+                            {
+                                stockStatus = "Stock Deshabilitado";
+                                stockClass = "inventario-stock-badge error";
+                            }
+                            else if (Model.Cantidad <= Model.Minimo)
+                            {
+                                stockStatus = "Bajo Stock";
+                                stockClass = "inventario-stock-badge warning";
+                            }
+                            else if (Model.Cantidad == 0)
+                            {
+                                stockStatus = "Agotado";
+                                stockClass = "inventario-stock-badge error";
+                            }
+                            else if (Model.Cantidad >= Model.Maximo)
+                            {
+                                stockStatus = "Stock Completo";
+                                stockClass = "inventario-stock-badge success";
+                            }
+                            else
+                            {
+                                stockStatus = "Stock Normal";
+                                stockClass = "inventario-stock-badge success";
+                            }
+                        }
+                        <span class="@stockClass">@stockStatus</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Fechas -->
+        <div class="inventario-details-card">
+            <h2 class="inventario-details-card-title">Fechas</h2>
+            <div class="inventario-details-grid">
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Fecha de Actualización:</span>
+                    <div class="inventario-details-value">@Model.FechaActualizacion.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+                <div class="inventario-details-field">
+                    <span class="inventario-details-label">Fecha de Creación del Producto:</span>
+                    <div class="inventario-details-value">@Model.Producto.FechaCreacion.ToString("dd/MM/yyyy")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="inventario-form-buttons">
+            @Html.ActionLink("Editar Inventario", "Edit", new { id = Model.IdInventario }, new { @class = "btn-inventario-save" })
+            @Html.ActionLink("Regresar a la Lista", "Index", "Inventario", null, new { @class = "btn-inventario-cancel" })
+        </div>
+    </div>
+</div>

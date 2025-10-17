@@ -1,0 +1,167 @@
+﻿@model EscuelaFelixArcadio.Models.Inventario
+
+@{
+    ViewBag.Title = "Editar Inventario";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/inventario.css" rel="stylesheet" />
+}
+
+<div class="inventario-container">
+    <div class="inventario-form-container">
+        <h1 class="inventario-form-title">Editar Inventario</h1>
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <!-- Mensajes de validación -->
+            @Html.ValidationSummary(true, "", new { @class = "inventario-alert inventario-alert-error" })
+            @Html.HiddenFor(model => model.IdInventario)
+
+            <!-- Sección: Información Básica -->
+            <div class="inventario-form-section">
+                <h2 class="inventario-form-section-title">Información Básica</h2>
+                <div class="inventario-form-grid">
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(model => model.IdProducto, "Producto", htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.DropDownList("IdProducto", null, htmlAttributes: new { @class = "inventario-form-control" })
+                        @Html.ValidationMessageFor(model => model.IdProducto, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(model => model.IdEstado, "Estado", htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.DropDownList("IdEstado", null, htmlAttributes: new { @class = "inventario-form-control" })
+                        @Html.ValidationMessageFor(model => model.IdEstado, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(model => model.IdVariante, "Variante", htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.DropDownList("IdVariante", null, htmlAttributes: new { @class = "inventario-form-control" })
+                        @Html.ValidationMessageFor(model => model.IdVariante, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: Cantidades -->
+            <div class="inventario-form-section">
+                <h2 class="inventario-form-section-title">Cantidades</h2>
+                <div class="inventario-form-grid">
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(model => model.Cantidad, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.EditorFor(model => model.Cantidad, new { htmlAttributes = new { @class = "inventario-form-control", @placeholder = "Ingrese la cantidad actual", @min = "0" } })
+                        @Html.ValidationMessageFor(model => model.Cantidad, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(model => model.Minimo, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.EditorFor(model => model.Minimo, new { htmlAttributes = new { @class = "inventario-form-control", @placeholder = "Cantidad mínima", @min = "0" } })
+                        @Html.ValidationMessageFor(model => model.Minimo, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(model => model.Maximo, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.EditorFor(model => model.Maximo, new { htmlAttributes = new { @class = "inventario-form-control", @placeholder = "Cantidad máxima", @min = "0" } })
+                        @Html.ValidationMessageFor(model => model.Maximo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: Información del Producto (Solo lectura) -->
+            <div class="inventario-form-section">
+                <h2 class="inventario-form-section-title">Información del Producto</h2>
+                <div class="inventario-form-grid">
+                    <div class="inventario-form-group">
+                        <label class="inventario-form-label">Nombre del Producto:</label>
+                        <div class="inventario-form-control" style="background: #f9fafb; color: #6b7280;">@(Model.Producto?.Nombre ?? "Sin nombre")</div>
+                    </div>
+
+                    <div class="inventario-form-group">
+                        <label class="inventario-form-label">Código:</label>
+                        <div class="inventario-form-control" style="background: #f9fafb; color: #6b7280;">@(Model.Producto?.Codigo ?? "Sin código")</div>
+                    </div>
+
+                    <div class="inventario-form-group">
+                        <label class="inventario-form-label">Categoría:</label>
+                        <div class="inventario-form-control" style="background: #f9fafb; color: #6b7280;">@(Model.Producto?.Categoria?.Nombre ?? "Sin categoría")</div>
+                    </div>
+
+                    <div class="inventario-form-group">
+                        <label class="inventario-form-label">Marca:</label>
+                        <div class="inventario-form-control" style="background: #f9fafb; color: #6b7280;">@(Model.Producto?.Marca ?? "Sin marca")</div>
+                    </div>
+
+                    <div class="inventario-form-group">
+                        <label class="inventario-form-label">Descripción:</label>
+                        <div class="inventario-form-control" style="background: #f9fafb; color: #6b7280;">@(Model.Producto?.Descripcion ?? "Sin descripción")</div>
+                    </div>
+
+                    <div class="inventario-form-group">
+                        <label class="inventario-form-label">Tipo:</label>
+                        <div class="inventario-form-control" style="background: #f9fafb; color: #6b7280;">@(Model.Producto?.EsServicio == true ? "Servicio" : "Producto")</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="inventario-form-buttons">
+                <button type="submit" class="btn-inventario-save">
+                    <i class="fas fa-save"></i>
+                    Guardar Cambios
+                </button>
+                @Html.ActionLink("Regresar a la Lista", "Index", "Inventario", null, new { @class = "btn-inventario-cancel" })
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script>
+        $(document).ready(function() {
+            // Cargar variantes cuando se selecciona un producto
+            $('#IdProducto').change(function() {
+                var productoId = $(this).val();
+                var varianteDropdown = $('#IdVariante');
+                
+                varianteDropdown.empty();
+                varianteDropdown.append('<option value="">Seleccione una variante</option>');
+                
+                if (productoId) {
+                    $.get('@Url.Action("GetVariantesByProducto", "Inventario")', { idProducto: productoId }, function(data) {
+                        $.each(data, function(index, item) {
+                            varianteDropdown.append('<option value="' + item.IdVariante + '">' + item.NombreVariante + '</option>');
+                        });
+                        
+                        // Restaurar la variante seleccionada
+                        var currentVarianteId = '@Model.IdVariante';
+                        if (currentVarianteId) {
+                            varianteDropdown.val(currentVarianteId);
+                        }
+                    });
+                }
+            });
+            
+            // Validación de cantidades
+            $('#Cantidad, #Minimo, #Maximo').on('input', function() {
+                var cantidad = parseInt($('#Cantidad').val()) || 0;
+                var minimo = parseInt($('#Minimo').val()) || 0;
+                var maximo = parseInt($('#Maximo').val()) || 0;
+                
+                if (minimo > maximo && maximo > 0) {
+                    $('#Minimo').addClass('error');
+                    $('#Maximo').addClass('error');
+                } else {
+                    $('#Minimo').removeClass('error');
+                    $('#Maximo').removeClass('error');
+                }
+            });
+            
+            // Cargar variantes al cargar la página
+            $('#IdProducto').trigger('change');
+        });
+    </script>
+}

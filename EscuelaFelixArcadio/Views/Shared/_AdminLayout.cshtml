@@ -5,12 +5,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Language" content="es" />
-    <title>@ViewBag.Title - Panel de Administración - Escuela Félix Arcadio</title>
+    <title>@ViewBag.Title - Panel de Administracion - Escuela Felix Arcadio</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="~/Content/admin-layout.css" rel="stylesheet" />
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <div class="admin-container">
@@ -20,11 +21,11 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <div class="sidebar-logo-icon">
-                        <img src="~/Content/images/escudo_escuela_felix_arcadio.jpg" alt="Escudo Escuela Félix Arcadio" class="escudo-image">
+                        <img src="~/Content/images/escudo_escuela_felix_arcadio.jpg" alt="Escudo Escuela Felix Arcadio" class="escudo-image">
                     </div>
                     <div class="sidebar-logo-text">
-                        <div class="sidebar-logo-title">Escuela Félix Arcadio Montero Monge</div>
-                        <div class="sidebar-logo-subtitle">Panel de Administración</div>
+                        <div class="sidebar-logo-title">Escuela Felix Arcadio Montero Monge</div>
+                        <div class="sidebar-logo-subtitle">Panel de Administracion</div>
                     </div>
                 </div>
             </div>
