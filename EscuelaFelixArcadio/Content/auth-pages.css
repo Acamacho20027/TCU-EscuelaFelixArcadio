@@ -122,9 +122,69 @@
     text-align: center;
 }
 
-/* Mostrar validation summary en todas las páginas de autenticación */
+/* Ocultar validation summary cuando está vacío */
 .auth-page .validation-summary-errors {
-    display: block;
+    display: none !important;
+    border: none !important;
+    background: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Sobrescribir estilos de alert-danger para validation-summary */
+.auth-page .validation-summary-errors.alert-danger {
+    display: none !important;
+    border: none !important;
+    background: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: transparent !important;
+}
+
+/* Forzar ocultación de cualquier elemento con borde rojo */
+.auth-page *[style*="border"] {
+    border: none !important;
+}
+
+.auth-page *[style*="background"] {
+    background: none !important;
+}
+
+/* Ocultar cualquier elemento que pueda tener color rojo */
+.auth-page .alert,
+.auth-page .alert-danger,
+.auth-page [class*="danger"],
+.auth-page [class*="error"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Forzar ocultación de cualquier elemento con color rojo */
+.auth-page *[style*="red"],
+.auth-page *[style*="#dc3545"],
+.auth-page *[style*="#f8d7da"],
+.auth-page *[style*="#f5c2c7"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    background: none !important;
+}
+
+/* Ocultar cualquier elemento que pueda estar causando la línea roja */
+.auth-page .auth-body > *:first-child {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    background: none !important;
 }
 
 .btn-auth-full {
