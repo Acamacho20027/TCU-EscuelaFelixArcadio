@@ -20,8 +20,6 @@
             {
                 @Html.AntiForgeryToken()
                 
-                @Html.ValidationSummary("", new { @class = "validation-summary-errors" })
-                
                 <div class="form-group-custom">
                     @Html.LabelFor(m => m.Email, new { @class = "form-label-custom" })
                     @Html.TextBoxFor(m => m.Email, new { @class = "form-control-custom", placeholder = "Ingresa tu correo electrónico" })

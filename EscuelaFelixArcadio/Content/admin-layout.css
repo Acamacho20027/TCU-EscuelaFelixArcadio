@@ -289,16 +289,28 @@ html, body {
 }
 
 .admin-placeholder-icon {
-    font-size: 8rem;
+    width: 120px;
+    height: 120px;
     margin-bottom: 2rem;
-    opacity: 0.3;
+    opacity: 0.8;
+    background-image: url('/Content/images/escudo_escuela_felix_arcadio.jpg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 50%;
+    border: 3px solid #1e40af;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+}
+
+.admin-placeholder-icon i {
+    display: none;
 }
 
 .admin-placeholder-text {
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 1rem;
-    color: #94a3b8;
+    color: #0f172a;
 }
 
 .admin-placeholder-subtitle {
@@ -480,6 +492,13 @@ body {
     color: #64748b !important;
     font-weight: 500 !important;
     white-space: nowrap;
+}
+
+
+/* ===== MOSTRAR TEXTO DE PLACEHOLDERS ===== */
+.admin-placeholder-text,
+.admin-placeholder-subtitle {
+    display: block !important;
 }
 
 /* LIMPIAR TODO Y EMPEZAR DE NUEVO */

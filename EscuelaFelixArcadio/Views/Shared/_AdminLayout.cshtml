@@ -137,65 +137,6 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
-    <script>
-        $(document).ready(function() {
-            // Función para corregir caracteres corruptos
-            function fixText() {
-                // Corregir título principal
-                $('.sidebar-logo-title').text('Escuela Félix Arcadio Montero Monge');
-                $('.sidebar-logo-subtitle').text('Panel de Administración');
-                
-                // Corregir enlaces específicos del menú por posición
-                $('.nav-section:first .nav-link:nth-child(2) span').text('Categorías');
-                $('.nav-section:first .nav-link:nth-child(4) span').text('Préstamos');
-                $('.nav-section:last .nav-link:nth-child(2) span').text('Estadísticas');
-                
-                // Corregir título de sección ADMINISTRACIÓN
-                $('.nav-section:last .nav-section-title').text('ADMINISTRACIÓN');
-                
-                // Corregir botón cerrar sesión
-                $('.admin-user-logout').html('<i class="fas fa-sign-out-alt"></i> Cerrar Sesión');
-                
-                // Corrección global de caracteres doblemente codificados
-                $('*').contents().filter(function() {
-                    return this.nodeType === 3; // Text nodes
-                }).each(function() {
-                    var text = $(this).text();
-                    if (text.includes('ÃƒÂ')) {
-                        $(this).text(text.replace(/ÃƒÂ©/g, 'é').replace(/ÃƒÂ³/g, 'ó').replace(/ÃƒÂ¡/g, 'á').replace(/ÃƒÂ­/g, 'í').replace(/ÃƒÂ±/g, 'ñ'));
-                    }
-                    if (text.includes('Ã')) {
-                        $(this).text(text.replace(/Ã©/g, 'é').replace(/Ã³/g, 'ó').replace(/Ã¡/g, 'á').replace(/Ã­/g, 'í').replace(/Ã±/g, 'ñ'));
-                    }
-                });
-                
-                // Corrección específica para elementos con texto visible
-                $('.nav-link span, .nav-section-title, .sidebar-logo-title, .sidebar-logo-subtitle').each(function() {
-                    var text = $(this).text();
-                    if (text.includes('Categor') && text.includes('Ã')) {
-                        $(this).text('Categorías');
-                    }
-                    if (text.includes('Pr') && text.includes('Ã')) {
-                        $(this).text('Préstamos');
-                    }
-                    if (text.includes('Estad') && text.includes('Ã')) {
-                        $(this).text('Estadísticas');
-                    }
-                    if (text.includes('ADMINISTRACI') && text.includes('Ã')) {
-                        $(this).text('ADMINISTRACIÓN');
-                    }
-                });
-            }
-            
-            // Ejecutar múltiples veces
-            fixText();
-            setTimeout(fixText, 50);
-            setTimeout(fixText, 100);
-            setTimeout(fixText, 200);
-            setTimeout(fixText, 500);
-            setTimeout(fixText, 1000);
-        });
-    </script>
     @RenderSection("scripts", required: false)
 </body>
 </html>
