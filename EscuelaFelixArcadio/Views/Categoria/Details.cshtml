@@ -1,0 +1,69 @@
+﻿@model EscuelaFelixArcadio.Models.Categoria
+
+@{
+    ViewBag.Title = "Detalles de Categoria";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/categoria.css" rel="stylesheet" />
+}
+
+<div class="categoria-container">
+    <div class="categoria-details-container">
+        <h1 class="categoria-details-title">Detalles de Categoria</h1>
+
+        <!-- Card: Información General -->
+        <div class="categoria-details-card">
+            <h2 class="categoria-details-card-title">Información General</h2>
+            <div class="categoria-details-grid">
+                <div class="categoria-details-field">
+                    <span class="categoria-details-label">ID de Categoría:</span>
+                    <div class="categoria-details-value">@Model.IdCategoria</div>
+                </div>
+                <div class="categoria-details-field">
+                    <span class="categoria-details-label">Nombre:</span>
+                    <div class="categoria-details-value">@Model.Nombre</div>
+                </div>
+                <div class="categoria-details-field">
+                    <span class="categoria-details-label">Estado:</span>
+                    <div class="categoria-details-value">
+                        @{
+                            string statusClass = Model.Estado.Descripcion.ToLower().Contains("activo") ? "success" : "error";
+                        }
+                        <span class="categoria-status-badge @statusClass">@Model.Estado.Descripcion</span>
+                    </div>
+                </div>
+                <div class="categoria-details-field">
+                    <span class="categoria-details-label">Fecha de Creación:</span>
+                    <div class="categoria-details-value">@Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Descripción -->
+        <div class="categoria-details-card">
+            <h2 class="categoria-details-card-title">Descripción</h2>
+            <div class="categoria-details-grid">
+                <div class="categoria-details-field" style="grid-column: 1 / -1;">
+                    <div class="categoria-details-value">
+                        @if (!string.IsNullOrEmpty(Model.Descripcion))
+                        {
+                            @Model.Descripcion
+                        }
+                        else
+                        {
+                            <span style="color: #9ca3af; font-style: italic;">No hay descripción disponible para esta categoría.</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="categoria-form-buttons">
+            @Html.ActionLink("Editar Categoría", "Edit", new { id = Model.IdCategoria }, new { @class = "btn-categoria-save" })
+            @Html.ActionLink("Regresar a la Lista", "Index", "Categoria", null, new { @class = "btn-categoria-cancel" })
+        </div>
+    </div>
+</div>

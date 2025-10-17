@@ -1,0 +1,65 @@
+﻿@model EscuelaFelixArcadio.Models.Categoria
+
+@{
+    ViewBag.Title = "Eliminar Categoria";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/categoria.css" rel="stylesheet" />
+}
+
+<div class="categoria-container">
+    <div class="categoria-delete-container">
+        <h1 class="categoria-delete-title">Eliminar Categoría</h1>
+        
+        <p class="categoria-delete-message">
+            ¿Está seguro de que desea eliminar esta categoría? Esta acción no se puede deshacer.
+        </p>
+
+        <!-- Advertencia si hay productos asociados -->
+        @if (ViewBag.TieneProductos == true)
+        {
+            <div class="categoria-alert categoria-alert-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>¡Advertencia!</strong> Esta categoría tiene productos asociados. No se puede eliminar hasta que reasigne o elimine todos los productos vinculados.
+            </div>
+        }
+
+        <!-- Información de la categoría a eliminar -->
+        <div class="categoria-delete-info">
+            <h3 class="categoria-delete-info-title">Categoría a Eliminar:</h3>
+            <div class="categoria-delete-info-details">
+                <strong>ID:</strong> @Model.IdCategoria<br>
+                <strong>Nombre:</strong> @Model.Nombre<br>
+                <strong>Estado:</strong> @Model.Estado.Descripcion<br>
+                <strong>Descripción:</strong> @(Model.Descripcion ?? "Sin descripción")<br>
+                <strong>Fecha de Creación:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        </div>
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            
+            <!-- Botones de acción -->
+            <div class="categoria-form-buttons">
+                @if (ViewBag.TieneProductos == true)
+                {
+                    <button type="button" class="btn-categoria-delete-confirm" disabled style="opacity: 0.5; cursor: not-allowed;">
+                        <i class="fas fa-ban"></i>
+                        No se puede eliminar
+                    </button>
+                }
+                else
+                {
+                    <button type="submit" class="btn-categoria-delete-confirm">
+                        <i class="fas fa-trash"></i>
+                        Eliminar Definitivamente
+                    </button>
+                }
+                @Html.ActionLink("Regresar a la Lista", "Index", "Categoria", null, new { @class = "btn-categoria-cancel" })
+            </div>
+        }
+    </div>
+</div>
