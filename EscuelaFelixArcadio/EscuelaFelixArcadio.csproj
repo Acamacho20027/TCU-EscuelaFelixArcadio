@@ -242,6 +242,7 @@
     <Content Include="Content\images\escuela_parque.jpg" />
     <Content Include="Content\images\herramientas-deportivas.jpg" />
     <Content Include="Content\inventario.css" />
+    <Content Include="Content\prestamos.css" />
     <Content Include="Content\sports-buttons-fix.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
@@ -320,6 +321,10 @@
     <Content Include="Views\Categoria\Create.cshtml" />
     <Content Include="Views\Categoria\Edit.cshtml" />
     <Content Include="Views\Categoria\Delete.cshtml" />
+    <Content Include="Views\Prestamos\Details.cshtml" />
+    <Content Include="Views\Prestamos\Create.cshtml" />
+    <Content Include="Views\Prestamos\Edit.cshtml" />
+    <Content Include="Views\Prestamos\Delete.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

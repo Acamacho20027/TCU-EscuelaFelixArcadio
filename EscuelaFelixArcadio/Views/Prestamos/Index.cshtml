@@ -1,14 +1,417 @@
+@model IEnumerable<EscuelaFelixArcadio.Models.Prestamo>
+
 @{
     ViewBag.Title = "Prestamos";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="admin-placeholder">
-    <div class="admin-placeholder-icon">
-        <i class="fas fa-hand-holding"></i>
+@section Styles {
+    <link href="~/Content/prestamos.css" rel="stylesheet" />
+}
+
+<div class="prestamos-container">
+    <!-- Header with title and create button -->
+    <div class="prestamos-header">
+        <h1 class="prestamos-title">Pr&#233;stamos</h1>
+        <a href="@Url.Action("Create", "Prestamos")" class="btn-create-prestamos">
+            <i class="fas fa-plus"></i>
+            Crear Prestamo
+        </a>
     </div>
-    <div class="admin-placeholder-text">Escuela Felix Arcadio Montero Monge</div>
-    <div class="admin-placeholder-subtitle">
-        Administra los prestamos de equipos deportivos a estudiantes y personal.
+
+    <!-- Success/Error messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="prestamos-alert prestamos-alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="prestamos-alert prestamos-alert-error">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Filters and search panel -->
+    <div class="prestamos-filters-panel">
+        <!-- Search bar -->
+        <div class="prestamos-search-bar" style="position: relative;">
+            <i class="fas fa-search prestamos-search-icon"></i>
+            <input type="text" id="searchInput" class="prestamos-search-input" placeholder="Buscar por numero de prestamo o notas...">
+        </div>
+
+        <!-- Filter dropdowns -->
+        <div class="prestamos-filters-row">
+            <div class="prestamos-filter-group">
+                <label class="prestamos-filter-label">Estado</label>
+                <select id="estadoFilter" class="prestamos-filter-select">
+                    <option value="">Todos los estados</option>
+                    @foreach (var estado in ViewBag.Estados as SelectList)
+                    {
+                        <option value="@estado.Value">@estado.Text</option>
+                    }
+                </select>
+            </div>
+
+            <div class="prestamos-filter-group">
+                <label class="prestamos-filter-label">Usuario</label>
+                <select id="usuarioFilter" class="prestamos-filter-select">
+                    <option value="">Todos los usuarios</option>
+                    @foreach (var usuario in ViewBag.Usuarios as SelectList)
+                    {
+                        <option value="@usuario.Value">@usuario.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <!-- Controls row -->
+        <div class="prestamos-controls-row">
+            <div class="prestamos-sort-group">
+                <label class="prestamos-sort-label">Ordenar por:</label>
+                <select id="sortBy" class="prestamos-filter-select">
+                    <option value="fecha">Fecha de Creacion</option>
+                    <option value="numero">Numero de Prestamo</option>
+                    <option value="usuario">Usuario</option>
+                    <option value="estado">Estado</option>
+                </select>
+                <select id="sortOrder" class="prestamos-filter-select">
+                    <option value="desc">Descendente</option>
+                    <option value="asc">Ascendente</option>
+                </select>
+            </div>
+
+            <div class="prestamos-items-per-page">
+                <label class="prestamos-items-label">Mostrar:</label>
+                <select id="pageSize" class="prestamos-filter-select">
+                    <option value="12">12</option>
+                    <option value="24">24</option>
+                    <option value="48">48</option>
+                </select>
+            </div>
+
+            <button id="clearFilters" class="prestamos-clear-filters">
+                <i class="fas fa-times"></i> Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="prestamos-loading" style="display: none;">
+        <div class="prestamos-spinner"></div>
+        <span>Cargando prestamos...</span>
+    </div>
+
+    <!-- Prestamos cards grid -->
+    <div id="prestamosGrid" class="prestamos-cards-grid">
+        @foreach (var item in Model)
+        {
+            var statusClass = "";
+            var estadoDescripcion = item.Estado.Descripcion.ToLower();
+            
+            if (estadoDescripcion.Contains("activo") && !estadoDescripcion.Contains("inactivo"))
+            {
+                statusClass = "activo";
+            }
+            else if (estadoDescripcion.Contains("pendiente"))
+            {
+                statusClass = "pendiente";
+            }
+            else if (estadoDescripcion.Contains("devuelto") || estadoDescripcion.Contains("completado"))
+            {
+                statusClass = "devuelto";
+            }
+            else if (estadoDescripcion.Contains("vencido"))
+            {
+                statusClass = "vencido";
+            }
+            else
+            {
+                statusClass = "pendiente";
+            }
+
+            <div class="prestamos-card">
+                <span class="prestamos-card-status @statusClass">@item.Estado.Descripcion</span>
+                
+                <div class="prestamos-card-header">
+                    <h3 class="prestamos-card-number">Prestamo #@item.NumeroPrestamo</h3>
+                    <p class="prestamos-card-user">
+                        <i class="fas fa-user"></i> @(item.ApplicationUser?.UserName ?? "Usuario no encontrado")
+                    </p>
+                </div>
+
+                <div class="prestamos-card-details">
+                    <div class="prestamos-card-detail">
+                        <span class="prestamos-card-detail-label">Fecha de Creacion</span>
+                        <span class="prestamos-card-detail-value">@item.FechadeCreacion.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="prestamos-card-detail">
+                        <span class="prestamos-card-detail-label">Fecha de Devolucion</span>
+                        <span class="prestamos-card-detail-value">
+                            @if (item.FechaDevolucion.HasValue)
+                            {
+                                @item.FechaDevolucion.Value.ToString("dd/MM/yyyy")
+                            }
+                            else
+                            {
+                                <text>Pendiente</text>
+                            }
+                        </span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(item.Notas))
+                    {
+                        <div class="prestamos-card-detail">
+                            <span class="prestamos-card-detail-label">Notas</span>
+                            <span class="prestamos-card-detail-value">@item.Notas</span>
+                        </div>
+                    }
+                </div>
+
+                <div class="prestamos-card-footer">
+                    <span class="prestamos-card-id">
+                        <i class="fas fa-hashtag"></i> ID: @item.IdPrestamo
+                    </span>
+                    <div class="prestamos-card-actions">
+                        <a href="@Url.Action("Details", new { id = item.IdPrestamo })" class="btn-prestamos-action btn-prestamos-details">
+                            <i class="fas fa-eye"></i> Detalle
+                        </a>
+                        <a href="@Url.Action("Delete", new { id = item.IdPrestamo })" class="btn-prestamos-action btn-prestamos-delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="prestamos-pagination">
+        <!-- Pagination will be generated by JavaScript -->
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var currentPage = 1;
+            var pageSize = 12;
+            var totalPages = @ViewBag.TotalPages;
+
+            // Initialize pagination
+            updatePagination(@ViewBag.CurrentPage, @ViewBag.TotalPages, @ViewBag.TotalItems);
+
+            // Search input with debounce
+            var searchTimeout;
+            $('#searchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    currentPage = 1;
+                    loadPrestamos();
+                }, 500);
+            });
+
+            // Filter changes
+            $('#estadoFilter, #usuarioFilter, #sortBy, #sortOrder, #pageSize').on('change', function() {
+                if ($(this).attr('id') === 'pageSize') {
+                    pageSize = parseInt($(this).val());
+                }
+                currentPage = 1;
+                loadPrestamos();
+            });
+
+            // Clear filters
+            $('#clearFilters').on('click', function() {
+                $('#searchInput').val('');
+                $('#estadoFilter').val('');
+                $('#usuarioFilter').val('');
+                $('#sortBy').val('fecha');
+                $('#sortOrder').val('desc');
+                $('#pageSize').val('12');
+                pageSize = 12;
+                currentPage = 1;
+                loadPrestamos();
+            });
+
+            // Load prestamos with AJAX
+            function loadPrestamos() {
+                $('#loadingIndicator').show();
+                $('#prestamosGrid').css('opacity', '0.5');
+
+                $.ajax({
+                    url: '@Url.Action("SearchPrestamos", "Prestamos")',
+                    type: 'GET',
+                    data: {
+                        search: $('#searchInput').val(),
+                        estado: $('#estadoFilter').val(),
+                        usuario: $('#usuarioFilter').val(),
+                        sortBy: $('#sortBy').val(),
+                        sortOrder: $('#sortOrder').val(),
+                        page: currentPage,
+                        pageSize: pageSize
+                    },
+                    success: function(data) {
+                        renderPrestamos(data.items);
+                        updatePagination(data.currentPage, data.totalPages, data.totalItems);
+                        totalPages = data.totalPages;
+                        $('#loadingIndicator').hide();
+                        $('#prestamosGrid').css('opacity', '1');
+                    },
+                    error: function() {
+                        $('#loadingIndicator').hide();
+                        $('#prestamosGrid').css('opacity', '1');
+                        alert('Error al cargar los prestamos');
+                    }
+                });
+            }
+
+            // Render prestamos cards
+            function renderPrestamos(prestamos) {
+                var html = '';
+                
+                if (prestamos.length === 0) {
+                    html = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #6b7280;">';
+                    html += '<i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem;"></i>';
+                    html += '<p style="font-size: 1.125rem; font-weight: 500;">No se encontraron prestamos</p>';
+                    html += '</div>';
+                } else {
+                    prestamos.forEach(function(prestamo) {
+                        var statusClass = getStatusClass(prestamo.EstadoDescripcion);
+                        
+                        html += '<div class="prestamos-card">';
+                        html += '<span class="prestamos-card-status ' + statusClass + '">' + prestamo.EstadoDescripcion + '</span>';
+                        html += '<div class="prestamos-card-header">';
+                        html += '<h3 class="prestamos-card-number">Prestamo #' + prestamo.NumeroPrestamo + '</h3>';
+                        html += '<p class="prestamos-card-user"><i class="fas fa-user"></i> ' + prestamo.UsuarioNombre + '</p>';
+                        html += '</div>';
+                        html += '<div class="prestamos-card-details">';
+                        html += '<div class="prestamos-card-detail">';
+                        html += '<span class="prestamos-card-detail-label">Fecha de Creacion</span>';
+                        html += '<span class="prestamos-card-detail-value">' + prestamo.FechadeCreacion + '</span>';
+                        html += '</div>';
+                        html += '<div class="prestamos-card-detail">';
+                        html += '<span class="prestamos-card-detail-label">Fecha de Devolucion</span>';
+                        html += '<span class="prestamos-card-detail-value">' + prestamo.FechaDevolucion + '</span>';
+                        html += '</div>';
+                        if (prestamo.Notas && prestamo.Notas !== 'Sin notas') {
+                            html += '<div class="prestamos-card-detail">';
+                            html += '<span class="prestamos-card-detail-label">Notas</span>';
+                            html += '<span class="prestamos-card-detail-value">' + prestamo.Notas + '</span>';
+                            html += '</div>';
+                        }
+                        html += '</div>';
+                        html += '<div class="prestamos-card-footer">';
+                        html += '<span class="prestamos-card-id"><i class="fas fa-hashtag"></i> ID: ' + prestamo.IdPrestamo + '</span>';
+                        html += '<div class="prestamos-card-actions">';
+                        html += '<a href="@Url.Action("Details", "Prestamos")/' + prestamo.IdPrestamo + '" class="btn-prestamos-action btn-prestamos-details">';
+                        html += '<i class="fas fa-eye"></i> Detalle</a>';
+                        html += '<a href="@Url.Action("Delete", "Prestamos")/' + prestamo.IdPrestamo + '" class="btn-prestamos-action btn-prestamos-delete">';
+                        html += '<i class="fas fa-trash-alt"></i></a>';
+                        html += '</div></div></div>';
+                    });
+                }
+                
+                $('#prestamosGrid').html(html);
+                
+                // Forzar color rojo para estados INACTIVO
+                $('.prestamos-card-status').each(function() {
+                    var text = $(this).text().toUpperCase();
+                    if (text.includes('INACTIVO')) {
+                        $(this).css({
+                            'background': '#fee2e2 !important',
+                            'background-color': '#fee2e2 !important',
+                            'color': '#991b1b !important'
+                        });
+                    }
+                });
+            }
+
+            // Get status class
+            function getStatusClass(estado) {
+                var estadoLower = estado.toLowerCase();
+                console.log('Estado recibido:', estado, 'Estado lower:', estadoLower);
+                
+                if (estadoLower.includes('inactivo')) {
+                    console.log('Detectado como inactivo');
+                    return 'inactivo';
+                } else if (estadoLower.includes('activo')) {
+                    console.log('Detectado como activo');
+                    return 'activo';
+                } else if (estadoLower.includes('pendiente')) {
+                    console.log('Detectado como pendiente');
+                    return 'pendiente';
+                } else if (estadoLower.includes('devuelto') || estadoLower.includes('completado')) {
+                    console.log('Detectado como devuelto');
+                    return 'devuelto';
+                } else if (estadoLower.includes('vencido')) {
+                    console.log('Detectado como vencido');
+                    return 'vencido';
+                }
+                console.log('Estado por defecto: pendiente');
+                return 'pendiente';
+            }
+
+            // Update pagination
+            function updatePagination(current, total, totalItems) {
+                var html = '';
+                
+                if (total > 0) {
+                    // Primera página
+                    if (current > 1) {
+                        html += '<button class="prestamos-pagination-btn" onclick="goToPage(1)">Primera</button>';
+                    } else {
+                        html += '<button class="prestamos-pagination-btn" disabled>Primera</button>';
+                    }
+                    
+                    // Anterior
+                    if (current > 1) {
+                        html += '<button class="prestamos-pagination-btn" onclick="goToPage(' + (current - 1) + ')">Anterior</button>';
+                    } else {
+                        html += '<button class="prestamos-pagination-btn" disabled>Anterior</button>';
+                    }
+                    
+                    // Page numbers
+                    var startPage = Math.max(1, current - 2);
+                    var endPage = Math.min(total, current + 2);
+                    
+                    if (startPage > 1) {
+                        html += '<span class="prestamos-pagination-dots">...</span>';
+                    }
+                    
+                    for (var i = startPage; i <= endPage; i++) {
+                        html += '<button class="prestamos-pagination-btn ' + (i === current ? 'active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+                    }
+                    
+                    if (endPage < total) {
+                        html += '<span class="prestamos-pagination-dots">...</span>';
+                    }
+                    
+                    // Siguiente
+                    if (current < total) {
+                        html += '<button class="prestamos-pagination-btn" onclick="goToPage(' + (current + 1) + ')">Siguiente</button>';
+                    } else {
+                        html += '<button class="prestamos-pagination-btn" disabled>Siguiente</button>';
+                    }
+                    
+                    // Última página
+                    if (current < total) {
+                        html += '<button class="prestamos-pagination-btn" onclick="goToPage(' + total + ')">Ultima</button>';
+                    } else {
+                        html += '<button class="prestamos-pagination-btn" disabled>Ultima</button>';
+                    }
+                }
+                
+                $('#pagination').html(html);
+            }
+
+            // Go to page function
+            window.goToPage = function(page) {
+                if (page >= 1 && page <= totalPages) {
+                    currentPage = page;
+                    loadPrestamos();
+                }
+            };
+        });
+    </script>
+}
+

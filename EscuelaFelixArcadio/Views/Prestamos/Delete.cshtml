@@ -1,0 +1,76 @@
+﻿@model EscuelaFelixArcadio.Models.Prestamo
+
+@{
+    ViewBag.Title = "Eliminar Prestamo";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/prestamos.css" rel="stylesheet" />
+}
+
+<div class="prestamos-container">
+    <div class="prestamos-delete-container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc2626; margin-bottom: 1rem;"></i>
+            <h2 class="prestamos-delete-title">¿Eliminar Prestamo?</h2>
+            <p class="prestamos-delete-message">
+                Esta accion es permanente y no se puede deshacer. ¿Esta seguro de que desea eliminar este prestamo?
+            </p>
+        </div>
+
+        <div class="prestamos-delete-info">
+            <h3 class="prestamos-delete-info-title">
+                <i class="fas fa-info-circle"></i> Informacion del Prestamo a Eliminar
+            </h3>
+            <div class="prestamos-delete-info-details">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <strong>ID:</strong> #@Model.IdPrestamo
+                    </div>
+                    <div>
+                        <strong>Numero de Prestamo:</strong> @Model.NumeroPrestamo
+                    </div>
+                    <div>
+                        <strong>Usuario:</strong> @(Model.ApplicationUser?.UserName ?? "Usuario no encontrado")
+                    </div>
+                    <div>
+                        <strong>Email:</strong> @(Model.ApplicationUser?.Email ?? "No disponible")
+                    </div>
+                    <div>
+                        <strong>Estado:</strong> @Model.Estado.Descripcion
+                    </div>
+                    <div>
+                        <strong>Devuelto:</strong> @(Model.Devolucion ? "Si" : "No")
+                    </div>
+                    <div>
+                        <strong>Fecha de Creacion:</strong> @Model.FechadeCreacion.ToString("dd/MM/yyyy")
+                    </div>
+                    <div>
+                        <strong>Fecha de Devolucion:</strong> @(Model.FechaDevolucion.HasValue ? Model.FechaDevolucion.Value.ToString("dd/MM/yyyy") : "Pendiente")
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Notas))
+                {
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #fecaca;">
+                        <strong>Notas:</strong><br />
+                        @Model.Notas
+                    </div>
+                }
+            </div>
+        </div>
+
+        @using (Html.BeginForm("Delete", "Prestamos", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            
+            <div class="prestamos-form-buttons">
+                <button type="submit" class="btn-prestamos-delete-confirm">
+                    <i class="fas fa-trash"></i>
+                    Eliminar Definitivamente
+                </button>
+                @Html.ActionLink("Regresar a la Lista", "Index", "Prestamos", null, new { @class = "btn-prestamos-cancel" })
+            </div>
+        }
+    </div>
+</div>

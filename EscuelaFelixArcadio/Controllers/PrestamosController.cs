@@ -3,89 +3,417 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using EscuelaFelixArcadio.Models;
+using System.Data.Entity;
 
 namespace EscuelaFelixArcadio.Controllers
 {
     [Authorize(Roles = "Administrador")]
     public class PrestamosController : Controller
     {
-        // GET: Prestamos
-        public ActionResult Index()
+        private ApplicationDbContext db = new ApplicationDbContext();
+
+        // GET: Prestamos - Lista principal de préstamos
+        public ActionResult Index(string search = "", string estado = "", string usuario = "", 
+            string sortBy = "fecha", string sortOrder = "desc", int page = 1, int pageSize = 12)
         {
-            ViewBag.Title = "Gestión de Préstamos";
-            return View();
+            ViewBag.Title = "Prestamos";
+            
+            // Obtener datos para los filtros
+            ViewBag.Estados = new SelectList(
+                db.Estado.OrderBy(e => e.Descripcion), 
+                "IdEstado", "Descripcion");
+
+            // Obtener usuarios para filtro
+            var usuarios = db.Users
+                .Select(u => new { Id = u.Id, Nombre = u.UserName })
+                .OrderBy(u => u.Nombre)
+                .ToList();
+            ViewBag.Usuarios = new SelectList(usuarios, "Id", "Nombre");
+
+            // Consulta base
+            var query = db.Prestamo
+                .Include(p => p.Estado)
+                .Include(p => p.ApplicationUser)
+                .AsQueryable();
+
+            // Aplicar filtros
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => 
+                    p.NumeroPrestamo.Contains(search) ||
+                    p.Notas.Contains(search));
+            }
+
+            if (!string.IsNullOrEmpty(estado))
+            {
+                int estadoId = int.Parse(estado);
+                query = query.Where(p => p.IdEstado == estadoId);
+            }
+
+            if (!string.IsNullOrEmpty(usuario))
+            {
+                query = query.Where(p => p.Id == usuario);
+            }
+
+            // Aplicar ordenamiento
+            switch (sortBy.ToLower())
+            {
+                case "numero":
+                    query = sortOrder == "asc" ? 
+                        query.OrderBy(p => p.NumeroPrestamo) : 
+                        query.OrderByDescending(p => p.NumeroPrestamo);
+                    break;
+                case "usuario":
+                    query = sortOrder == "asc" ? 
+                        query.OrderBy(p => p.ApplicationUser.UserName) : 
+                        query.OrderByDescending(p => p.ApplicationUser.UserName);
+                    break;
+                case "estado":
+                    query = sortOrder == "asc" ? 
+                        query.OrderBy(p => p.Estado.Descripcion) : 
+                        query.OrderByDescending(p => p.Estado.Descripcion);
+                    break;
+                case "fecha":
+                    query = sortOrder == "asc" ? 
+                        query.OrderBy(p => p.FechadeCreacion) : 
+                        query.OrderByDescending(p => p.FechadeCreacion);
+                    break;
+                default:
+                    query = query.OrderByDescending(p => p.FechadeCreacion);
+                    break;
+            }
+
+            // Calcular paginación
+            var totalItems = query.Count();
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            var skip = (page - 1) * pageSize;
+
+            var prestamos = query.Skip(skip).Take(pageSize).ToList();
+
+            // Pasar datos a la vista
+            ViewBag.CurrentSearch = search;
+            ViewBag.CurrentEstado = estado;
+            ViewBag.CurrentUsuario = usuario;
+            ViewBag.CurrentSortBy = sortBy;
+            ViewBag.CurrentSortOrder = sortOrder;
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalItems = totalItems;
+            ViewBag.TotalPages = totalPages;
+
+            return View(prestamos);
         }
 
-        // GET: Prestamos/Details/5
-        public ActionResult Details(int id)
+        // AJAX: Buscar préstamos con filtros
+        [HttpGet]
+        public JsonResult SearchPrestamos(string search = "", string estado = "", string usuario = "", 
+            string sortBy = "fecha", string sortOrder = "desc", int page = 1, int pageSize = 12)
         {
-            return View();
+            // Consulta base
+            var query = db.Prestamo
+                .Include(p => p.Estado)
+                .Include(p => p.ApplicationUser)
+                .AsQueryable();
+
+            // Aplicar filtros
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => 
+                    p.NumeroPrestamo.Contains(search) ||
+                    p.Notas.Contains(search));
+            }
+
+            if (!string.IsNullOrEmpty(estado))
+            {
+                int estadoId = int.Parse(estado);
+                query = query.Where(p => p.IdEstado == estadoId);
+            }
+
+            if (!string.IsNullOrEmpty(usuario))
+            {
+                query = query.Where(p => p.Id == usuario);
+            }
+
+            // Aplicar ordenamiento
+            switch (sortBy.ToLower())
+            {
+                case "numero":
+                    query = sortOrder == "asc" ? 
+                        query.OrderBy(p => p.NumeroPrestamo) : 
+                        query.OrderByDescending(p => p.NumeroPrestamo);
+                    break;
+                case "usuario":
+                    query = sortOrder == "asc" ? 
+                        query.OrderBy(p => p.ApplicationUser.UserName) : 
+                        query.OrderByDescending(p => p.ApplicationUser.UserName);
+                    break;
+                case "estado":
+                    query = sortOrder == "asc" ? 
+                        query.OrderBy(p => p.Estado.Descripcion) : 
+                        query.OrderByDescending(p => p.Estado.Descripcion);
+                    break;
+                case "fecha":
+                    query = sortOrder == "asc" ? 
+                        query.OrderBy(p => p.FechadeCreacion) : 
+                        query.OrderByDescending(p => p.FechadeCreacion);
+                    break;
+                default:
+                    query = query.OrderByDescending(p => p.FechadeCreacion);
+                    break;
+            }
+
+            // Calcular paginación
+            var totalItems = query.Count();
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            var skip = (page - 1) * pageSize;
+
+            var prestamos = query.Skip(skip).Take(pageSize).ToList();
+
+            var result = new
+            {
+                items = prestamos.Select(p => new
+                {
+                    IdPrestamo = p.IdPrestamo,
+                    NumeroPrestamo = p.NumeroPrestamo,
+                    UsuarioNombre = p.ApplicationUser?.UserName ?? "Usuario no encontrado",
+                    EstadoDescripcion = p.Estado.Descripcion,
+                    IdEstado = p.IdEstado,
+                    FechadeCreacion = p.FechadeCreacion.ToString("dd/MM/yyyy"),
+                    FechaDevolucion = p.FechaDevolucion?.ToString("dd/MM/yyyy") ?? "Pendiente",
+                    Notas = p.Notas ?? "Sin notas",
+                    Devolucion = p.Devolucion
+                }).ToList(),
+                totalItems = totalItems,
+                totalPages = totalPages,
+                currentPage = page,
+                pageSize = pageSize
+            };
+
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
-        // GET: Prestamos/Create
+        // GET: Prestamos/Details/5 - Ver detalles de un préstamo
+        public ActionResult Details(long id)
+        {
+            ViewBag.Title = "Detalles de Prestamo";
+            
+            var prestamo = db.Prestamo
+                .Include(p => p.Estado)
+                .Include(p => p.ApplicationUser)
+                .FirstOrDefault(p => p.IdPrestamo == id);
+
+            if (prestamo == null)
+            {
+                return HttpNotFound();
+            }
+
+            return View(prestamo);
+        }
+
+        // GET: Prestamos/Create - Crear nuevo préstamo
         public ActionResult Create()
         {
+            ViewBag.Title = "Crear Prestamo";
+            
+            ViewBag.IdEstado = new SelectList(
+                db.Estado.OrderBy(e => e.Descripcion), 
+                "IdEstado", "Descripcion");
+
+            ViewBag.Id = new SelectList(
+                db.Users.OrderBy(u => u.UserName), 
+                "Id", "UserName");
+
             return View();
         }
 
-        // POST: Prestamos/Create
+        // POST: Prestamos/Create - Procesar creación de nuevo préstamo
         [HttpPost]
-        public ActionResult Create(FormCollection collection)
+        [ValidateAntiForgeryToken]
+        public ActionResult Create([Bind(Include = "NumeroPrestamo,Id,IdEstado,Notas,Devolucion")] Prestamo prestamo)
         {
             try
             {
-                // TODO: Add insert logic here
+                // Generar número de préstamo automático si no se proporciona
+                if (string.IsNullOrEmpty(prestamo.NumeroPrestamo))
+                {
+                    var ultimoPrestamo = db.Prestamo
+                        .OrderByDescending(p => p.IdPrestamo)
+                        .FirstOrDefault();
+                    
+                    long siguienteNumero = 1;
+                    if (ultimoPrestamo != null && !string.IsNullOrEmpty(ultimoPrestamo.NumeroPrestamo))
+                    {
+                        // Intentar parsear el número, si falla usar el ID como respaldo
+                        if (!long.TryParse(ultimoPrestamo.NumeroPrestamo, out siguienteNumero))
+                        {
+                            // Si el parseo falla, usar el ID del último préstamo + 1
+                            siguienteNumero = ultimoPrestamo.IdPrestamo + 1;
+                        }
+                        else
+                        {
+                            siguienteNumero++;
+                        }
+                    }
+                    
+                    prestamo.NumeroPrestamo = siguienteNumero.ToString().PadLeft(6, '0');
+                    
+                    // Limpiar el error del ModelState para NumeroPrestamo
+                    ModelState.Remove("NumeroPrestamo");
+                }
 
+                if (ModelState.IsValid)
+                {
+                    prestamo.FechadeCreacion = DateTime.UtcNow;
+                    if (prestamo.Devolucion)
+                    {
+                        prestamo.FechaDevolucion = DateTime.UtcNow;
+                    }
+                    
+                    db.Prestamo.Add(prestamo);
+                    db.SaveChanges();
+                    
+                    TempData["SuccessMessage"] = "Prestamo creado exitosamente.";
                 return RedirectToAction("Index");
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ModelState.AddModelError("", "Error al crear el prestamo: " + ex.Message);
             }
+
+            ViewBag.IdEstado = new SelectList(
+                db.Estado.OrderBy(e => e.Descripcion), 
+                "IdEstado", "Descripcion", prestamo.IdEstado);
+
+            ViewBag.Id = new SelectList(
+                db.Users.OrderBy(u => u.UserName), 
+                "Id", "UserName", prestamo.Id);
+
+            return View(prestamo);
         }
 
-        // GET: Prestamos/Edit/5
-        public ActionResult Edit(int id)
+        // GET: Prestamos/Edit/5 - Editar préstamo
+        public ActionResult Edit(long id)
         {
-            return View();
+            ViewBag.Title = "Editar Prestamo";
+            
+            var prestamo = db.Prestamo
+                .Include(p => p.Estado)
+                .Include(p => p.ApplicationUser)
+                .FirstOrDefault(p => p.IdPrestamo == id);
+                
+            if (prestamo == null)
+            {
+                return HttpNotFound();
+            }
+
+            ViewBag.IdEstado = new SelectList(
+                db.Estado.OrderBy(e => e.Descripcion), 
+                "IdEstado", "Descripcion", prestamo.IdEstado);
+
+            ViewBag.Id = new SelectList(
+                db.Users.OrderBy(u => u.UserName), 
+                "Id", "UserName", prestamo.Id);
+
+            return View(prestamo);
         }
 
-        // POST: Prestamos/Edit/5
+        // POST: Prestamos/Edit/5 - Procesar edición de préstamo
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit([Bind(Include = "IdPrestamo,NumeroPrestamo,Id,IdEstado,FechadeCreacion,Notas,Devolucion")] Prestamo prestamo)
         {
             try
             {
-                // TODO: Add update logic here
+                if (ModelState.IsValid)
+                {
+                    // Si se marca como devuelto y no tiene fecha de devolución, asignar fecha actual
+                    if (prestamo.Devolucion && !prestamo.FechaDevolucion.HasValue)
+                    {
+                        prestamo.FechaDevolucion = DateTime.UtcNow;
+                    }
+                    // Si se desmarca como devuelto, limpiar fecha de devolución
+                    else if (!prestamo.Devolucion && prestamo.FechaDevolucion.HasValue)
+                    {
+                        prestamo.FechaDevolucion = null;
+                    }
 
+                    db.Entry(prestamo).State = EntityState.Modified;
+                    db.SaveChanges();
+                    
+                    TempData["SuccessMessage"] = "Prestamo actualizado exitosamente.";
                 return RedirectToAction("Index");
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ModelState.AddModelError("", "Error al actualizar el prestamo: " + ex.Message);
             }
+
+            ViewBag.IdEstado = new SelectList(
+                db.Estado.OrderBy(e => e.Descripcion), 
+                "IdEstado", "Descripcion", prestamo.IdEstado);
+
+            ViewBag.Id = new SelectList(
+                db.Users.OrderBy(u => u.UserName), 
+                "Id", "UserName", prestamo.Id);
+
+            return View(prestamo);
         }
 
-        // GET: Prestamos/Delete/5
-        public ActionResult Delete(int id)
+        // GET: Prestamos/Delete/5 - Confirmar eliminación
+        public ActionResult Delete(long id)
         {
-            return View();
+            ViewBag.Title = "Eliminar Prestamo";
+            
+            var prestamo = db.Prestamo
+                .Include(p => p.Estado)
+                .Include(p => p.ApplicationUser)
+                .FirstOrDefault(p => p.IdPrestamo == id);
+
+            if (prestamo == null)
+            {
+                return HttpNotFound();
+            }
+
+            return View(prestamo);
         }
 
-        // POST: Prestamos/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
+        // POST: Prestamos/Delete/5 - Procesar eliminación
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteConfirmed(long id)
         {
             try
             {
-                // TODO: Add delete logic here
+                var prestamo = db.Prestamo.Find(id);
+                if (prestamo != null)
+                {
+                    db.Prestamo.Remove(prestamo);
+                    db.SaveChanges();
+                    TempData["SuccessMessage"] = "Prestamo eliminado exitosamente.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "No se encontró el prestamo a eliminar.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error al eliminar el prestamo: " + ex.Message;
+            }
 
                 return RedirectToAction("Index");
             }
-            catch
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                return View();
+                db.Dispose();
             }
+            base.Dispose(disposing);
         }
     }
 }

@@ -1,0 +1,122 @@
+﻿@model EscuelaFelixArcadio.Models.Prestamo
+
+@{
+    ViewBag.Title = "Editar Prestamo";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/prestamos.css" rel="stylesheet" />
+}
+
+<div class="prestamos-container">
+    <div class="prestamos-form-container">
+        <h2 class="prestamos-form-title">Editar Prestamo</h2>
+
+        @using (Html.BeginForm("Edit", "Prestamos", FormMethod.Post, new { @class = "prestamos-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.IdPrestamo)
+            @Html.HiddenFor(model => model.FechadeCreacion)
+            
+            @Html.ValidationSummary(true, "", new { @class = "prestamos-alert prestamos-alert-error" })
+
+            <div class="prestamos-form-section">
+                <h3 class="prestamos-form-section-title">Informacion del Prestamo</h3>
+                
+                <div class="prestamos-form-grid">
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(model => model.NumeroPrestamo, "Numero de Prestamo", new { @class = "prestamos-form-label" })
+                        @Html.TextBoxFor(model => model.NumeroPrestamo, new { @class = "prestamos-form-control", @readonly = "readonly" })
+                        @Html.ValidationMessageFor(model => model.NumeroPrestamo, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(model => model.Id, "Usuario", new { @class = "prestamos-form-label" })
+                        @Html.DropDownList("Id", null, "Seleccione un usuario", new { @class = "prestamos-form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.Id, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="prestamos-form-grid">
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(model => model.IdEstado, "Estado", new { @class = "prestamos-form-label" })
+                        @Html.DropDownList("IdEstado", null, "Seleccione un estado", new { @class = "prestamos-form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.IdEstado, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(model => model.Devolucion, "Estado de Devolucion", new { @class = "prestamos-form-label" })
+                        <select name="Devolucion" class="prestamos-form-control">
+                            <option value="false" @(Model.Devolucion == false ? "selected" : "")>No</option>
+                            <option value="true" @(Model.Devolucion == true ? "selected" : "")>Si</option>
+                        </select>
+                        @Html.ValidationMessageFor(model => model.Devolucion, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="prestamos-form-grid">
+                    <div class="prestamos-form-group">
+                        <label class="prestamos-form-label">Fecha de Creacion</label>
+                        <input type="text" class="prestamos-form-control" value="@Model.FechadeCreacion.ToString("dd/MM/yyyy HH:mm")" readonly />
+                    </div>
+
+                    <div class="prestamos-form-group">
+                        <label class="prestamos-form-label">Fecha de Devolucion</label>
+                        <input type="text" class="prestamos-form-control" value="@(Model.FechaDevolucion.HasValue ? Model.FechaDevolucion.Value.ToString("dd/MM/yyyy HH:mm") : "Pendiente")" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <div class="prestamos-form-section">
+                <h3 class="prestamos-form-section-title">Informacion Adicional</h3>
+                
+                <div class="prestamos-form-group">
+                    @Html.LabelFor(model => model.Notas, "Notas u Observaciones", new { @class = "prestamos-form-label" })
+                    @Html.TextAreaFor(model => model.Notas, new { @class = "prestamos-form-control", rows = 4, placeholder = "Ingrese notas u observaciones del prestamo (opcional)" })
+                    @Html.ValidationMessageFor(model => model.Notas, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="prestamos-form-buttons">
+                <button type="submit" class="btn-prestamos-save">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+                <a href="@Url.Action("Index", "Prestamos")" class="btn-prestamos-cancel">
+                    Regresar a la Lista
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script>
+        $(document).ready(function() {
+            // Validación para solo permitir números en NumeroPrestamo
+            $('input[name="NumeroPrestamo"]').on('input', function() {
+                var value = $(this).val();
+                // Remover cualquier carácter que no sea número
+                var numericValue = value.replace(/[^0-9]/g, '');
+                $(this).val(numericValue);
+                
+                // Limpiar errores si hay contenido válido
+                if (numericValue !== '') {
+                    $('[data-valmsg-for="NumeroPrestamo"]').text('');
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+            
+            // Prevenir pegar contenido no numérico
+            $('input[name="NumeroPrestamo"]').on('paste', function(e) {
+                setTimeout(function() {
+                    var value = $('input[name="NumeroPrestamo"]').val();
+                    var numericValue = value.replace(/[^0-9]/g, '');
+                    $('input[name="NumeroPrestamo"]').val(numericValue);
+                }, 10);
+            });
+        });
+    </script>
+}
