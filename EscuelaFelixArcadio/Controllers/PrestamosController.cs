@@ -230,7 +230,7 @@ namespace EscuelaFelixArcadio.Controllers
         // POST: Prestamos/Create - Procesar creación de nuevo préstamo
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "NumeroPrestamo,Id,IdEstado,Notas,Devolucion")] Prestamo prestamo)
+        public ActionResult Create([Bind(Include = "NumeroPrestamo,Id,IdEstado,Notas,Devolucion,FechaVencimiento,DuracionEstimada,MotivoPrestamo,FechaInicioUso,FechaFinUso,EsUrgente")] Prestamo prestamo)
         {
             try
             {
@@ -265,6 +265,20 @@ namespace EscuelaFelixArcadio.Controllers
                 if (ModelState.IsValid)
                 {
                     prestamo.FechadeCreacion = DateTime.UtcNow;
+                    
+                    // Calcular fecha de vencimiento si no se proporciona
+                    if (!prestamo.FechaVencimiento.HasValue && prestamo.DuracionEstimada.HasValue)
+                    {
+                        prestamo.FechaVencimiento = prestamo.FechadeCreacion.AddDays(prestamo.DuracionEstimada.Value);
+                    }
+                    
+                    // Si no hay duración estimada ni fecha de vencimiento, usar 7 días por defecto
+                    if (!prestamo.FechaVencimiento.HasValue)
+                    {
+                        prestamo.FechaVencimiento = prestamo.FechadeCreacion.AddDays(7);
+                        prestamo.DuracionEstimada = 7;
+                    }
+                    
                     if (prestamo.Devolucion)
                     {
                         prestamo.FechaDevolucion = DateTime.UtcNow;
@@ -322,24 +336,39 @@ namespace EscuelaFelixArcadio.Controllers
         // POST: Prestamos/Edit/5 - Procesar edición de préstamo
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "IdPrestamo,NumeroPrestamo,Id,IdEstado,FechadeCreacion,Notas,Devolucion")] Prestamo prestamo)
+        public ActionResult Edit([Bind(Include = "IdPrestamo,NumeroPrestamo,IdEstado,Notas,Devolucion,DuracionEstimada,MotivoPrestamo,EsUrgente")] Prestamo prestamo)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    // Si se marca como devuelto y no tiene fecha de devolución, asignar fecha actual
-                    if (prestamo.Devolucion && !prestamo.FechaDevolucion.HasValue)
+                    // Obtener el préstamo existente para preservar campos no editables
+                    var prestamoExistente = db.Prestamo.Find(prestamo.IdPrestamo);
+                    if (prestamoExistente == null)
                     {
-                        prestamo.FechaDevolucion = DateTime.UtcNow;
-                    }
-                    // Si se desmarca como devuelto, limpiar fecha de devolución
-                    else if (!prestamo.Devolucion && prestamo.FechaDevolucion.HasValue)
-                    {
-                        prestamo.FechaDevolucion = null;
+                        TempData["ErrorMessage"] = "Prestamo no encontrado.";
+                        return RedirectToAction("Index");
                     }
 
-                    db.Entry(prestamo).State = EntityState.Modified;
+                    // Actualizar solo los campos editables en el préstamo existente
+                    prestamoExistente.IdEstado = prestamo.IdEstado;
+                    prestamoExistente.Notas = prestamo.Notas;
+                    prestamoExistente.Devolucion = prestamo.Devolucion;
+                    prestamoExistente.DuracionEstimada = prestamo.DuracionEstimada;
+                    prestamoExistente.MotivoPrestamo = prestamo.MotivoPrestamo;
+                    prestamoExistente.EsUrgente = prestamo.EsUrgente;
+
+                    // Si se marca como devuelto y no tiene fecha de devolución, asignar fecha actual
+                    if (prestamoExistente.Devolucion && !prestamoExistente.FechaDevolucion.HasValue)
+                    {
+                        prestamoExistente.FechaDevolucion = DateTime.UtcNow;
+                    }
+                    // Si se desmarca como devuelto, limpiar fecha de devolución
+                    else if (!prestamoExistente.Devolucion && prestamoExistente.FechaDevolucion.HasValue)
+                    {
+                        prestamoExistente.FechaDevolucion = null;
+                    }
+
                     db.SaveChanges();
                     
                     TempData["SuccessMessage"] = "Prestamo actualizado exitosamente.";

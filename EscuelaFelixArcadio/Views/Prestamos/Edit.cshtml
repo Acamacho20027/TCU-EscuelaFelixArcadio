@@ -33,8 +33,7 @@
 
                     <div class="prestamos-form-group">
                         @Html.LabelFor(model => model.Id, "Usuario", new { @class = "prestamos-form-label" })
-                        @Html.DropDownList("Id", null, "Seleccione un usuario", new { @class = "prestamos-form-control", required = "required" })
-                        @Html.ValidationMessageFor(model => model.Id, "", new { @class = "text-danger" })
+                        <input type="text" class="prestamos-form-control" value="@(Model.ApplicationUser?.UserName ?? "Usuario no encontrado")" readonly />
                     </div>
                 </div>
 
@@ -52,6 +51,48 @@
                             <option value="true" @(Model.Devolucion == true ? "selected" : "")>Si</option>
                         </select>
                         @Html.ValidationMessageFor(model => model.Devolucion, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="prestamos-form-grid">
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(model => model.DuracionEstimada, "Duracion Estimada (dias)", new { @class = "prestamos-form-label" })
+                        @Html.TextBoxFor(model => model.DuracionEstimada, new { @class = "prestamos-form-control", type = "number", min = "1", max = "365", placeholder = "Ej: 7 dias" })
+                        @Html.ValidationMessageFor(model => model.DuracionEstimada, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(model => model.FechaVencimiento, "Fecha de Vencimiento", new { @class = "prestamos-form-label" })
+                        <input type="text" class="prestamos-form-control" value="@(Model.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "No especificada")" readonly />
+                    </div>
+                </div>
+
+                <div class="prestamos-form-grid">
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(model => model.MotivoPrestamo, "Motivo del Prestamo", new { @class = "prestamos-form-label" })
+                        @Html.TextBoxFor(model => model.MotivoPrestamo, new { @class = "prestamos-form-control", placeholder = "Ej: Clase de futbol, Entrenamiento, Evento" })
+                        @Html.ValidationMessageFor(model => model.MotivoPrestamo, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(model => model.EsUrgente, "Es Urgente", new { @class = "prestamos-form-label" })
+                        <select name="EsUrgente" class="prestamos-form-control">
+                            <option value="false" @(Model.EsUrgente == false ? "selected" : "")>No</option>
+                            <option value="true" @(Model.EsUrgente == true ? "selected" : "")>Si</option>
+                        </select>
+                        @Html.ValidationMessageFor(model => model.EsUrgente, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="prestamos-form-grid">
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(model => model.FechaInicioUso, "Fecha de Inicio de Uso", new { @class = "prestamos-form-label" })
+                        <input type="text" class="prestamos-form-control" value="@(Model.FechaInicioUso?.ToString("dd/MM/yyyy") ?? "No especificada")" readonly />
+                    </div>
+
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(model => model.FechaFinUso, "Fecha de Fin de Uso", new { @class = "prestamos-form-label" })
+                        <input type="text" class="prestamos-form-control" value="@(Model.FechaFinUso?.ToString("dd/MM/yyyy") ?? "No especificada")" readonly />
                     </div>
                 </div>
 
@@ -116,6 +157,40 @@
                     var numericValue = value.replace(/[^0-9]/g, '');
                     $('input[name="NumeroPrestamo"]').val(numericValue);
                 }, 10);
+            });
+            
+            // Validación para solo permitir letras en MotivoPrestamo
+            $('input[name="MotivoPrestamo"]').on('input', function() {
+                var value = $(this).val();
+                // Remover cualquier carácter que no sea letra, espacio o acentos
+                var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                $(this).val(lettersOnly);
+                
+                // Limpiar errores si hay contenido válido
+                if (lettersOnly !== '') {
+                    $('[data-valmsg-for="MotivoPrestamo"]').text('');
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+            
+            // Prevenir pegar contenido no válido en MotivoPrestamo
+            $('input[name="MotivoPrestamo"]').on('paste', function(e) {
+                setTimeout(function() {
+                    var value = $('input[name="MotivoPrestamo"]').val();
+                    var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    $('input[name="MotivoPrestamo"]').val(lettersOnly);
+                }, 10);
+            });
+            
+            // Calcular fecha de vencimiento automáticamente
+            $('input[name="DuracionEstimada"]').on('input', function() {
+                var duracion = parseInt($(this).val());
+                if (duracion > 0) {
+                    var fechaActual = new Date();
+                    var fechaVencimiento = new Date(fechaActual.getTime() + (duracion * 24 * 60 * 60 * 1000));
+                    var fechaFormateada = fechaVencimiento.toISOString().split('T')[0];
+                    $('input[name="FechaVencimiento"]').val(fechaFormateada);
+                }
             });
         });
     </script>
