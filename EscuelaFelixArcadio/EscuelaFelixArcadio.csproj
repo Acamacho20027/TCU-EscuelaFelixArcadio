@@ -247,6 +247,7 @@
     <Content Include="Content\images\herramientas-deportivas.jpg" />
     <Content Include="Content\inventario.css" />
     <Content Include="Content\prestamos.css" />
+    <Content Include="Content\sanciones.css" />
     <Content Include="Content\sports-buttons-fix.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
@@ -329,6 +330,10 @@
     <Content Include="Views\Prestamos\Create.cshtml" />
     <Content Include="Views\Prestamos\Edit.cshtml" />
     <Content Include="Views\Prestamos\Delete.cshtml" />
+    <Content Include="Views\Sanciones\Details.cshtml" />
+    <Content Include="Views\Sanciones\Create.cshtml" />
+    <Content Include="Views\Sanciones\Edit.cshtml" />
+    <Content Include="Views\Sanciones\Delete.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

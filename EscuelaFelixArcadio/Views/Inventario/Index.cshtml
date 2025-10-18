@@ -141,8 +141,12 @@
                                 <button type="button" class="btn-inventario-action btn-inventario-details" onclick="showSerialNumbers(${item.IdProducto || 0}, ${item.IdVariante || 0}, '${item.ProductoNombre || 'Sin nombre'}')">
                                     <i class="fas fa-barcode"></i> Series
                                 </button>
-                                <a href="/Inventario/Details/${item.IdInventario}" class="btn-inventario-action btn-inventario-details">Detalle</a>
-                                <a href="/Inventario/Delete/${item.IdInventario}" class="btn-inventario-action btn-inventario-delete">Eliminar</a>
+                        <a href="/Inventario/Details/${item.IdInventario}" class="btn-inventario-action btn-inventario-details">
+                            <i class="fas fa-eye"></i> Detalle
+                        </a>
+                        <a href="/Inventario/Delete/${item.IdInventario}" class="btn-inventario-action btn-inventario-delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
                             </div>
                         </div>
                     </div>
@@ -517,8 +521,12 @@
                         <button type="button" class="btn-inventario-action btn-inventario-details" onclick="showSerialNumbers(@item.IdProducto, @(item.IdVariante.HasValue ? item.IdVariante.Value : 0), '@Html.Raw(item.Producto.Nombre.Replace("'", "\\'"))')">
                             <i class="fas fa-barcode"></i> Series
                         </button>
-                        @Html.ActionLink("Detalle", "Details", new { id = item.IdInventario }, new { @class = "btn-inventario-action btn-inventario-details" })
-                        @Html.ActionLink("Eliminar", "Delete", new { id = item.IdInventario }, new { @class = "btn-inventario-action btn-inventario-delete" })
+                        <a href="@Url.Action("Details", new { id = item.IdInventario })" class="btn-inventario-action btn-inventario-details">
+                            <i class="fas fa-eye"></i> Detalle
+                        </a>
+                        <a href="@Url.Action("Delete", new { id = item.IdInventario })" class="btn-inventario-action btn-inventario-delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
                     </div>
                 </div>
             </div>

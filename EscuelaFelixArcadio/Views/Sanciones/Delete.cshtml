@@ -1,0 +1,93 @@
+﻿@model EscuelaFelixArcadio.Models.Sancion
+
+@{
+    ViewBag.Title = "Eliminar Sancion";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/sanciones.css" rel="stylesheet" />
+}
+
+<div class="sanciones-container">
+    <div class="sanciones-delete-container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc2626; margin-bottom: 1rem;"></i>
+            <h2 class="sanciones-delete-title">¿Eliminar Sancion?</h2>
+            <p class="sanciones-delete-message">
+                Esta accion es permanente y no se puede deshacer. ¿Esta seguro de que desea eliminar esta sancion?
+            </p>
+        </div>
+
+        <div class="sanciones-delete-info">
+            <h3 class="sanciones-delete-info-title">
+                <i class="fas fa-info-circle"></i> Informacion de la Sancion a Eliminar
+            </h3>
+            <div class="sanciones-delete-info-details">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <strong>ID:</strong> #@Model.IdSancion
+                    </div>
+                    <div>
+                        <strong>Usuario:</strong> @(Model.ApplicationUser?.UserName ?? "Usuario no encontrado")
+                    </div>
+                    <div>
+                        <strong>Email:</strong> @(Model.ApplicationUser?.Email ?? "No disponible")
+                    </div>
+                    <div>
+                        <strong>Tipo:</strong> @(Model.Tipo ?? "No especificado")
+                    </div>
+                    <div>
+                        <strong>Estado:</strong> @Model.Estado.Descripcion
+                    </div>
+                    <div>
+                        <strong>Monto:</strong> @Model.Monto.ToString("C")
+                    </div>
+                    <div>
+                        <strong>Fecha de Inicio:</strong> @Model.FechaInicio.ToString("dd/MM/yyyy")
+                    </div>
+                    <div>
+                        <strong>Fecha de Fin:</strong> @(Model.FechaFin.HasValue ? Model.FechaFin.Value.ToString("dd/MM/yyyy") : "En curso")
+                    </div>
+                    @if (Model.IdPrestamo.HasValue && Model.Prestamo != null)
+                    {
+                        <div>
+                            <strong>Prestamo Relacionado:</strong> @Model.Prestamo.NumeroPrestamo
+                        </div>
+                    }
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Motivo))
+                {
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #fecaca;">
+                        <strong>Motivo:</strong><br />
+                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: #fff7f7; border-radius: 4px; max-height: 150px; overflow-y: auto;">
+                            @Model.Motivo
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="sanciones-delete-info">
+            <h3 class="sanciones-delete-info-title">
+                <i class="fas fa-exclamation-triangle"></i> Advertencia:
+            </h3>
+            <div class="sanciones-delete-info-details">
+                Al eliminar esta sancion, se perdera todo el historial asociado. Esta accion no puede revertirse.
+            </div>
+        </div>
+
+        @using (Html.BeginForm("Delete", "Sanciones", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            
+            <div class="sanciones-form-buttons">
+                <button type="submit" class="btn-sanciones-delete-confirm">
+                    <i class="fas fa-trash"></i>
+                    Eliminar Definitivamente
+                </button>
+                @Html.ActionLink("Regresar a la Lista", "Index", "Sanciones", null, new { @class = "btn-sanciones-cancel" })
+            </div>
+        }
+    </div>
+</div>

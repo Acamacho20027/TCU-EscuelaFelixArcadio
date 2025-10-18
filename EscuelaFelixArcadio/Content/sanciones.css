@@ -1,0 +1,856 @@
+/* ===== SANCIONES MODULE STYLES ===== */
+
+/* Main container for sanciones pages */
+.sanciones-container {
+    background-color: #f8fafc;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* ===== FILTERS AND SEARCH PANEL ===== */
+.sanciones-filters-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.sanciones-search-bar {
+    margin-bottom: 1.5rem;
+}
+
+.sanciones-search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    position: relative;
+}
+
+.sanciones-search-input:focus {
+    border-color: #0ea5e9;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.sanciones-search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    pointer-events: none;
+}
+
+.sanciones-filters-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.sanciones-filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.sanciones-filter-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.sanciones-filter-select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background: white;
+    cursor: pointer;
+}
+
+.sanciones-filter-select:focus {
+    border-color: #0ea5e9;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.sanciones-controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.sanciones-sort-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sanciones-sort-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.sanciones-items-per-page {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sanciones-items-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.sanciones-clear-filters {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sanciones-clear-filters:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+/* ===== PAGINATION ===== */
+.sanciones-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    padding: 1rem 2rem;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.sanciones-pagination-btn {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    color: #374151;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
+    min-width: auto;
+}
+
+.sanciones-pagination-btn:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    text-decoration: none;
+    color: #374151;
+}
+
+.sanciones-pagination-btn.active {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+    color: white;
+}
+
+.sanciones-pagination-btn:disabled {
+    background: #f9fafb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    border-color: #e5e7eb;
+}
+
+.sanciones-pagination-dots {
+    padding: 0.5rem;
+    color: #9ca3af;
+}
+
+/* ===== LOADING STATES ===== */
+.sanciones-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    color: #6b7280;
+}
+
+.sanciones-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #0ea5e9;
+    border-radius: 50%;
+    animation: sanciones-spin 1s linear infinite;
+    margin-right: 0.5rem;
+}
+
+@keyframes sanciones-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Header section with title and create button */
+.sanciones-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.sanciones-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    text-align: center;
+    flex: 1;
+}
+
+.sanciones-title::after {
+    content: '';
+    display: block;
+    width: 200px;
+    height: 3px;
+    background: linear-gradient(90deg, #0ea5e9, #3b82f6);
+    margin: 0.5rem auto 0;
+    border-radius: 2px;
+}
+
+/* Create button */
+.btn-create-sanciones {
+    background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.btn-create-sanciones:hover {
+    background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+    text-decoration: none;
+    color: white;
+}
+
+.btn-create-sanciones i {
+    font-size: 1.1rem;
+}
+
+/* Cards grid for sanciones items */
+.sanciones-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Individual sanciones card */
+.sanciones-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.sanciones-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: #cbd5e1;
+}
+
+/* Card status badge */
+.sanciones-card-status {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sanciones-card-status.activa {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.sanciones-card-status.finalizada {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.sanciones-card-status.pendiente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.sanciones-card-status.inactivo {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Card header with sancion info */
+.sanciones-card-header {
+    margin-bottom: 1rem;
+    padding-right: 80px;
+}
+
+.sanciones-card-user {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0ea5e9;
+    margin: 0 0 0.25rem 0;
+}
+
+.sanciones-card-tipo {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Card details grid */
+.sanciones-card-details {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.sanciones-card-detail {
+    display: flex;
+    flex-direction: column;
+}
+
+.sanciones-card-detail-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.sanciones-card-detail-value {
+    font-size: 0.9rem;
+    color: #1f2937;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.sanciones-card-monto {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0ea5e9;
+    text-align: center;
+    padding: 1rem;
+    background: #f0f9ff;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.sanciones-card-monto-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Card footer with ID and actions */
+.sanciones-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.sanciones-card-id {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.sanciones-card-id i {
+    font-size: 1rem;
+}
+
+.sanciones-card-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Action buttons */
+.btn-sanciones-action {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-sanciones-edit {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+
+.btn-sanciones-edit:hover {
+    background: #bfdbfe;
+    color: #1e3a8a;
+    text-decoration: none;
+}
+
+.btn-sanciones-details {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-sanciones-details:hover {
+    background: #e2e8f0;
+    color: #334155;
+    text-decoration: none;
+}
+
+.btn-sanciones-delete {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.btn-sanciones-delete:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+    text-decoration: none;
+}
+
+/* Form styles for Create/Edit views */
+.sanciones-form-container {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.sanciones-form-container .sanciones-form-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0ea5e9 !important;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid #0ea5e9 !important;
+}
+
+.sanciones-form-section {
+    margin-bottom: 2rem;
+}
+
+.sanciones-form-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.sanciones-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.sanciones-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.sanciones-form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.sanciones-form-control {
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    background: white;
+}
+
+.sanciones-form-control:focus {
+    border-color: #0ea5e9;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.sanciones-form-control:disabled {
+    background: #f9fafb;
+    color: #6b7280;
+}
+
+/* Form buttons */
+.sanciones-form-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-sanciones-save {
+    background: #10b981 !important;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-sanciones-save:hover {
+    background: #059669 !important;
+    transform: translateY(-2px);
+    text-decoration: none;
+    color: white;
+}
+
+.btn-sanciones-cancel {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-sanciones-cancel:hover {
+    background: #e2e8f0;
+    color: #334155;
+    text-decoration: none;
+}
+
+.btn-sanciones-delete-confirm {
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-sanciones-delete-confirm:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+    transform: translateY(-2px);
+    text-decoration: none;
+    color: white;
+}
+
+/* Details view styles */
+.sanciones-details-container {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.sanciones-details-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0ea5e9 !important;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid #0ea5e9 !important;
+}
+
+.sanciones-details-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sanciones-details-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.sanciones-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.sanciones-details-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.sanciones-details-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.sanciones-details-value {
+    padding: 0.75rem 1rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #111827;
+    font-weight: 500;
+}
+
+/* Delete confirmation styles */
+.sanciones-delete-container {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.sanciones-delete-container .sanciones-delete-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #dc2626 !important;
+    margin-bottom: 1rem;
+}
+
+.sanciones-delete-message {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.sanciones-delete-info {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.sanciones-delete-container .sanciones-delete-info-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #dc2626 !important;
+    margin-bottom: 0.5rem;
+}
+
+.sanciones-delete-info-details {
+    font-size: 0.875rem;
+    color: #991b1b;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .sanciones-container {
+        padding: 1rem;
+    }
+    
+    .sanciones-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .sanciones-title {
+        font-size: 2rem;
+    }
+    
+    .sanciones-cards-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .sanciones-form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .sanciones-details-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .sanciones-form-buttons {
+        flex-direction: column;
+    }
+    
+    .sanciones-filters-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .sanciones-controls-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .sanciones-sort-group,
+    .sanciones-items-per-page {
+        justify-content: center;
+    }
+    
+    .sanciones-pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 1rem 0.5rem;
+        gap: 0.25rem;
+    }
+    
+    .sanciones-pagination-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Success/Error messages */
+.sanciones-alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.sanciones-alert-success {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.sanciones-alert-error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.sanciones-alert-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+/* Badge específico para estado */
+.sanciones-status-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 100px;
+    border: 1px solid transparent;
+}
+
+.sanciones-status-badge.success {
+    background-color: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+
+.sanciones-status-badge.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+.sanciones-status-badge.warning {
+    background-color: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+.sanciones-status-badge.info {
+    background-color: #dbeafe;
+    color: #1e40af;
+    border-color: #bfdbfe;
+}
+

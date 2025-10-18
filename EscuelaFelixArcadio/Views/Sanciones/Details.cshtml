@@ -1,0 +1,207 @@
+﻿@model EscuelaFelixArcadio.Models.Sancion
+
+@{
+    ViewBag.Title = "Detalles de Sancion";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    var statusClass = "";
+    var estadoDescripcion = Model.Estado.Descripcion.ToLower();
+    
+    if (estadoDescripcion.Contains("inactivo") || estadoDescripcion.Contains("cancelada"))
+    {
+        statusClass = "error"; // Inactivo = rojo
+    }
+    else if (estadoDescripcion.Contains("activ"))
+    {
+        statusClass = "success"; // Activo = verde
+    }
+    else if (estadoDescripcion.Contains("pendiente"))
+    {
+        statusClass = "warning";
+    }
+    else if (estadoDescripcion.Contains("finalizada") || estadoDescripcion.Contains("completada") || estadoDescripcion.Contains("pagada"))
+    {
+        statusClass = "success";
+    }
+    else
+    {
+        statusClass = "warning";
+    }
+    
+    var diasActiva = Model.FechaFin.HasValue 
+        ? (Model.FechaFin.Value - Model.FechaInicio).Days 
+        : (DateTime.Now - Model.FechaInicio).Days;
+}
+
+@section Styles {
+    <link href="~/Content/sanciones.css" rel="stylesheet" />
+}
+
+<div class="sanciones-container">
+    <div class="sanciones-details-container">
+        <h2 class="sanciones-details-title">Detalles de la Sancion</h2>
+
+        <!-- Información principal -->
+        <div class="sanciones-details-card">
+            <h3 class="sanciones-details-card-title">
+                <i class="fas fa-gavel"></i> Información General
+            </h3>
+            <div class="sanciones-details-grid">
+                <div class="sanciones-details-field">
+                    <label class="sanciones-details-label">ID de Sanción</label>
+                    <div class="sanciones-details-value">
+                        <i class="fas fa-hashtag"></i> @Model.IdSancion
+                    </div>
+                </div>
+
+                <div class="sanciones-details-field">
+                    <label class="sanciones-details-label">Estado</label>
+                    <div class="sanciones-details-value">
+                        <span class="sanciones-status-badge @statusClass">
+                            @Model.Estado.Descripcion
+                        </span>
+                    </div>
+                </div>
+
+                <div class="sanciones-details-field">
+                    <label class="sanciones-details-label">Usuario Sancionado</label>
+                    <div class="sanciones-details-value">
+                        <i class="fas fa-user"></i> @(Model.ApplicationUser?.UserName ?? "Usuario no encontrado")
+                    </div>
+                </div>
+
+                <div class="sanciones-details-field">
+                    <label class="sanciones-details-label">Email del Usuario</label>
+                    <div class="sanciones-details-value">
+                        <i class="fas fa-envelope"></i> @(Model.ApplicationUser?.Email ?? "No disponible")
+                    </div>
+                </div>
+
+                <div class="sanciones-details-field">
+                    <label class="sanciones-details-label">Tipo de Sanción</label>
+                    <div class="sanciones-details-value">
+                        <i class="fas fa-tag"></i> @(Model.Tipo ?? "No especificado")
+                    </div>
+                </div>
+
+                <div class="sanciones-details-field">
+                    <label class="sanciones-details-label">Monto</label>
+                    <div class="sanciones-details-value">
+                        <i class="fas fa-dollar-sign"></i> @Model.Monto.ToString("C")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de fechas -->
+        <div class="sanciones-details-card">
+            <h3 class="sanciones-details-card-title">
+                <i class="fas fa-calendar-alt"></i> Fechas de la Sanción
+            </h3>
+            <div class="sanciones-details-grid">
+                <div class="sanciones-details-field">
+                    <label class="sanciones-details-label">Fecha de Inicio</label>
+                    <div class="sanciones-details-value">
+                        <i class="fas fa-calendar-plus"></i> @Model.FechaInicio.ToString("dd/MM/yyyy")
+                    </div>
+                </div>
+
+                <div class="sanciones-details-field">
+                    <label class="sanciones-details-label">Fecha de Fin</label>
+                    <div class="sanciones-details-value">
+                        @if (Model.FechaFin.HasValue)
+                        {
+                            <i class="fas fa-calendar-check"></i>
+                            @Model.FechaFin.Value.ToString("dd/MM/yyyy")
+                        }
+                        else
+                        {
+                            <i class="fas fa-clock"></i>
+                            <span style="color: #dc2626; font-weight: 600;">En curso</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="sanciones-details-field">
+                    <label class="sanciones-details-label">Duración</label>
+                    <div class="sanciones-details-value">
+                        <i class="fas fa-hourglass-half"></i> @diasActiva día@(diasActiva != 1 ? "s" : "")
+                    </div>
+                </div>
+
+                <div class="sanciones-details-field">
+                    <label class="sanciones-details-label">Estado Temporal</label>
+                    <div class="sanciones-details-value">
+                        @if (Model.FechaFin.HasValue)
+                        {
+                            <span class="sanciones-status-badge success">
+                                <i class="fas fa-check-circle"></i> Finalizada
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="sanciones-status-badge error">
+                                <i class="fas fa-exclamation-circle"></i> Activa
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del préstamo relacionado -->
+        @if (Model.IdPrestamo.HasValue && Model.Prestamo != null)
+        {
+            <div class="sanciones-details-card">
+                <h3 class="sanciones-details-card-title">
+                    <i class="fas fa-link"></i> Préstamo Relacionado
+                </h3>
+                <div class="sanciones-details-grid">
+                    <div class="sanciones-details-field">
+                        <label class="sanciones-details-label">ID del Préstamo</label>
+                        <div class="sanciones-details-value">
+                            <i class="fas fa-hashtag"></i> @Model.IdPrestamo.Value
+                        </div>
+                    </div>
+
+                    <div class="sanciones-details-field">
+                        <label class="sanciones-details-label">Número de Préstamo</label>
+                        <div class="sanciones-details-value">
+                            <i class="fas fa-barcode"></i> @Model.Prestamo.NumeroPrestamo
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <a href="@Url.Action("Details", "Prestamos", new { id = Model.IdPrestamo })" class="btn-sanciones-details" style="text-decoration: none;">
+                        <i class="fas fa-eye"></i> Ver Detalles del Préstamo
+                    </a>
+                </div>
+            </div>
+        }
+
+        <!-- Motivo de la sanción -->
+        @if (!string.IsNullOrEmpty(Model.Motivo))
+        {
+            <div class="sanciones-details-card">
+                <h3 class="sanciones-details-card-title">
+                    <i class="fas fa-sticky-note"></i> Motivo de la Sanción
+                </h3>
+                <div class="sanciones-details-field" style="grid-column: 1 / -1;">
+                    <div class="sanciones-details-value" style="white-space: pre-wrap; line-height: 1.6;">
+                        @Model.Motivo
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Botones de acción -->
+        <div class="sanciones-form-buttons">
+            <a href="@Url.Action("Edit", new { id = Model.IdSancion })" class="btn-sanciones-save">
+                <i class="fas fa-edit"></i> Editar Sanción
+            </a>
+            <a href="@Url.Action("Index")" class="btn-sanciones-cancel">
+                Regresar a la Lista
+            </a>
+        </div>
+    </div>
+</div>
