@@ -124,7 +124,7 @@
                                     <i class="fas fa-eye"></i> Detalle
                                 </a>
                                 <a href="/Categoria/Delete/${item.IdCategoria}" class="btn-categoria-action btn-categoria-delete">
-                                    <i class="fas fa-trash"></i> Eliminar
+                                    <i class="fas fa-trash-alt"></i>
                                 </a>
                             </div>
                         </div>
@@ -318,8 +318,12 @@
                         <span>ID: @item.IdCategoria</span>
                     </div>
                     <div class="categoria-card-actions">
-                        @Html.ActionLink("Detalle", "Details", new { id = item.IdCategoria }, new { @class = "btn-categoria-action btn-categoria-details" })
-                        @Html.ActionLink("Eliminar", "Delete", new { id = item.IdCategoria }, new { @class = "btn-categoria-action btn-categoria-delete" })
+                        <a href="@Url.Action("Details", new { id = item.IdCategoria })" class="btn-categoria-action btn-categoria-details">
+                            <i class="fas fa-eye"></i> Detalle
+                        </a>
+                        <a href="@Url.Action("Delete", new { id = item.IdCategoria })" class="btn-categoria-action btn-categoria-delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
                     </div>
                 </div>
             </div>

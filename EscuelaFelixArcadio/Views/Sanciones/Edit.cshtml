@@ -1,0 +1,173 @@
+﻿@model EscuelaFelixArcadio.Models.Sancion
+
+@{
+    ViewBag.Title = "Editar Sancion";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/sanciones.css" rel="stylesheet" />
+}
+
+<div class="sanciones-container">
+    <div class="sanciones-form-container">
+        <h2 class="sanciones-form-title">Editar Sancion</h2>
+
+        @using (Html.BeginForm("Edit", "Sanciones", FormMethod.Post, new { @class = "sanciones-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.IdSancion)
+            @Html.HiddenFor(model => model.Id)
+            
+            @Html.ValidationSummary(true, "", new { @class = "sanciones-alert sanciones-alert-error" })
+
+            <div class="sanciones-form-section">
+                <h3 class="sanciones-form-section-title">Informacion de la Sancion</h3>
+                
+                <div class="sanciones-form-grid">
+                    <div class="sanciones-form-group">
+                        <label class="sanciones-form-label">Usuario Sancionado</label>
+                        <input type="text" id="usuarioDisplay" name="usuarioDisplay" class="sanciones-form-control" value="@(Model.ApplicationUser?.UserName ?? "Usuario no encontrado")" readonly />
+                        <small style="color: #6b7280; font-size: 0.8rem; margin-top: 0.25rem; display: block;">
+                            El usuario no puede modificarse una vez creada la sancion
+                        </small>
+                    </div>
+
+                    <div class="sanciones-form-group">
+                        @Html.LabelFor(model => model.IdEstado, "Estado", new { @class = "sanciones-form-label" })
+                        @Html.DropDownList("IdEstado", null, "Seleccione un estado", new { @class = "sanciones-form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.IdEstado, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="sanciones-form-grid">
+                    <div class="sanciones-form-group">
+                        @Html.LabelFor(model => model.Tipo, "Tipo de Sancion", new { @class = "sanciones-form-label" })
+                        @Html.DropDownListFor(model => model.Tipo, new SelectList(new[] {
+                            new SelectListItem { Text = "Retraso", Value = "Retraso" },
+                            new SelectListItem { Text = "Daño", Value = "Daño" },
+                            new SelectListItem { Text = "Pérdida", Value = "Pérdida" }
+                        }, "Value", "Text"), "Seleccione un tipo", new { @class = "sanciones-form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.Tipo, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="sanciones-form-group">
+                        @Html.LabelFor(model => model.Monto, "Monto de la Sanción", new { @class = "sanciones-form-label" })
+                        @Html.TextBoxFor(model => model.Monto, "{0:F2}", new { @class = "sanciones-form-control", type = "number", step = "0.01", min = "0", required = "required" })
+                        @Html.ValidationMessageFor(model => model.Monto, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="sanciones-form-grid">
+                    <div class="sanciones-form-group">
+                        @Html.LabelFor(model => model.FechaInicio, "Fecha de Inicio", new { @class = "sanciones-form-label" })
+                        @Html.TextBoxFor(model => model.FechaInicio, "{0:yyyy-MM-dd}", new { @class = "sanciones-form-control", type = "date", required = "required" })
+                        @Html.ValidationMessageFor(model => model.FechaInicio, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="sanciones-form-group">
+                        @Html.LabelFor(model => model.FechaFin, "Fecha de Fin (Opcional)", new { @class = "sanciones-form-label" })
+                        @Html.TextBoxFor(model => model.FechaFin, "{0:yyyy-MM-dd}", new { @class = "sanciones-form-control", type = "date" })
+                        @Html.ValidationMessageFor(model => model.FechaFin, "", new { @class = "text-danger" })
+                        <small style="color: #6b7280; font-size: 0.8rem; margin-top: 0.25rem; display: block;">
+                            Dejar vacío si la sanción está en curso
+                        </small>
+                    </div>
+                </div>
+
+                <div class="sanciones-form-group">
+                    @Html.LabelFor(model => model.IdPrestamo, "Préstamo Relacionado (Opcional)", new { @class = "sanciones-form-label" })
+                    @Html.DropDownList("IdPrestamo", null, "Seleccione un préstamo (opcional)", new { @class = "sanciones-form-control" })
+                    @Html.ValidationMessageFor(model => model.IdPrestamo, "", new { @class = "text-danger" })
+                    <small style="color: #6b7280; font-size: 0.8rem; margin-top: 0.25rem; display: block;">
+                        Si la sanción está relacionada con un préstamo específico
+                    </small>
+                </div>
+
+                <div class="sanciones-form-group">
+                    <label class="sanciones-form-label">ID de Sanción</label>
+                    <input type="text" class="sanciones-form-control" value="@Model.IdSancion" readonly />
+                </div>
+            </div>
+
+            <div class="sanciones-form-section">
+                <h3 class="sanciones-form-section-title">Motivo de la Sanción</h3>
+                
+                <div class="sanciones-form-group">
+                    @Html.LabelFor(model => model.Motivo, "Descripción del Motivo", new { @class = "sanciones-form-label" })
+                    @Html.TextAreaFor(model => model.Motivo, new { @class = "sanciones-form-control", rows = 4, placeholder = "Describa el motivo de la sanción...", maxlength = "1000" })
+                    @Html.ValidationMessageFor(model => model.Motivo, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="sanciones-form-buttons">
+                <button type="submit" class="btn-sanciones-save">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+                <a href="@Url.Action("Index", "Sanciones")" class="btn-sanciones-cancel">
+                    Regresar a la Lista
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script>
+        $(document).ready(function() {
+            // Validación para solo permitir letras y espacios en Tipo
+            $('input[name="Tipo"]').on('input', function() {
+                var value = $(this).val();
+                var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                $(this).val(lettersOnly);
+                
+                if (lettersOnly !== '') {
+                    $('[data-valmsg-for="Tipo"]').text('');
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+            
+            // Prevenir pegar contenido no válido en Tipo
+            $('input[name="Tipo"]').on('paste', function(e) {
+                setTimeout(function() {
+                    var value = $('input[name="Tipo"]').val();
+                    var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    $('input[name="Tipo"]').val(lettersOnly);
+                }, 10);
+            });
+            
+            // Validación del monto (solo números y decimales)
+            $('input[name="Monto"]').on('input', function() {
+                var value = $(this).val();
+                // Permitir números y un solo punto decimal
+                var numericValue = value.replace(/[^\d.]/g, '');
+                
+                // Asegurar solo un punto decimal
+                var parts = numericValue.split('.');
+                if (parts.length > 2) {
+                    numericValue = parts[0] + '.' + parts.slice(1).join('');
+                }
+                
+                $(this).val(numericValue);
+                
+                if (numericValue !== '') {
+                    $('[data-valmsg-for="Monto"]').text('');
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+            
+            // Validación de fechas
+            $('input[name="FechaFin"]').on('change', function() {
+                var fechaInicio = new Date($('input[name="FechaInicio"]').val());
+                var fechaFin = new Date($(this).val());
+                
+                if (fechaFin && fechaInicio && fechaFin < fechaInicio) {
+                    alert('La fecha de fin debe ser posterior a la fecha de inicio');
+                    $(this).val('');
+                }
+            });
+        });
+    </script>
+}

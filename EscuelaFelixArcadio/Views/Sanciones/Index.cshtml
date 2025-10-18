@@ -1,14 +1,470 @@
+@model IEnumerable<EscuelaFelixArcadio.Models.Sancion>
+
 @{
     ViewBag.Title = "Sanciones";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="admin-placeholder">
-    <div class="admin-placeholder-icon">
-        <i class="fas fa-exclamation-triangle"></i>
+@section Styles {
+    <link href="~/Content/sanciones.css" rel="stylesheet" />
+}
+
+<div class="sanciones-container">
+    <!-- Header with title and create button -->
+    <div class="sanciones-header">
+        <h1 class="sanciones-title">Sanciones</h1>
+        <a href="@Url.Action("Create", "Sanciones")" class="btn-create-sanciones">
+            <i class="fas fa-plus"></i>
+            Crear Sancion
+        </a>
     </div>
-    <div class="admin-placeholder-text">Escuela Felix Arcadio Montero Monge</div>
-    <div class="admin-placeholder-subtitle">
-        Administra las sanciones aplicadas por incumplimiento de normas deportivas.
+
+    <!-- Success/Error messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="sanciones-alert sanciones-alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="sanciones-alert sanciones-alert-error">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Filters and search panel -->
+    <div class="sanciones-filters-panel">
+        <!-- Search bar -->
+        <div class="sanciones-search-bar" style="position: relative;">
+            <i class="fas fa-search sanciones-search-icon"></i>
+            <input type="text" id="searchInput" class="sanciones-search-input" placeholder="Buscar por motivo, tipo o usuario...">
+        </div>
+
+        <!-- Filter dropdowns -->
+        <div class="sanciones-filters-row">
+            <div class="sanciones-filter-group">
+                <label class="sanciones-filter-label">Estado</label>
+                <select id="estadoFilter" class="sanciones-filter-select">
+                    <option value="">Todos los estados</option>
+                    @foreach (var estado in ViewBag.Estados as SelectList)
+                    {
+                        <option value="@estado.Value">@estado.Text</option>
+                    }
+                </select>
+            </div>
+
+            <div class="sanciones-filter-group">
+                <label class="sanciones-filter-label">Usuario</label>
+                <select id="usuarioFilter" class="sanciones-filter-select">
+                    <option value="">Todos los usuarios</option>
+                    @foreach (var usuario in ViewBag.Usuarios as SelectList)
+                    {
+                        <option value="@usuario.Value">@usuario.Text</option>
+                    }
+                </select>
+            </div>
+
+            <div class="sanciones-filter-group">
+                <label class="sanciones-filter-label">Tipo de Sancion</label>
+                <select id="tipoFilter" class="sanciones-filter-select">
+                    <option value="">Todos los tipos</option>
+                    @foreach (var tipo in ViewBag.Tipos as SelectList)
+                    {
+                        <option value="@tipo.Text">@tipo.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <!-- Controls row -->
+        <div class="sanciones-controls-row">
+            <div class="sanciones-sort-group">
+                <label class="sanciones-sort-label">Ordenar por:</label>
+                <select id="sortBy" class="sanciones-filter-select">
+                    <option value="fecha">Fecha de Inicio</option>
+                    <option value="usuario">Usuario</option>
+                    <option value="tipo">Tipo</option>
+                    <option value="monto">Monto</option>
+                    <option value="estado">Estado</option>
+                </select>
+                <select id="sortOrder" class="sanciones-filter-select">
+                    <option value="desc">Descendente</option>
+                    <option value="asc">Ascendente</option>
+                </select>
+            </div>
+
+            <div class="sanciones-items-per-page">
+                <label class="sanciones-items-label">Mostrar:</label>
+                <select id="pageSize" class="sanciones-filter-select">
+                    <option value="12">12</option>
+                    <option value="24">24</option>
+                    <option value="48">48</option>
+                </select>
+            </div>
+
+            <button id="clearFilters" class="sanciones-clear-filters">
+                <i class="fas fa-times"></i> Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="sanciones-loading" style="display: none;">
+        <div class="sanciones-spinner"></div>
+        <span>Cargando sanciones...</span>
+    </div>
+
+    <!-- Sanciones cards grid -->
+    <div id="sancionesGrid" class="sanciones-cards-grid">
+        @foreach (var item in Model)
+        {
+            var statusClass = "";
+            var estadoDescripcion = item.Estado.Descripcion.ToLower();
+            
+            if (estadoDescripcion.Contains("activ") && !estadoDescripcion.Contains("inactiv"))
+            {
+                statusClass = "activa";
+            }
+            else if (estadoDescripcion.Contains("finalizada") || estadoDescripcion.Contains("completada") || estadoDescripcion.Contains("pagada"))
+            {
+                statusClass = "finalizada";
+            }
+            else if (estadoDescripcion.Contains("pendiente"))
+            {
+                statusClass = "pendiente";
+            }
+            else if (estadoDescripcion.Contains("inactivo"))
+            {
+                statusClass = "inactivo";
+            }
+            else
+            {
+                statusClass = "pendiente";
+            }
+
+            var diasActiva = item.FechaFin.HasValue 
+                ? (item.FechaFin.Value - item.FechaInicio).Days 
+                : (DateTime.Now - item.FechaInicio).Days;
+
+            <div class="sanciones-card">
+                <span class="sanciones-card-status @statusClass">@item.Estado.Descripcion</span>
+                
+                <div class="sanciones-card-header">
+                    <h3 class="sanciones-card-user">@(item.ApplicationUser?.UserName ?? "Usuario no encontrado")</h3>
+                    <p class="sanciones-card-tipo">@(item.Tipo ?? "Sin tipo")</p>
+                </div>
+
+                <div class="sanciones-card-monto">
+                    <div class="sanciones-card-monto-label">Monto</div>
+                    @item.Monto.ToString("C")
+                </div>
+
+                <div class="sanciones-card-details">
+                    <div class="sanciones-card-detail">
+                        <span class="sanciones-card-detail-label">Fecha de Inicio</span>
+                        <span class="sanciones-card-detail-value">@item.FechaInicio.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="sanciones-card-detail">
+                        <span class="sanciones-card-detail-label">Fecha de Fin</span>
+                        <span class="sanciones-card-detail-value">
+                            @if (item.FechaFin.HasValue)
+                            {
+                                @item.FechaFin.Value.ToString("dd/MM/yyyy")
+                            }
+                            else
+                            {
+                                <text>En curso</text>
+                            }
+                        </span>
+                    </div>
+                    <div class="sanciones-card-detail">
+                        <span class="sanciones-card-detail-label">Duracion</span>
+                        <span class="sanciones-card-detail-value">@diasActiva dia@(diasActiva != 1 ? "s" : "")</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(item.Motivo))
+                    {
+                        <div class="sanciones-card-detail">
+                            <span class="sanciones-card-detail-label">Motivo</span>
+                            <span class="sanciones-card-detail-value">
+                                @(item.Motivo.Length > 50 ? item.Motivo.Substring(0, 50) + "..." : item.Motivo)
+                            </span>
+                        </div>
+                    }
+                </div>
+
+                <div class="sanciones-card-footer">
+                    <span class="sanciones-card-id">
+                        <i class="fas fa-hashtag"></i> ID: @item.IdSancion
+                    </span>
+                    <div class="sanciones-card-actions">
+                        <a href="@Url.Action("Details", new { id = item.IdSancion })" class="btn-sanciones-action btn-sanciones-details">
+                            <i class="fas fa-eye"></i> Detalle
+                        </a>
+                        <a href="@Url.Action("Delete", new { id = item.IdSancion })" class="btn-sanciones-action btn-sanciones-delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="sanciones-pagination">
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <a href="@Url.Action("Index", new { page = 1 })" class="sanciones-pagination-btn">Primera</a>
+            <a href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1 })" class="sanciones-pagination-btn" id="prevPage">Anterior</a>
+        }
+        else
+        {
+            <button class="sanciones-pagination-btn" disabled>Primera</button>
+            <button class="sanciones-pagination-btn" disabled>Anterior</button>
+        }
+
+        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+        {
+            if (i == ViewBag.CurrentPage)
+            {
+                <span class="sanciones-pagination-btn active">@i</span>
+            }
+            else if (i == 1 || i == ViewBag.TotalPages || (i >= ViewBag.CurrentPage - 2 && i <= ViewBag.CurrentPage + 2))
+            {
+                <a href="@Url.Action("Index", new { page = i })" class="sanciones-pagination-btn">@i</a>
+            }
+            else if (i == ViewBag.CurrentPage - 3 || i == ViewBag.CurrentPage + 3)
+            {
+                <span class="sanciones-pagination-dots">...</span>
+            }
+        }
+
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <a href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1 })" class="sanciones-pagination-btn" id="nextPage">Siguiente</a>
+            <a href="@Url.Action("Index", new { page = ViewBag.TotalPages })" class="sanciones-pagination-btn">Ultima</a>
+        }
+        else
+        {
+            <button class="sanciones-pagination-btn" disabled>Siguiente</button>
+            <button class="sanciones-pagination-btn" disabled>Ultima</button>
+        }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let currentPage = @ViewBag.CurrentPage;
+            let pageSize = @ViewBag.PageSize;
+            let totalItems = @ViewBag.TotalItems;
+            let totalPages = @ViewBag.TotalPages;
+
+            // Función para actualizar la visualización de sanciones
+            function loadSanciones() {
+                const search = $('#searchInput').val();
+                const estado = $('#estadoFilter').val();
+                const usuario = $('#usuarioFilter').val();
+                const tipo = $('#tipoFilter').val();
+                const sortBy = $('#sortBy').val();
+                const sortOrder = $('#sortOrder').val();
+                
+                $('#loadingIndicator').show();
+                $('#sancionesGrid').hide();
+
+                $.ajax({
+                    url: '@Url.Action("SearchSanciones", "Sanciones")',
+                    type: 'GET',
+                    data: {
+                        search: search,
+                        estado: estado,
+                        usuario: usuario,
+                        tipo: tipo,
+                        sortBy: sortBy,
+                        sortOrder: sortOrder,
+                        page: currentPage,
+                        pageSize: pageSize
+                    },
+                    success: function(data) {
+                        totalItems = data.totalItems;
+                        totalPages = data.totalPages;
+                        
+                        renderSanciones(data.items);
+                        updatePagination();
+                        
+                        $('#loadingIndicator').hide();
+                        $('#sancionesGrid').show();
+                    },
+                    error: function() {
+                        $('#loadingIndicator').hide();
+                        $('#sancionesGrid').show();
+                        alert('Error al cargar las sanciones');
+                    }
+                });
+            }
+
+            // Función para renderizar las sanciones
+            function renderSanciones(sanciones) {
+                let html = '';
+                
+                if (sanciones.length === 0) {
+                    html = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #6b7280;">' +
+                           '<i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>' +
+                           '<p style="font-size: 1.1rem;">No se encontraron sanciones</p>' +
+                           '</div>';
+                } else {
+                    sanciones.forEach(function(item) {
+                        let statusClass = getStatusClass(item.EstadoDescripcion);
+                        
+                        html += '<div class="sanciones-card">';
+                        html += '<span class="sanciones-card-status ' + statusClass + '">' + item.EstadoDescripcion + '</span>';
+                        html += '<div class="sanciones-card-header">';
+                        html += '<h3 class="sanciones-card-user">' + item.UsuarioNombre + '</h3>';
+                        html += '<p class="sanciones-card-tipo">' + item.Tipo + '</p>';
+                        html += '</div>';
+                        html += '<div class="sanciones-card-monto">';
+                        html += '<div class="sanciones-card-monto-label">Monto</div>';
+                        html += item.Monto;
+                        html += '</div>';
+                        html += '<div class="sanciones-card-details">';
+                        html += '<div class="sanciones-card-detail">';
+                        html += '<span class="sanciones-card-detail-label">Fecha de Inicio</span>';
+                        html += '<span class="sanciones-card-detail-value">' + item.FechaInicio + '</span>';
+                        html += '</div>';
+                        html += '<div class="sanciones-card-detail">';
+                        html += '<span class="sanciones-card-detail-label">Fecha de Fin</span>';
+                        html += '<span class="sanciones-card-detail-value">' + item.FechaFin + '</span>';
+                        html += '</div>';
+                        
+                        if (item.Motivo && item.Motivo !== 'Sin motivo') {
+                            html += '<div class="sanciones-card-detail">';
+                            html += '<span class="sanciones-card-detail-label">Motivo</span>';
+                            html += '<span class="sanciones-card-detail-value">' + (item.Motivo.length > 50 ? item.Motivo.substring(0, 50) + '...' : item.Motivo) + '</span>';
+                            html += '</div>';
+                        }
+                        
+                        html += '</div>';
+                        html += '<div class="sanciones-card-footer">';
+                        html += '<span class="sanciones-card-id"><i class="fas fa-hashtag"></i> ID: ' + item.IdSancion + '</span>';
+                        html += '<div class="sanciones-card-actions">';
+                        html += '<a href="/Sanciones/Details/' + item.IdSancion + '" class="btn-sanciones-action btn-sanciones-details"><i class="fas fa-eye"></i> Detalle</a>';
+                        html += '<a href="/Sanciones/Delete/' + item.IdSancion + '" class="btn-sanciones-action btn-sanciones-delete"><i class="fas fa-trash-alt"></i></a>';
+                        html += '</div></div></div>';
+                    });
+                }
+                
+                $('#sancionesGrid').html(html);
+            }
+
+            // Función para obtener la clase de estado
+            function getStatusClass(descripcion) {
+                let desc = descripcion.toLowerCase();
+                if (desc.includes('activ') && !desc.includes('inactiv')) return 'activa';
+                if (desc.includes('finalizada') || desc.includes('completada') || desc.includes('pagada')) return 'finalizada';
+                if (desc.includes('pendiente')) return 'pendiente';
+                if (desc.includes('inactivo')) return 'inactivo';
+                return 'pendiente';
+            }
+
+            // Función para actualizar la paginación
+            function updatePagination() {
+                const startItem = (currentPage - 1) * pageSize + 1;
+                const endItem = Math.min(currentPage * pageSize, totalItems);
+                
+                $('#startItem').text(startItem);
+                $('#endItem').text(endItem);
+                $('#totalItems').text(totalItems);
+                
+                let paginationHtml = '';
+                
+                // Botón anterior
+                if (currentPage > 1) {
+                    paginationHtml += '<a href="#" class="sanciones-pagination-btn" data-page="1">Primera</a>';
+                    paginationHtml += '<a href="#" class="sanciones-pagination-btn" data-page="' + (currentPage - 1) + '">Anterior</a>';
+                } else {
+                    paginationHtml += '<button class="sanciones-pagination-btn" disabled>Primera</button>';
+                    paginationHtml += '<button class="sanciones-pagination-btn" disabled>Anterior</button>';
+                }
+                
+                // Números de página
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentPage) {
+                        paginationHtml += '<span class="sanciones-pagination-btn active">' + i + '</span>';
+                    } else if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                        paginationHtml += '<a href="#" class="sanciones-pagination-btn" data-page="' + i + '">' + i + '</a>';
+                    } else if (i === currentPage - 3 || i === currentPage + 3) {
+                        paginationHtml += '<span class="sanciones-pagination-dots">...</span>';
+                    }
+                }
+                
+                // Botón siguiente
+                if (currentPage < totalPages) {
+                    paginationHtml += '<a href="#" class="sanciones-pagination-btn" data-page="' + (currentPage + 1) + '">Siguiente</a>';
+                    paginationHtml += '<a href="#" class="sanciones-pagination-btn" data-page="' + totalPages + '">Ultima</a>';
+                } else {
+                    paginationHtml += '<button class="sanciones-pagination-btn" disabled>Siguiente</button>';
+                    paginationHtml += '<button class="sanciones-pagination-btn" disabled>Ultima</button>';
+                }
+                
+                $('#pagination').html(paginationHtml);
+            }
+
+            // Event listeners para filtros
+            $('#searchInput').on('keyup', debounce(function() {
+                currentPage = 1;
+                loadSanciones();
+            }, 500));
+
+            $('#estadoFilter, #usuarioFilter, #tipoFilter, #sortBy, #sortOrder').on('change', function() {
+                currentPage = 1;
+                loadSanciones();
+            });
+
+            $('#pageSize').on('change', function() {
+                pageSize = parseInt($(this).val());
+                currentPage = 1;
+                loadSanciones();
+            });
+
+            // Paginación con delegación de eventos
+            $(document).on('click', '.sanciones-pagination-btn[data-page]', function(e) {
+                e.preventDefault();
+                currentPage = parseInt($(this).data('page'));
+                loadSanciones();
+                window.scrollTo(0, 0);
+            });
+
+            // Limpiar filtros
+            $('#clearFilters').on('click', function() {
+                $('#searchInput').val('');
+                $('#estadoFilter').val('');
+                $('#usuarioFilter').val('');
+                $('#tipoFilter').val('');
+                $('#sortBy').val('fecha');
+                $('#sortOrder').val('desc');
+                $('#pageSize').val('12');
+                pageSize = 12;
+                currentPage = 1;
+                loadSanciones();
+            });
+
+            // Función debounce para el buscador
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Auto-ocultar mensajes de éxito/error después de 5 segundos
+            setTimeout(function() {
+                $('.sanciones-alert').fadeOut();
+            }, 5000);
+        });
+    </script>
+}
