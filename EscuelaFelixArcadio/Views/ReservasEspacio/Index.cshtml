@@ -11,12 +11,12 @@
 
 <div class="reservas-container">
     <!-- Header with title and create button -->
-    <div class="reservas-header">
-        <h1 class="reservas-title">Reservas de Espacios</h1>
-        <div style="display: flex; gap: 1rem;">
-            <a href="@Url.Action("Calendario", "ReservasEspacio")" class="btn-create-reservas" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
-                <i class="fas fa-calendar-alt"></i> Ver Calendario
-            </a>
+    <div class="reservas-header" style="display: flex; align-items: center; justify-content: space-between;">
+        <a href="@Url.Action("Calendario", "ReservasEspacio")" class="btn-reservas-cancel">
+            <i class="fas fa-arrow-left"></i> Volver al Calendario
+        </a>
+        <h1 class="reservas-title" style="margin: 0;">Reservas de Espacios</h1>
+        <div style="display: flex; gap: 1rem; align-items: center;">
             <a href="@Url.Action("Create", "ReservasEspacio")" class="btn-create-reservas">
                 <i class="fas fa-plus"></i> Crear Reserva
             </a>
@@ -137,13 +137,28 @@
             {
                 statusClass = "completada";
             }
+            else if (estadoDescripcion.Contains("inactivo"))
+            {
+                statusClass = "inactivo";
+            }
             else
             {
                 statusClass = "inactivo";
             }
 
             <div class="reservas-card">
-                <span class="reservas-card-status @statusClass">@item.Estado.Descripcion</span>
+                @if (item.Estado.Descripcion.ToUpper().Contains("INACTIVO"))
+                {
+                    <span class="reservas-card-status" style="background-color: #fee2e2 !important; background: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fecaca !important;">@item.Estado.Descripcion</span>
+                }
+                else if (item.Estado.Descripcion.ToUpper().Contains("ACTIVO"))
+                {
+                    <span class="reservas-card-status" style="background-color: #dcfce7 !important; background: #dcfce7 !important; color: #166534 !important; border: 1px solid #bbf7d0 !important;">@item.Estado.Descripcion</span>
+                }
+                else
+                {
+                    <span class="reservas-card-status @statusClass">@item.Estado.Descripcion</span>
+                }
                 
                 <div class="reservas-card-header">
                     <h3 class="reservas-card-espacio">@item.Espacio.Nombre</h3>
@@ -296,7 +311,13 @@
                         let statusClass = getStatusClass(item.EstadoDescripcion);
                         
                         html += '<div class="reservas-card">';
-                        html += '<span class="reservas-card-status ' + statusClass + '">' + item.EstadoDescripcion + '</span>';
+                        if (item.EstadoDescripcion.toUpperCase().includes('INACTIVO')) {
+                            html += '<span class="reservas-card-status" style="background-color: #fee2e2 !important; background: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fecaca !important;">' + item.EstadoDescripcion + '</span>';
+                        } else if (item.EstadoDescripcion.toUpperCase().includes('ACTIVO')) {
+                            html += '<span class="reservas-card-status" style="background-color: #dcfce7 !important; background: #dcfce7 !important; color: #166534 !important; border: 1px solid #bbf7d0 !important;">' + item.EstadoDescripcion + '</span>';
+                        } else {
+                            html += '<span class="reservas-card-status ' + statusClass + '">' + item.EstadoDescripcion + '</span>';
+                        }
                         html += '<div class="reservas-card-header">';
                         html += '<h3 class="reservas-card-espacio">' + item.EspacioNombre + '</h3>';
                         html += '<p class="reservas-card-usuario"><i class="fas fa-user"></i> ' + item.UsuarioNombre + '</p>';
@@ -335,6 +356,7 @@
                 if (desc.includes('activ')) return 'activa';
                 if (desc.includes('cancelada')) return 'cancelada';
                 if (desc.includes('completada')) return 'completada';
+                if (desc.includes('inactivo')) return 'inactivo';
                 return 'inactivo';
             }
 
