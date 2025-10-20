@@ -1,0 +1,174 @@
+﻿@{
+    ViewBag.Title = "Calendario de Reservas";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reservas.css" rel="stylesheet" />
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.css" rel="stylesheet" />
+}
+
+<div class="reservas-container">
+    <!-- Header -->
+    <div class="reservas-header">
+        <h1 class="reservas-title">Calendario de Reservas</h1>
+        <div style="display: flex; gap: 1rem;">
+            <a href="@Url.Action("Index", "ReservasEspacio")" class="btn-reservas-cancel">
+                <i class="fas fa-list"></i> Ver Lista
+            </a>
+            <a href="@Url.Action("Create", "ReservasEspacio")" class="btn-create-reservas">
+                <i class="fas fa-plus"></i> Nueva Reserva
+            </a>
+        </div>
+    </div>
+
+    <!-- Success/Error messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="reservas-alert reservas-alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="reservas-alert reservas-alert-error">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Filtros del calendario -->
+    <div class="reservas-filters-panel">
+        <div class="reservas-filters-row">
+            <div class="reservas-filter-group">
+                <label class="reservas-filter-label">Filtrar por Espacio</label>
+                <select id="filtroEspacio" class="reservas-filter-select">
+                    <option value="">Todos los espacios</option>
+                    @foreach (var espacio in ViewBag.Espacios as SelectList)
+                    {
+                        <option value="@espacio.Value">@espacio.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="reservas-filter-group">
+                <button id="btnHoy" class="btn-create-reservas" style="margin-top: 1.5rem;">
+                    <i class="fas fa-calendar-day"></i> Ir a Hoy
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendario -->
+    <div class="reservas-calendario-container">
+        <div id="calendar"></div>
+    </div>
+
+    <!-- Leyenda -->
+    <div class="reservas-details-card" style="max-width: 100%; margin-top: 1.5rem;">
+        <h3 class="reservas-details-card-title">Leyenda</h3>
+        <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 20px; height: 20px; background: #0ea5e9; border-radius: 4px;"></div>
+                <span>Activa</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 20px; height: 20px; background: #6b7280; border-radius: 4px;"></div>
+                <span>Inactiva/Cancelada</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/locales/es.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: 'Hoy',
+                    month: 'Mes',
+                    week: 'Semana',
+                    day: 'Dia'
+                },
+                events: function(info, successCallback, failureCallback) {
+                    var idEspacio = $('#filtroEspacio').val();
+                    var params = {
+                        fechaInicio: info.start.toISOString(),
+                        fechaFin: info.end.toISOString()
+                    };
+                    
+                    if (idEspacio) {
+                        params.idEspacio = idEspacio;
+                    }
+
+                    $.ajax({
+                        url: '@Url.Action("GetReservasPorFecha", "ReservasEspacio")',
+                        type: 'GET',
+                        data: params,
+                        success: function(data) {
+                            successCallback(data);
+                        },
+                        error: function() {
+                            failureCallback();
+                            alert('Error al cargar las reservas del calendario');
+                        }
+                    });
+                },
+                eventClick: function(info) {
+                    var reserva = info.event.extendedProps;
+                    var mensaje = 'RESERVA: ' + info.event.title + '\n\n';
+                    mensaje += 'Espacio: ' + reserva.espacioNombre + '\n';
+                    mensaje += 'Usuario: ' + reserva.usuarioNombre + '\n';
+                    mensaje += 'Email: ' + reserva.usuarioEmail + '\n';
+                    mensaje += 'Estado: ' + reserva.estadoDescripcion + '\n';
+                    mensaje += 'Inicio: ' + info.event.start.toLocaleString('es-ES') + '\n';
+                    mensaje += 'Fin: ' + info.event.end.toLocaleString('es-ES') + '\n';
+                    if (reserva.notas !== 'Sin notas') {
+                        mensaje += 'Notas: ' + reserva.notas;
+                    }
+                    
+                    if (confirm(mensaje + '\n\n¿Desea ver los detalles completos?')) {
+                        window.location.href = '/ReservasEspacio/Details/' + reserva.idReserva;
+                    }
+                },
+                eventDidMount: function(info) {
+                    info.el.style.cursor = 'pointer';
+                },
+                height: 'auto',
+                navLinks: true,
+                editable: false,
+                dayMaxEvents: true,
+                slotMinTime: '06:00:00',
+                slotMaxTime: '22:00:00'
+            });
+
+            calendar.render();
+
+            // Recargar calendario al cambiar filtro
+            $('#filtroEspacio').on('change', function() {
+                calendar.refetchEvents();
+            });
+
+            // Boton ir a hoy
+            $('#btnHoy').on('click', function() {
+                calendar.today();
+            });
+
+            // Auto-ocultar mensajes
+            setTimeout(function() {
+                $('.reservas-alert').fadeOut();
+            }, 5000);
+        });
+    </script>
+}

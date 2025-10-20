@@ -1,14 +1,524 @@
+﻿@model IEnumerable<EscuelaFelixArcadio.Models.Espacio>
+
 @{
-    ViewBag.Title = "Espacios";
+    ViewBag.Title = "Gestion de Espacios";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="admin-placeholder">
-    <div class="admin-placeholder-icon">
-        <i class="fas fa-building"></i>
+@section Styles {
+    <link href="~/Content/espacios.css" rel="stylesheet" />
+}
+
+<div class="espacios-container">
+    <!-- Header with title and buttons -->
+    <div class="espacios-header">
+        <h1 class="espacios-title">Catalogo de Espacios</h1>
+        <div style="display: flex; gap: 1rem;">
+            <a href="@Url.Action("Index", "ReservasEspacio")" class="btn-create-espacios" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">
+                <i class="fas fa-calendar-check"></i> Ver Reservas
+            </a>
+            <a href="@Url.Action("Create", "Espacios")" class="btn-create-espacios">
+                <i class="fas fa-plus"></i> Crear Espacio
+            </a>
+        </div>
     </div>
-    <div class="admin-placeholder-text">Escuela Felix Arcadio Montero Monge</div>
-    <div class="admin-placeholder-subtitle">
-        Administra instalaciones, reservas y mantenimiento de espacios deportivos.
+
+    <!-- Success/Error messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="espacios-alert espacios-alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="espacios-alert espacios-alert-error">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Filters and search panel -->
+    <div class="espacios-filters-panel">
+        <!-- Search bar -->
+        <div class="espacios-search-bar" style="position: relative;">
+            <i class="fas fa-search espacios-search-icon"></i>
+            <input type="text" id="searchInput" class="espacios-search-input" placeholder="Buscar por nombre, codigo o ubicacion...">
+        </div>
+
+        <!-- Filter dropdowns -->
+        <div class="espacios-filters-row">
+            <div class="espacios-filter-group">
+                <label class="espacios-filter-label">Estado</label>
+                <select id="estadoFilter" class="espacios-filter-select">
+                    <option value="">Todos los estados</option>
+                    @foreach (var estado in ViewBag.Estados as SelectList)
+                    {
+                        <option value="@estado.Value">@estado.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <!-- Controls row -->
+        <div class="espacios-controls-row">
+            <div class="espacios-sort-group">
+                <label class="espacios-sort-label">Ordenar por:</label>
+                <select id="sortBy" class="espacios-filter-select">
+                    <option value="nombre">Nombre</option>
+                    <option value="codigo">Codigo</option>
+                    <option value="capacidad">Capacidad</option>
+                    <option value="estado">Estado</option>
+                    <option value="fecha">Fecha de Creacion</option>
+                </select>
+                <select id="sortOrder" class="espacios-filter-select">
+                    <option value="asc">Ascendente</option>
+                    <option value="desc">Descendente</option>
+                </select>
+            </div>
+
+            <div class="espacios-items-per-page">
+                <label class="espacios-items-label">Mostrar:</label>
+                <select id="pageSize" class="espacios-filter-select">
+                    <option value="12">12</option>
+                    <option value="24">24</option>
+                    <option value="48">48</option>
+                </select>
+            </div>
+
+            <button id="clearFilters" class="espacios-clear-filters">
+                <i class="fas fa-times"></i> Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="espacios-loading" style="display: none;">
+        <div class="espacios-spinner"></div>
+        <span>Cargando espacios...</span>
+    </div>
+
+    <!-- Espacios cards grid -->
+    <div id="espaciosGrid" class="espacios-cards-grid">
+        @foreach (var item in Model)
+        {
+            var statusClass = "";
+            var estadoDescripcion = item.Estado.Descripcion.ToLower();
+            
+            if (estadoDescripcion.Contains("activ"))
+            {
+                statusClass = "disponible";
+            }
+            else if (estadoDescripcion.Contains("inactivo"))
+            {
+                statusClass = "inactivo";
+            }
+            else if (estadoDescripcion.Contains("mantenimiento"))
+            {
+                statusClass = "mantenimiento";
+            }
+            else
+            {
+                statusClass = "ocupado";
+            }
+
+            <div class="espacios-card">
+                @if (item.Estado.Descripcion.ToUpper().Contains("INACTIVO"))
+                {
+                    <span class="espacios-card-status" style="background-color: #fee2e2 !important; background: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fecaca !important;">@item.Estado.Descripcion</span>
+                }
+                else
+                {
+                    <span class="espacios-card-status @statusClass">@item.Estado.Descripcion</span>
+                }
+                
+                <div class="espacios-card-header">
+                    <h3 class="espacios-card-nombre">@item.Nombre</h3>
+                    <p class="espacios-card-codigo">
+                        <i class="fas fa-barcode"></i> @item.Codigo
+                    </p>
+                </div>
+
+                <div class="espacios-card-details">
+                    <div class="espacios-card-detail">
+                        <span class="espacios-card-detail-label">Capacidad</span>
+                        <span class="espacios-card-detail-value">
+                            <i class="fas fa-users"></i> @(item.Capacidad.HasValue ? item.Capacidad.Value.ToString() + " personas" : "No especificada")
+                        </span>
+                    </div>
+                    <div class="espacios-card-detail">
+                        <span class="espacios-card-detail-label">Ubicacion</span>
+                        <span class="espacios-card-detail-value">
+                            <i class="fas fa-map-marker-alt"></i> @(item.Ubicacion ?? "No especificada")
+                        </span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(item.Descripcion))
+                    {
+                        <div class="espacios-card-detail">
+                            <span class="espacios-card-detail-label">Descripcion</span>
+                            <span class="espacios-card-detail-value">
+                                @(item.Descripcion.Length > 50 ? item.Descripcion.Substring(0, 50) + "..." : item.Descripcion)
+                            </span>
+                        </div>
+                    }
+                </div>
+
+                <div class="espacios-card-footer">
+                    <span class="espacios-card-id">
+                        <i class="fas fa-hashtag"></i> ID: @item.IdEspacio
+                    </span>
+                    <div class="espacios-card-actions">
+                        <a href="@Url.Action("Details", new { id = item.IdEspacio })" class="btn-espacios-action btn-espacios-details">
+                            <i class="fas fa-eye"></i> Detalle
+                        </a>
+                        <a href="@Url.Action("Delete", new { id = item.IdEspacio })" class="btn-espacios-action btn-espacios-delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="espacios-pagination">
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <a href="@Url.Action("Index", new { page = 1 })" class="espacios-pagination-btn">Primera</a>
+            <a href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1 })" class="espacios-pagination-btn">Anterior</a>
+        }
+        else
+        {
+            <button class="espacios-pagination-btn" disabled>Primera</button>
+            <button class="espacios-pagination-btn" disabled>Anterior</button>
+        }
+
+        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+        {
+            if (i == ViewBag.CurrentPage)
+            {
+                <span class="espacios-pagination-btn active">@i</span>
+            }
+            else if (i == 1 || i == ViewBag.TotalPages || (i >= ViewBag.CurrentPage - 2 && i <= ViewBag.CurrentPage + 2))
+            {
+                <a href="@Url.Action("Index", new { page = i })" class="espacios-pagination-btn">@i</a>
+            }
+            else if (i == ViewBag.CurrentPage - 3 || i == ViewBag.CurrentPage + 3)
+            {
+                <span class="espacios-pagination-dots">...</span>
+            }
+        }
+
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <a href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1 })" class="espacios-pagination-btn">Siguiente</a>
+            <a href="@Url.Action("Index", new { page = ViewBag.TotalPages })" class="espacios-pagination-btn">Ultima</a>
+        }
+        else
+        {
+            <button class="espacios-pagination-btn" disabled>Siguiente</button>
+            <button class="espacios-pagination-btn" disabled>Ultima</button>
+        }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let currentPage = @ViewBag.CurrentPage;
+            let pageSize = @ViewBag.PageSize;
+            let totalItems = @ViewBag.TotalItems;
+            let totalPages = @ViewBag.TotalPages;
+
+            // Funcion para actualizar la visualizacion de espacios
+            function loadEspacios() {
+                const search = $('#searchInput').val();
+                const estado = $('#estadoFilter').val();
+                const sortBy = $('#sortBy').val();
+                const sortOrder = $('#sortOrder').val();
+                
+                $('#loadingIndicator').show();
+                $('#espaciosGrid').hide();
+
+                $.ajax({
+                    url: '@Url.Action("SearchEspacios", "Espacios")',
+                    type: 'GET',
+                    data: {
+                        search: search,
+                        estado: estado,
+                        sortBy: sortBy,
+                        sortOrder: sortOrder,
+                        page: currentPage,
+                        pageSize: pageSize
+                    },
+                    success: function(data) {
+                        totalItems = data.totalItems;
+                        totalPages = data.totalPages;
+                        
+                        renderEspacios(data.items);
+                        updatePagination();
+                        
+                        $('#loadingIndicator').hide();
+                        $('#espaciosGrid').show();
+                    },
+                    error: function() {
+                        $('#loadingIndicator').hide();
+                        $('#espaciosGrid').show();
+                        alert('Error al cargar los espacios');
+                    }
+                });
+            }
+
+            // Funcion para renderizar los espacios
+            function renderEspacios(espacios) {
+                let html = '';
+                
+                if (espacios.length === 0) {
+                    html = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #6b7280;">' +
+                           '<i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>' +
+                           '<p style="font-size: 1.1rem;">No se encontraron espacios</p>' +
+                           '</div>';
+                } else {
+                    espacios.forEach(function(item) {
+                        let statusClass = getStatusClass(item.EstadoDescripcion);
+                        
+                        html += '<div class="espacios-card">';
+                        if (item.EstadoDescripcion.toUpperCase().includes('INACTIVO')) {
+                            html += '<span class="espacios-card-status" style="background-color: #fee2e2 !important; background: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fecaca !important;">' + item.EstadoDescripcion + '</span>';
+                        } else {
+                            html += '<span class="espacios-card-status ' + statusClass + '">' + item.EstadoDescripcion + '</span>';
+                        }
+                        html += '<div class="espacios-card-header">';
+                        html += '<h3 class="espacios-card-nombre">' + item.Nombre + '</h3>';
+                        html += '<p class="espacios-card-codigo"><i class="fas fa-barcode"></i> ' + item.Codigo + '</p>';
+                        html += '</div>';
+                        html += '<div class="espacios-card-details">';
+                        html += '<div class="espacios-card-detail">';
+                        html += '<span class="espacios-card-detail-label">Capacidad</span>';
+                        html += '<span class="espacios-card-detail-value"><i class="fas fa-users"></i> ' + (item.Capacidad > 0 ? item.Capacidad + ' personas' : 'No especificada') + '</span>';
+                        html += '</div>';
+                        html += '<div class="espacios-card-detail">';
+                        html += '<span class="espacios-card-detail-label">Ubicacion</span>';
+                        html += '<span class="espacios-card-detail-value"><i class="fas fa-map-marker-alt"></i> ' + item.Ubicacion + '</span>';
+                        html += '</div>';
+                        if (item.Descripcion && item.Descripcion !== 'Sin descripcion') {
+                            html += '<div class="espacios-card-detail">';
+                            html += '<span class="espacios-card-detail-label">Descripcion</span>';
+                            html += '<span class="espacios-card-detail-value">' + (item.Descripcion.length > 50 ? item.Descripcion.substring(0, 50) + '...' : item.Descripcion) + '</span>';
+                            html += '</div>';
+                        }
+                        html += '</div>';
+                        html += '<div class="espacios-card-footer">';
+                        html += '<span class="espacios-card-id"><i class="fas fa-hashtag"></i> ID: ' + item.IdEspacio + '</span>';
+                        html += '<div class="espacios-card-actions">';
+                        html += '<a href="/Espacios/Details/' + item.IdEspacio + '" class="btn-espacios-action btn-espacios-details"><i class="fas fa-eye"></i> Detalle</a>';
+                        html += '<a href="/Espacios/Delete/' + item.IdEspacio + '" class="btn-espacios-action btn-espacios-delete"><i class="fas fa-trash-alt"></i></a>';
+                        html += '</div></div></div>';
+                    });
+                }
+                
+                $('#espaciosGrid').html(html);
+            }
+
+            // Funcion para obtener la clase de estado
+            function getStatusClass(descripcion) {
+                let desc = descripcion.toLowerCase();
+                if (desc.includes('activ')) return 'disponible';
+                if (desc.includes('inactivo')) return 'inactivo';
+                if (desc.includes('mantenimiento')) return 'mantenimiento';
+                return 'ocupado';
+            }
+
+            // Funcion para actualizar la paginacion
+            function updatePagination() {
+                let paginationHtml = '';
+                
+                if (currentPage > 1) {
+                    paginationHtml += '<a href="#" class="espacios-pagination-btn" data-page="1">Primera</a>';
+                    paginationHtml += '<a href="#" class="espacios-pagination-btn" data-page="' + (currentPage - 1) + '">Anterior</a>';
+                } else {
+                    paginationHtml += '<button class="espacios-pagination-btn" disabled>Primera</button>';
+                    paginationHtml += '<button class="espacios-pagination-btn" disabled>Anterior</button>';
+                }
+                
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentPage) {
+                        paginationHtml += '<span class="espacios-pagination-btn active">' + i + '</span>';
+                    } else if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                        paginationHtml += '<a href="#" class="espacios-pagination-btn" data-page="' + i + '">' + i + '</a>';
+                    } else if (i === currentPage - 3 || i === currentPage + 3) {
+                        paginationHtml += '<span class="espacios-pagination-dots">...</span>';
+                    }
+                }
+                
+                if (currentPage < totalPages) {
+                    paginationHtml += '<a href="#" class="espacios-pagination-btn" data-page="' + (currentPage + 1) + '">Siguiente</a>';
+                    paginationHtml += '<a href="#" class="espacios-pagination-btn" data-page="' + totalPages + '">Ultima</a>';
+                } else {
+                    paginationHtml += '<button class="espacios-pagination-btn" disabled>Siguiente</button>';
+                    paginationHtml += '<button class="espacios-pagination-btn" disabled>Ultima</button>';
+                }
+                
+                $('#pagination').html(paginationHtml);
+            }
+
+            // Event listeners para filtros
+            $('#searchInput').on('keyup', debounce(function() {
+                currentPage = 1;
+                loadEspacios();
+            }, 500));
+
+            $('#estadoFilter, #sortBy, #sortOrder').on('change', function() {
+                currentPage = 1;
+                loadEspacios();
+            });
+
+            $('#pageSize').on('change', function() {
+                pageSize = parseInt($(this).val());
+                currentPage = 1;
+                loadEspacios();
+            });
+
+            // Paginacion con delegacion de eventos
+            $(document).on('click', '.espacios-pagination-btn[data-page]', function(e) {
+                e.preventDefault();
+                currentPage = parseInt($(this).data('page'));
+                loadEspacios();
+                window.scrollTo(0, 0);
+            });
+
+            // Limpiar filtros
+            $('#clearFilters').on('click', function() {
+                $('#searchInput').val('');
+                $('#estadoFilter').val('');
+                $('#sortBy').val('nombre');
+                $('#sortOrder').val('asc');
+                $('#pageSize').val('12');
+                pageSize = 12;
+                currentPage = 1;
+                loadEspacios();
+            });
+
+            // Funcion debounce para el buscador
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Auto-ocultar mensajes de exito/error despues de 5 segundos
+            setTimeout(function() {
+                $('.espacios-alert').fadeOut();
+            }, 5000);
+
+            // Forzar estilos para estados inactivos
+            function forzarEstilosInactivos() {
+                $('.espacios-card-status.inactivo').each(function() {
+                    $(this).css({
+                        'background': '#fee2e2 !important',
+                        'background-color': '#fee2e2 !important',
+                        'color': '#991b1b !important',
+                        'border': '1px solid #fecaca !important'
+                    });
+                });
+            }
+
+            // Ejecutar al cargar la página
+            forzarEstilosInactivos();
+
+            // Ejecutar después de cargar contenido dinámico
+            setTimeout(forzarEstilosInactivos, 100);
+
+            // Forzar estilos inmediatamente
+            $(document).ready(function() {
+                forzarEstilosInactivos();
+            });
+
+            // Forzar estilos cada vez que cambie el contenido
+            $(document).on('DOMNodeInserted', function() {
+                forzarEstilosInactivos();
+            });
+        });
+    </script>
+
+    <!-- Script adicional para forzar estilos -->
+    <script>
+        // Ejecutar inmediatamente
+        (function() {
+            function aplicarEstilosInactivos() {
+                // Buscar por texto "INACTIVO" en cualquier elemento
+                var todosElementos = document.querySelectorAll('*');
+                todosElementos.forEach(function(elemento) {
+                    if (elemento.textContent && elemento.textContent.trim() === 'INACTIVO') {
+                        elemento.style.cssText = 'background: #fee2e2 !important; background-color: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fecaca !important;';
+                        console.log('Aplicado estilo a elemento con texto INACTIVO:', elemento);
+                    }
+                });
+                
+                // Buscar específicamente en cards
+                var cards = document.querySelectorAll('.espacios-card');
+                cards.forEach(function(card) {
+                    var spans = card.querySelectorAll('span');
+                    spans.forEach(function(span) {
+                        if (span.textContent && span.textContent.trim() === 'INACTIVO') {
+                            span.style.cssText = 'background: #fee2e2 !important; background-color: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fecaca !important;';
+                            console.log('Aplicado estilo a span en card:', span);
+                        }
+                    });
+                });
+                
+                // También buscar por clase
+                var elementosClase = document.querySelectorAll('.espacios-card-status.inactivo');
+                elementosClase.forEach(function(elemento) {
+                    elemento.style.cssText = 'background: #fee2e2 !important; background-color: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fecaca !important;';
+                    console.log('Aplicado estilo a elemento con clase:', elemento);
+                });
+            }
+            
+            // Ejecutar inmediatamente
+            aplicarEstilosInactivos();
+            
+            // Ejecutar cuando el DOM esté listo
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', aplicarEstilosInactivos);
+            }
+            
+            // Ejecutar múltiples veces
+            setTimeout(aplicarEstilosInactivos, 10);
+            setTimeout(aplicarEstilosInactivos, 50);
+            setTimeout(aplicarEstilosInactivos, 100);
+            setTimeout(aplicarEstilosInactivos, 200);
+            setTimeout(aplicarEstilosInactivos, 500);
+            setTimeout(aplicarEstilosInactivos, 1000);
+        })();
+        
+        // SOLUCIÓN DEFINITIVA - EJECUTAR MÚLTIPLES VECES
+        function forzarRojoInactivo() {
+            // Buscar TODOS los elementos que contengan "INACTIVO"
+            var elementos = document.querySelectorAll('*');
+            elementos.forEach(function(el) {
+                if (el.textContent && el.textContent.trim() === 'INACTIVO') {
+                    el.style.setProperty('background-color', '#fee2e2', 'important');
+                    el.style.setProperty('background', '#fee2e2', 'important');
+                    el.style.setProperty('color', '#991b1b', 'important');
+                    el.style.setProperty('border', '1px solid #fecaca', 'important');
+                }
+            });
+        }
+        
+        // Ejecutar múltiples veces
+        setTimeout(forzarRojoInactivo, 100);
+        setTimeout(forzarRojoInactivo, 500);
+        setTimeout(forzarRojoInactivo, 1000);
+        setTimeout(forzarRojoInactivo, 2000);
+        setTimeout(forzarRojoInactivo, 5000);
+        
+        // Ejecutar cuando cambie el contenido
+        setInterval(forzarRojoInactivo, 2000);
+    </script>
+}

@@ -1,0 +1,95 @@
+﻿@model EscuelaFelixArcadio.Models.Espacio
+
+@{
+    ViewBag.Title = "Eliminar Espacio";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/espacios.css" rel="stylesheet" />
+}
+
+<div class="espacios-container">
+    <div class="espacios-delete-container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc2626; margin-bottom: 1rem;"></i>
+            <h2 class="espacios-delete-title">¿Eliminar Espacio?</h2>
+            <p class="espacios-delete-message">
+                Esta accion es permanente y no se puede deshacer. ¿Esta seguro de que desea eliminar este espacio?
+            </p>
+        </div>
+
+        <div class="espacios-delete-info">
+            <h3 class="espacios-delete-info-title">
+                <i class="fas fa-info-circle"></i> Informacion del Espacio a Eliminar
+            </h3>
+            <div class="espacios-delete-info-details">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <strong>ID:</strong> #@Model.IdEspacio
+                    </div>
+                    <div>
+                        <strong>Codigo:</strong> @(Model.Codigo ?? "N/A")
+                    </div>
+                    <div>
+                        <strong>Nombre:</strong> @Model.Nombre
+                    </div>
+                    <div>
+                        <strong>Estado:</strong> @Model.Estado.Descripcion
+                    </div>
+                    <div>
+                        <strong>Capacidad:</strong> @(Model.Capacidad.HasValue ? Model.Capacidad.Value.ToString() + " personas" : "No especificada")
+                    </div>
+                    <div>
+                        <strong>Ubicacion:</strong> @(Model.Ubicacion ?? "No especificada")
+                    </div>
+                    <div style="grid-column: 1/-1;">
+                        <strong>Fecha de Creacion:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy")
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Descripcion))
+                    {
+                        <div style="grid-column: 1/-1;">
+                            <strong>Descripcion:</strong> @Model.Descripcion
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (ViewBag.TieneReservasActivas == true)
+        {
+            <div class="espacios-alert espacios-alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <strong>Advertencia:</strong> Este espacio tiene reservas activas. No se puede eliminar hasta que todas las reservas hayan finalizado.
+            </div>
+        }
+        else
+        {
+            <div class="espacios-delete-info">
+                <h3 class="espacios-delete-info-title">
+                    <i class="fas fa-exclamation-triangle"></i> Advertencia:
+                </h3>
+                <div class="espacios-delete-info-details">
+                    Al eliminar este espacio, se perdera todo el historial asociado. Esta accion no puede revertirse.
+                </div>
+            </div>
+        }
+
+        @using (Html.BeginForm("Delete", "Espacios", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            
+            <div class="espacios-form-buttons">
+                @if (ViewBag.TieneReservasActivas != true)
+                {
+                    <button type="submit" class="btn-espacios-delete-confirm">
+                        <i class="fas fa-trash"></i> Eliminar Definitivamente
+                    </button>
+                }
+                <a href="@Url.Action("Index", "Espacios")" class="btn-espacios-cancel">
+                    Regresar a la Lista
+                </a>
+            </div>
+        }
+    </div>
+</div>

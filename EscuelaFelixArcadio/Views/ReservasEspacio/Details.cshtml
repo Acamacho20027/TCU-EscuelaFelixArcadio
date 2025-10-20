@@ -1,0 +1,156 @@
+﻿@model EscuelaFelixArcadio.Models.ReservaEspacio
+
+@{
+    ViewBag.Title = "Detalles de Reserva";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    var statusClass = "";
+    var estadoDescripcion = Model.Estado.Descripcion.ToLower();
+    
+    if (estadoDescripcion.Contains("activ"))
+    {
+        statusClass = "success";
+    }
+    else if (estadoDescripcion.Contains("inactivo") || estadoDescripcion.Contains("cancelada"))
+    {
+        statusClass = "error";
+    }
+    else if (estadoDescripcion.Contains("completada"))
+    {
+        statusClass = "info";
+    }
+    else
+    {
+        statusClass = "warning";
+    }
+    
+    var duracion = (Model.FechaFin - Model.FechaInicio);
+}
+
+@section Styles {
+    <link href="~/Content/reservas.css" rel="stylesheet" />
+}
+
+<div class="reservas-container">
+    <div class="reservas-details-container">
+        <h2 class="reservas-details-title">Detalles de la Reserva</h2>
+
+        <!-- Informacion principal -->
+        <div class="reservas-details-card">
+            <h3 class="reservas-details-card-title">
+                <i class="fas fa-calendar-check"></i> Informacion General
+            </h3>
+            <div class="reservas-details-grid">
+                <div class="reservas-details-field">
+                    <label class="reservas-details-label">ID de Reserva</label>
+                    <div class="reservas-details-value">
+                        <i class="fas fa-hashtag"></i> @Model.IdReservaEspacio
+                    </div>
+                </div>
+
+                <div class="reservas-details-field">
+                    <label class="reservas-details-label">Estado</label>
+                    <div class="reservas-details-value">
+                        <span class="reservas-status-badge @statusClass">
+                            @Model.Estado.Descripcion
+                        </span>
+                    </div>
+                </div>
+
+                <div class="reservas-details-field">
+                    <label class="reservas-details-label">Espacio Reservado</label>
+                    <div class="reservas-details-value">
+                        <i class="fas fa-building"></i> @Model.Espacio.Nombre
+                    </div>
+                </div>
+
+                <div class="reservas-details-field">
+                    <label class="reservas-details-label">Codigo del Espacio</label>
+                    <div class="reservas-details-value">
+                        <i class="fas fa-barcode"></i> @(Model.Espacio.Codigo ?? "N/A")
+                    </div>
+                </div>
+
+                <div class="reservas-details-field">
+                    <label class="reservas-details-label">Usuario</label>
+                    <div class="reservas-details-value">
+                        <i class="fas fa-user"></i> @(Model.ApplicationUser?.UserName ?? "Usuario no encontrado")
+                    </div>
+                </div>
+
+                <div class="reservas-details-field">
+                    <label class="reservas-details-label">Email del Usuario</label>
+                    <div class="reservas-details-value">
+                        <i class="fas fa-envelope"></i> @(Model.ApplicationUser?.Email ?? "No disponible")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informacion de fechas -->
+        <div class="reservas-details-card">
+            <h3 class="reservas-details-card-title">
+                <i class="fas fa-clock"></i> Fechas de la Reserva
+            </h3>
+            <div class="reservas-details-grid">
+                <div class="reservas-details-field">
+                    <label class="reservas-details-label">Fecha y Hora de Inicio</label>
+                    <div class="reservas-details-value">
+                        <i class="fas fa-calendar-plus"></i> @Model.FechaInicio.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+
+                <div class="reservas-details-field">
+                    <label class="reservas-details-label">Fecha y Hora de Fin</label>
+                    <div class="reservas-details-value">
+                        <i class="fas fa-calendar-check"></i> @Model.FechaFin.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+
+                <div class="reservas-details-field">
+                    <label class="reservas-details-label">Duracion</label>
+                    <div class="reservas-details-value">
+                        <i class="fas fa-hourglass-half"></i> 
+                        @if (duracion.Days > 0)
+                        {
+                            @duracion.Days <text> dia@(duracion.Days != 1 ? "s" : "")</text>
+                        }
+                        @duracion.Hours <text> hora@(duracion.Hours != 1 ? "s" : "")</text>
+                    </div>
+                </div>
+
+                <div class="reservas-details-field">
+                    <label class="reservas-details-label">Fecha de Creacion</label>
+                    <div class="reservas-details-value">
+                        <i class="fas fa-calendar-alt"></i> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm:ss")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notas -->
+        @if (!string.IsNullOrEmpty(Model.Notas))
+        {
+            <div class="reservas-details-card">
+                <h3 class="reservas-details-card-title">
+                    <i class="fas fa-sticky-note"></i> Notas u Observaciones
+                </h3>
+                <div class="reservas-details-field" style="grid-column: 1 / -1;">
+                    <div class="reservas-details-value" style="white-space: pre-wrap; line-height: 1.6;">
+                        @Model.Notas
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Botones de accion -->
+        <div class="reservas-form-buttons">
+            <a href="@Url.Action("Edit", new { id = Model.IdReservaEspacio })" class="btn-reservas-save">
+                <i class="fas fa-edit"></i> Editar Reserva
+            </a>
+            <a href="@Url.Action("Index")" class="btn-reservas-cancel">
+                Regresar
+            </a>
+        </div>
+    </div>
+</div>

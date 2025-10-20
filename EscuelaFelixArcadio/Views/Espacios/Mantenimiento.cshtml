@@ -1,0 +1,28 @@
+﻿@{
+    ViewBag.Title = "Gestion de Mantenimiento";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/espacios.css" rel="stylesheet" />
+}
+
+<div class="espacios-container">
+    <!-- Header with title -->
+    <div class="espacios-header">
+        <h1 class="espacios-title">Mantenimiento de Espacios</h1>
+        <a href="@Url.Action("Index", "Espacios")" class="btn-espacios-cancel">
+            <i class="fas fa-arrow-left"></i> Regresar al Dashboard
+        </a>
+    </div>
+
+    <!-- Placeholder para futuras funcionalidades de mantenimiento -->
+    <div class="espacios-details-card" style="max-width: 100%; text-align: center; padding: 3rem;">
+        <i class="fas fa-tools" style="font-size: 4rem; color: #f59e0b; margin-bottom: 1rem;"></i>
+        <h3 style="font-size: 1.5rem; color: #1e293b; margin-bottom: 1rem;">Modulo de Mantenimiento</h3>
+        <p style="color: #6b7280; font-size: 1rem; line-height: 1.6;">
+            En este modulo podras programar y gestionar el mantenimiento de los espacios deportivos y educativos.<br>
+            <strong>Proximamente disponible.</strong>
+        </p>
+    </div>
+</div>

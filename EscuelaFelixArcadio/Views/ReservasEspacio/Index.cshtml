@@ -1,0 +1,432 @@
+﻿@model IEnumerable<EscuelaFelixArcadio.Models.ReservaEspacio>
+
+@{
+    ViewBag.Title = "Reservas de Espacios";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reservas.css" rel="stylesheet" />
+}
+
+<div class="reservas-container">
+    <!-- Header with title and create button -->
+    <div class="reservas-header">
+        <h1 class="reservas-title">Reservas de Espacios</h1>
+        <div style="display: flex; gap: 1rem;">
+            <a href="@Url.Action("Calendario", "ReservasEspacio")" class="btn-create-reservas" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                <i class="fas fa-calendar-alt"></i> Ver Calendario
+            </a>
+            <a href="@Url.Action("Create", "ReservasEspacio")" class="btn-create-reservas">
+                <i class="fas fa-plus"></i> Crear Reserva
+            </a>
+        </div>
+    </div>
+
+    <!-- Success/Error messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="reservas-alert reservas-alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="reservas-alert reservas-alert-error">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Filters and search panel -->
+    <div class="reservas-filters-panel">
+        <!-- Search bar -->
+        <div class="reservas-search-bar" style="position: relative;">
+            <i class="fas fa-search reservas-search-icon"></i>
+            <input type="text" id="searchInput" class="reservas-search-input" placeholder="Buscar por espacio, usuario o notas...">
+        </div>
+
+        <!-- Filter dropdowns -->
+        <div class="reservas-filters-row">
+            <div class="reservas-filter-group">
+                <label class="reservas-filter-label">Estado</label>
+                <select id="estadoFilter" class="reservas-filter-select">
+                    <option value="">Todos los estados</option>
+                    @foreach (var estado in ViewBag.Estados as SelectList)
+                    {
+                        <option value="@estado.Value">@estado.Text</option>
+                    }
+                </select>
+            </div>
+
+            <div class="reservas-filter-group">
+                <label class="reservas-filter-label">Espacio</label>
+                <select id="espacioFilter" class="reservas-filter-select">
+                    <option value="">Todos los espacios</option>
+                    @foreach (var espacio in ViewBag.Espacios as SelectList)
+                    {
+                        <option value="@espacio.Value">@espacio.Text</option>
+                    }
+                </select>
+            </div>
+
+            <div class="reservas-filter-group">
+                <label class="reservas-filter-label">Usuario</label>
+                <select id="usuarioFilter" class="reservas-filter-select">
+                    <option value="">Todos los usuarios</option>
+                    @foreach (var usuario in ViewBag.Usuarios as SelectList)
+                    {
+                        <option value="@usuario.Value">@usuario.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <!-- Controls row -->
+        <div class="reservas-controls-row">
+            <div class="reservas-sort-group">
+                <label class="reservas-sort-label">Ordenar por:</label>
+                <select id="sortBy" class="reservas-filter-select">
+                    <option value="fecha">Fecha de Inicio</option>
+                    <option value="espacio">Espacio</option>
+                    <option value="usuario">Usuario</option>
+                    <option value="estado">Estado</option>
+                </select>
+                <select id="sortOrder" class="reservas-filter-select">
+                    <option value="desc">Descendente</option>
+                    <option value="asc">Ascendente</option>
+                </select>
+            </div>
+
+            <div class="reservas-items-per-page">
+                <label class="reservas-items-label">Mostrar:</label>
+                <select id="pageSize" class="reservas-filter-select">
+                    <option value="12">12</option>
+                    <option value="24">24</option>
+                    <option value="48">48</option>
+                </select>
+            </div>
+
+            <button id="clearFilters" class="reservas-clear-filters">
+                <i class="fas fa-times"></i> Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="reservas-loading" style="display: none;">
+        <div class="reservas-spinner"></div>
+        <span>Cargando reservas...</span>
+    </div>
+
+    <!-- Reservas cards grid -->
+    <div id="reservasGrid" class="reservas-cards-grid">
+        @foreach (var item in Model)
+        {
+            var statusClass = "";
+            var estadoDescripcion = item.Estado.Descripcion.ToLower();
+            
+            if (estadoDescripcion.Contains("activ"))
+            {
+                statusClass = "activa";
+            }
+            else if (estadoDescripcion.Contains("cancelada"))
+            {
+                statusClass = "cancelada";
+            }
+            else if (estadoDescripcion.Contains("completada"))
+            {
+                statusClass = "completada";
+            }
+            else
+            {
+                statusClass = "inactivo";
+            }
+
+            <div class="reservas-card">
+                <span class="reservas-card-status @statusClass">@item.Estado.Descripcion</span>
+                
+                <div class="reservas-card-header">
+                    <h3 class="reservas-card-espacio">@item.Espacio.Nombre</h3>
+                    <p class="reservas-card-usuario">
+                        <i class="fas fa-user"></i> @(item.ApplicationUser?.UserName ?? "Usuario no encontrado")
+                    </p>
+                </div>
+
+                <div class="reservas-card-details">
+                    <div class="reservas-card-detail">
+                        <span class="reservas-card-detail-label">Fecha de Inicio</span>
+                        <span class="reservas-card-detail-value">@item.FechaInicio.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <div class="reservas-card-detail">
+                        <span class="reservas-card-detail-label">Fecha de Fin</span>
+                        <span class="reservas-card-detail-value">@item.FechaFin.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(item.Notas))
+                    {
+                        <div class="reservas-card-detail">
+                            <span class="reservas-card-detail-label">Notas</span>
+                            <span class="reservas-card-detail-value">
+                                @(item.Notas.Length > 50 ? item.Notas.Substring(0, 50) + "..." : item.Notas)
+                            </span>
+                        </div>
+                    }
+                </div>
+
+                <div class="reservas-card-footer">
+                    <span class="reservas-card-id">
+                        <i class="fas fa-hashtag"></i> ID: @item.IdReservaEspacio
+                    </span>
+                    <div class="reservas-card-actions">
+                        <a href="@Url.Action("Details", new { id = item.IdReservaEspacio })" class="btn-reservas-action btn-reservas-details">
+                            <i class="fas fa-eye"></i> Detalle
+                        </a>
+                        <a href="@Url.Action("Delete", new { id = item.IdReservaEspacio })" class="btn-reservas-action btn-reservas-delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="reservas-pagination">
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <a href="@Url.Action("Index", new { page = 1 })" class="reservas-pagination-btn">Primera</a>
+            <a href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1 })" class="reservas-pagination-btn">Anterior</a>
+        }
+        else
+        {
+            <button class="reservas-pagination-btn" disabled>Primera</button>
+            <button class="reservas-pagination-btn" disabled>Anterior</button>
+        }
+
+        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+        {
+            if (i == ViewBag.CurrentPage)
+            {
+                <span class="reservas-pagination-btn active">@i</span>
+            }
+            else if (i == 1 || i == ViewBag.TotalPages || (i >= ViewBag.CurrentPage - 2 && i <= ViewBag.CurrentPage + 2))
+            {
+                <a href="@Url.Action("Index", new { page = i })" class="reservas-pagination-btn">@i</a>
+            }
+            else if (i == ViewBag.CurrentPage - 3 || i == ViewBag.CurrentPage + 3)
+            {
+                <span class="reservas-pagination-dots">...</span>
+            }
+        }
+
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <a href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1 })" class="reservas-pagination-btn">Siguiente</a>
+            <a href="@Url.Action("Index", new { page = ViewBag.TotalPages })" class="reservas-pagination-btn">Ultima</a>
+        }
+        else
+        {
+            <button class="reservas-pagination-btn" disabled>Siguiente</button>
+            <button class="reservas-pagination-btn" disabled>Ultima</button>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let currentPage = @ViewBag.CurrentPage;
+            let pageSize = @ViewBag.PageSize;
+            let totalItems = @ViewBag.TotalItems;
+            let totalPages = @ViewBag.TotalPages;
+
+            // Funcion para actualizar la visualizacion de reservas
+            function loadReservas() {
+                const search = $('#searchInput').val();
+                const estado = $('#estadoFilter').val();
+                const espacio = $('#espacioFilter').val();
+                const usuario = $('#usuarioFilter').val();
+                const sortBy = $('#sortBy').val();
+                const sortOrder = $('#sortOrder').val();
+                
+                $('#loadingIndicator').show();
+                $('#reservasGrid').hide();
+
+                $.ajax({
+                    url: '@Url.Action("SearchReservas", "ReservasEspacio")',
+                    type: 'GET',
+                    data: {
+                        search: search,
+                        estado: estado,
+                        espacio: espacio,
+                        usuario: usuario,
+                        sortBy: sortBy,
+                        sortOrder: sortOrder,
+                        page: currentPage,
+                        pageSize: pageSize
+                    },
+                    success: function(data) {
+                        totalItems = data.totalItems;
+                        totalPages = data.totalPages;
+                        
+                        renderReservas(data.items);
+                        updatePagination();
+                        
+                        $('#loadingIndicator').hide();
+                        $('#reservasGrid').show();
+                    },
+                    error: function() {
+                        $('#loadingIndicator').hide();
+                        $('#reservasGrid').show();
+                        alert('Error al cargar las reservas');
+                    }
+                });
+            }
+
+            // Funcion para renderizar las reservas
+            function renderReservas(reservas) {
+                let html = '';
+                
+                if (reservas.length === 0) {
+                    html = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #6b7280;">' +
+                           '<i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>' +
+                           '<p style="font-size: 1.1rem;">No se encontraron reservas</p>' +
+                           '</div>';
+                } else {
+                    reservas.forEach(function(item) {
+                        let statusClass = getStatusClass(item.EstadoDescripcion);
+                        
+                        html += '<div class="reservas-card">';
+                        html += '<span class="reservas-card-status ' + statusClass + '">' + item.EstadoDescripcion + '</span>';
+                        html += '<div class="reservas-card-header">';
+                        html += '<h3 class="reservas-card-espacio">' + item.EspacioNombre + '</h3>';
+                        html += '<p class="reservas-card-usuario"><i class="fas fa-user"></i> ' + item.UsuarioNombre + '</p>';
+                        html += '</div>';
+                        html += '<div class="reservas-card-details">';
+                        html += '<div class="reservas-card-detail">';
+                        html += '<span class="reservas-card-detail-label">Fecha de Inicio</span>';
+                        html += '<span class="reservas-card-detail-value">' + item.FechaInicio + '</span>';
+                        html += '</div>';
+                        html += '<div class="reservas-card-detail">';
+                        html += '<span class="reservas-card-detail-label">Fecha de Fin</span>';
+                        html += '<span class="reservas-card-detail-value">' + item.FechaFin + '</span>';
+                        html += '</div>';
+                        if (item.Notas && item.Notas !== 'Sin notas') {
+                            html += '<div class="reservas-card-detail">';
+                            html += '<span class="reservas-card-detail-label">Notas</span>';
+                            html += '<span class="reservas-card-detail-value">' + (item.Notas.length > 50 ? item.Notas.substring(0, 50) + '...' : item.Notas) + '</span>';
+                            html += '</div>';
+                        }
+                        html += '</div>';
+                        html += '<div class="reservas-card-footer">';
+                        html += '<span class="reservas-card-id"><i class="fas fa-hashtag"></i> ID: ' + item.IdReservaEspacio + '</span>';
+                        html += '<div class="reservas-card-actions">';
+                        html += '<a href="/ReservasEspacio/Details/' + item.IdReservaEspacio + '" class="btn-reservas-action btn-reservas-details"><i class="fas fa-eye"></i> Detalle</a>';
+                        html += '<a href="/ReservasEspacio/Delete/' + item.IdReservaEspacio + '" class="btn-reservas-action btn-reservas-delete"><i class="fas fa-trash-alt"></i></a>';
+                        html += '</div></div></div>';
+                    });
+                }
+                
+                $('#reservasGrid').html(html);
+            }
+
+            // Funcion para obtener la clase de estado
+            function getStatusClass(descripcion) {
+                let desc = descripcion.toLowerCase();
+                if (desc.includes('activ')) return 'activa';
+                if (desc.includes('cancelada')) return 'cancelada';
+                if (desc.includes('completada')) return 'completada';
+                return 'inactivo';
+            }
+
+            // Funcion para actualizar la paginacion
+            function updatePagination() {
+                let paginationHtml = '';
+                
+                if (currentPage > 1) {
+                    paginationHtml += '<a href="#" class="reservas-pagination-btn" data-page="1">Primera</a>';
+                    paginationHtml += '<a href="#" class="reservas-pagination-btn" data-page="' + (currentPage - 1) + '">Anterior</a>';
+                } else {
+                    paginationHtml += '<button class="reservas-pagination-btn" disabled>Primera</button>';
+                    paginationHtml += '<button class="reservas-pagination-btn" disabled>Anterior</button>';
+                }
+                
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentPage) {
+                        paginationHtml += '<span class="reservas-pagination-btn active">' + i + '</span>';
+                    } else if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                        paginationHtml += '<a href="#" class="reservas-pagination-btn" data-page="' + i + '">' + i + '</a>';
+                    } else if (i === currentPage - 3 || i === currentPage + 3) {
+                        paginationHtml += '<span class="reservas-pagination-dots">...</span>';
+                    }
+                }
+                
+                if (currentPage < totalPages) {
+                    paginationHtml += '<a href="#" class="reservas-pagination-btn" data-page="' + (currentPage + 1) + '">Siguiente</a>';
+                    paginationHtml += '<a href="#" class="reservas-pagination-btn" data-page="' + totalPages + '">Ultima</a>';
+                } else {
+                    paginationHtml += '<button class="reservas-pagination-btn" disabled>Siguiente</button>';
+                    paginationHtml += '<button class="reservas-pagination-btn" disabled>Ultima</button>';
+                }
+                
+                $('#pagination').html(paginationHtml);
+            }
+
+            // Event listeners para filtros
+            $('#searchInput').on('keyup', debounce(function() {
+                currentPage = 1;
+                loadReservas();
+            }, 500));
+
+            $('#estadoFilter, #espacioFilter, #usuarioFilter, #sortBy, #sortOrder').on('change', function() {
+                currentPage = 1;
+                loadReservas();
+            });
+
+            $('#pageSize').on('change', function() {
+                pageSize = parseInt($(this).val());
+                currentPage = 1;
+                loadReservas();
+            });
+
+            // Paginacion con delegacion de eventos
+            $(document).on('click', '.reservas-pagination-btn[data-page]', function(e) {
+                e.preventDefault();
+                currentPage = parseInt($(this).data('page'));
+                loadReservas();
+                window.scrollTo(0, 0);
+            });
+
+            // Limpiar filtros
+            $('#clearFilters').on('click', function() {
+                $('#searchInput').val('');
+                $('#estadoFilter').val('');
+                $('#espacioFilter').val('');
+                $('#usuarioFilter').val('');
+                $('#sortBy').val('fecha');
+                $('#sortOrder').val('desc');
+                $('#pageSize').val('12');
+                pageSize = 12;
+                currentPage = 1;
+                loadReservas();
+            });
+
+            // Funcion debounce para el buscador
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Auto-ocultar mensajes de exito/error despues de 5 segundos
+            setTimeout(function() {
+                $('.reservas-alert').fadeOut();
+            }, 5000);
+        });
+    </script>
+}
