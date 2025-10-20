@@ -1,0 +1,85 @@
+﻿@model EscuelaFelixArcadio.Models.ReservaEspacio
+
+@{
+    ViewBag.Title = "Cancelar Reserva";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reservas.css" rel="stylesheet" />
+}
+
+<div class="reservas-container">
+    <div class="reservas-delete-container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc2626; margin-bottom: 1rem;"></i>
+            <h2 class="reservas-delete-title">¿Cancelar Reserva?</h2>
+            <p class="reservas-delete-message">
+                Esta accion es permanente y no se puede deshacer. ¿Esta seguro de que desea cancelar esta reserva?
+            </p>
+        </div>
+
+        <div class="reservas-delete-info">
+            <h3 class="reservas-delete-info-title">
+                <i class="fas fa-info-circle"></i> Informacion de la Reserva a Cancelar
+            </h3>
+            <div class="reservas-delete-info-details">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <strong>ID:</strong> #@Model.IdReservaEspacio
+                    </div>
+                    <div>
+                        <strong>Espacio:</strong> @Model.Espacio.Nombre
+                    </div>
+                    <div>
+                        <strong>Usuario:</strong> @(Model.ApplicationUser?.UserName ?? "Usuario no encontrado")
+                    </div>
+                    <div>
+                        <strong>Email:</strong> @(Model.ApplicationUser?.Email ?? "No disponible")
+                    </div>
+                    <div>
+                        <strong>Estado:</strong> @Model.Estado.Descripcion
+                    </div>
+                    <div>
+                        <strong>Fecha de Inicio:</strong> @Model.FechaInicio.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                    <div>
+                        <strong>Fecha de Fin:</strong> @Model.FechaFin.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                    <div>
+                        <strong>Fecha de Creacion:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy")
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Notas))
+                    {
+                        <div style="grid-column: 1/-1;">
+                            <strong>Notas:</strong> @Model.Notas
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="reservas-delete-info">
+            <h3 class="reservas-delete-info-title">
+                <i class="fas fa-exclamation-triangle"></i> Advertencia:
+            </h3>
+            <div class="reservas-delete-info-details">
+                Al cancelar esta reserva, el espacio quedara disponible nuevamente para estas fechas. Esta accion no puede revertirse.
+            </div>
+        </div>
+
+        @using (Html.BeginForm("Delete", "ReservasEspacio", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            
+            <div class="reservas-form-buttons">
+                <button type="submit" class="btn-reservas-delete-confirm">
+                    <i class="fas fa-ban"></i> Cancelar Reserva
+                </button>
+                <a href="@Url.Action("Index", "ReservasEspacio")" class="btn-reservas-cancel">
+                    Regresar
+                </a>
+            </div>
+        }
+    </div>
+</div>

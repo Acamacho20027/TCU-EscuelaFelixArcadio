@@ -1,0 +1,121 @@
+﻿@model EscuelaFelixArcadio.Models.ReservaEspacio
+
+@{
+    ViewBag.Title = "Crear Reserva";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reservas.css" rel="stylesheet" />
+}
+
+<div class="reservas-container">
+    <div class="reservas-form-container">
+        <h2 class="reservas-form-title">Crear Nueva Reserva</h2>
+
+        @using (Html.BeginForm("Create", "ReservasEspacio", FormMethod.Post, new { @class = "reservas-form" }))
+        {
+            @Html.AntiForgeryToken()
+            
+            @Html.ValidationSummary(true, "", new { @class = "reservas-alert reservas-alert-error" })
+
+            <div class="reservas-form-section">
+                <h3 class="reservas-form-section-title">Informacion de la Reserva</h3>
+                
+                <div class="reservas-form-grid">
+                    <div class="reservas-form-group">
+                        @Html.LabelFor(model => model.IdEspacio, "Espacio", new { @class = "reservas-form-label" })
+                        @Html.DropDownList("IdEspacio", null, "Seleccione un espacio", new { @class = "reservas-form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.IdEspacio, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="reservas-form-group">
+                        @Html.LabelFor(model => model.Id, "Usuario", new { @class = "reservas-form-label" })
+                        @Html.DropDownList("Id", null, "Seleccione un usuario", new { @class = "reservas-form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.Id, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="reservas-form-grid">
+                    <div class="reservas-form-group">
+                        @Html.LabelFor(model => model.FechaInicio, "Fecha y Hora de Inicio", new { @class = "reservas-form-label" })
+                        @Html.TextBoxFor(model => model.FechaInicio, new { @class = "reservas-form-control", type = "datetime-local", required = "required" })
+                        @Html.ValidationMessageFor(model => model.FechaInicio, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="reservas-form-group">
+                        @Html.LabelFor(model => model.FechaFin, "Fecha y Hora de Fin", new { @class = "reservas-form-label" })
+                        @Html.TextBoxFor(model => model.FechaFin, new { @class = "reservas-form-control", type = "datetime-local", required = "required" })
+                        @Html.ValidationMessageFor(model => model.FechaFin, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="reservas-form-group">
+                    @Html.LabelFor(model => model.IdEstado, "Estado", new { @class = "reservas-form-label" })
+                    @Html.DropDownList("IdEstado", null, "Seleccione un estado", new { @class = "reservas-form-control", required = "required" })
+                    @Html.ValidationMessageFor(model => model.IdEstado, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="reservas-form-group">
+                    @Html.LabelFor(model => model.Notas, "Notas u Observaciones", new { @class = "reservas-form-label" })
+                    @Html.TextAreaFor(model => model.Notas, new { @class = "reservas-form-control", rows = 4, placeholder = "Ingrese notas u observaciones de la reserva (opcional)", maxlength = "1000" })
+                    @Html.ValidationMessageFor(model => model.Notas, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="reservas-form-buttons">
+                <button type="submit" class="btn-reservas-save">
+                    <i class="fas fa-plus"></i> Crear Reserva
+                </button>
+                <a href="@Url.Action("Index", "ReservasEspacio")" class="btn-reservas-cancel">
+                    Regresar
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script>
+        $(document).ready(function() {
+            // Validacion de fechas
+            $('input[name="FechaFin"]').on('change', function() {
+                var fechaInicio = new Date($('input[name="FechaInicio"]').val());
+                var fechaFin = new Date($(this).val());
+                
+                if (fechaFin && fechaInicio && fechaFin <= fechaInicio) {
+                    alert('La fecha de fin debe ser posterior a la fecha de inicio');
+                    $(this).val('');
+                }
+            });
+
+            // Verificar disponibilidad al cambiar fechas o espacio
+            function verificarDisponibilidad() {
+                var idEspacio = $('#IdEspacio').val();
+                var fechaInicio = $('input[name="FechaInicio"]').val();
+                var fechaFin = $('input[name="FechaFin"]').val();
+
+                if (idEspacio && fechaInicio && fechaFin) {
+                    $.ajax({
+                        url: '@Url.Action("VerificarDisponibilidad", "Espacios")',
+                        type: 'GET',
+                        data: {
+                            idEspacio: idEspacio,
+                            fechaInicio: fechaInicio,
+                            fechaFin: fechaFin
+                        },
+                        success: function(data) {
+                            if (!data.disponible) {
+                                alert(data.message);
+                            }
+                        }
+                    });
+                }
+            }
+
+            $('#IdEspacio, input[name="FechaInicio"], input[name="FechaFin"]').on('change', verificarDisponibilidad);
+        });
+    </script>
+}

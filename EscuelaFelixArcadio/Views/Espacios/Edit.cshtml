@@ -1,0 +1,145 @@
+﻿@model EscuelaFelixArcadio.Models.Espacio
+
+@{
+    ViewBag.Title = "Editar Espacio";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/espacios.css" rel="stylesheet" />
+}
+
+<div class="espacios-container">
+    <div class="espacios-form-container">
+        <h2 class="espacios-form-title">Editar Espacio</h2>
+
+        @using (Html.BeginForm("Edit", "Espacios", FormMethod.Post, new { @class = "espacios-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.IdEspacio)
+            @Html.HiddenFor(model => model.FechaCreacion)
+            
+            @Html.ValidationSummary(true, "", new { @class = "espacios-alert espacios-alert-error" })
+
+            <div class="espacios-form-section">
+                <h3 class="espacios-form-section-title">Informacion del Espacio</h3>
+                
+                <div class="espacios-form-grid">
+                    <div class="espacios-form-group">
+                        @Html.LabelFor(model => model.Codigo, "Codigo del Espacio", new { @class = "espacios-form-label" })
+                        @Html.TextBoxFor(model => model.Codigo, new { @class = "espacios-form-control", placeholder = "Se genera automaticamente", maxlength = "100", @readonly = "readonly" })
+                        @Html.ValidationMessageFor(model => model.Codigo, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="espacios-form-group">
+                        @Html.LabelFor(model => model.Nombre, "Nombre del Espacio", new { @class = "espacios-form-label" })
+                        @Html.TextBoxFor(model => model.Nombre, new { @class = "espacios-form-control", maxlength = "250", required = "required" })
+                        @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="espacios-form-grid">
+                    <div class="espacios-form-group">
+                        @Html.LabelFor(model => model.Capacidad, "Capacidad (personas)", new { @class = "espacios-form-label" })
+                        @Html.TextBoxFor(model => model.Capacidad, new { @class = "espacios-form-control", type = "number", min = "1" })
+                        @Html.ValidationMessageFor(model => model.Capacidad, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="espacios-form-group">
+                        @Html.LabelFor(model => model.Ubicacion, "Ubicacion", new { @class = "espacios-form-label" })
+                        @Html.TextBoxFor(model => model.Ubicacion, new { @class = "espacios-form-control", maxlength = "250" })
+                        @Html.ValidationMessageFor(model => model.Ubicacion, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="espacios-form-group">
+                    @Html.LabelFor(model => model.IdEstado, "Estado", new { @class = "espacios-form-label" })
+                    @Html.DropDownList("IdEstado", null, "Seleccione un estado", new { @class = "espacios-form-control", required = "required" })
+                    @Html.ValidationMessageFor(model => model.IdEstado, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="espacios-form-group">
+                    @Html.LabelFor(model => model.Descripcion, "Descripcion", new { @class = "espacios-form-label" })
+                    @Html.TextAreaFor(model => model.Descripcion, new { @class = "espacios-form-control", rows = 4, maxlength = "1000" })
+                    @Html.ValidationMessageFor(model => model.Descripcion, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="espacios-form-buttons">
+                <button type="submit" class="btn-espacios-save">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+                <a href="@Url.Action("Index", "Espacios")" class="btn-espacios-cancel">
+                    Regresar a la Lista
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script>
+        $(document).ready(function() {
+            // Validación para código (solo letras)
+            $('input[name="Codigo"]').on('input', function() {
+                var value = $(this).val();
+                var validValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, '');
+                $(this).val(validValue.toUpperCase());
+            });
+            
+            // Validación para nombre (no números)
+            $('input[name="Nombre"]').on('input', function() {
+                var value = $(this).val();
+                var validValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                $(this).val(validValue);
+            });
+            
+            // Validación para ubicación (solo letras)
+            $('input[name="Ubicacion"]').on('input', function() {
+                var value = $(this).val();
+                var validValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                $(this).val(validValue);
+            });
+            
+            // Validación para capacidad (solo números positivos)
+            $('input[name="Capacidad"]').on('input', function() {
+                var value = parseInt($(this).val());
+                if (isNaN(value) || value < 1) {
+                    $(this).val('');
+                }
+            });
+            
+            // Validación del formulario antes de enviar
+            $('.espacios-form').on('submit', function(e) {
+                var isValid = true;
+                
+                // Validar código (solo letras)
+                var codigo = $('#Codigo').val();
+                if (codigo && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+$/.test(codigo)) {
+                    alert('El código del espacio solo puede contener letras.');
+                    isValid = false;
+                }
+                
+                // Validar nombre (no números)
+                var nombre = $('#Nombre').val();
+                if (nombre && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(nombre)) {
+                    alert('El nombre del espacio no puede contener números.');
+                    isValid = false;
+                }
+                
+                // Validar ubicación (solo letras)
+                var ubicacion = $('#Ubicacion').val();
+                if (ubicacion && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(ubicacion)) {
+                    alert('La ubicación solo puede contener letras.');
+                    isValid = false;
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}

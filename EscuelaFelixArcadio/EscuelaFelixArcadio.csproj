@@ -179,6 +179,7 @@
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\PrestamosController.cs" />
     <Compile Include="Controllers\ReportesController.cs" />
+    <Compile Include="Controllers\ReservasEspacioController.cs" />
     <Compile Include="Controllers\SancionesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -311,7 +312,6 @@
     <Content Include="Views\Administrativo\Index.cshtml" />
     <Content Include="Views\Categoria\Index.cshtml" />
     <Content Include="Views\Deportivo\Index.cshtml" />
-    <Content Include="Views\Espacios\Index.cshtml" />
     <Content Include="Views\Estadisticas\Index.cshtml" />
     <Content Include="Views\Inventario\Index.cshtml" />
     <Content Include="Views\Prestamos\Index.cshtml" />
@@ -334,6 +334,18 @@
     <Content Include="Views\Sanciones\Create.cshtml" />
     <Content Include="Views\Sanciones\Edit.cshtml" />
     <Content Include="Views\Sanciones\Delete.cshtml" />
+    <Content Include="Views\ReservasEspacio\Index.cshtml" />
+    <Content Include="Views\ReservasEspacio\Details.cshtml" />
+    <Content Include="Views\ReservasEspacio\Create.cshtml" />
+    <Content Include="Views\ReservasEspacio\Edit.cshtml" />
+    <Content Include="Views\ReservasEspacio\Delete.cshtml" />
+    <Content Include="Views\ReservasEspacio\Calendario.cshtml" />
+    <Content Include="Views\Espacios\Index.cshtml" />
+    <Content Include="Views\Espacios\Details.cshtml" />
+    <Content Include="Views\Espacios\Create.cshtml" />
+    <Content Include="Views\Espacios\Edit.cshtml" />
+    <Content Include="Views\Espacios\Delete.cshtml" />
+    <Content Include="Views\Espacios\Mantenimiento.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
