@@ -7,6 +7,121 @@
 
 @section Styles {
     <link href="~/Content/reservas.css" rel="stylesheet" />
+    <style>
+        /* Estilos para modal de error personalizado */
+        .error-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .error-modal-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: errorModalSlideIn 0.3s ease-out;
+        }
+
+        .error-modal-header {
+            padding: 2rem 2rem 1rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .error-modal-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem auto;
+            box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
+        }
+
+        .error-modal-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .error-modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .error-modal-message {
+            padding: 1.5rem 2rem 2rem 2rem;
+            text-align: center;
+        }
+
+        .error-modal-text {
+            font-size: 1rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin: 0 0 1.5rem 0;
+        }
+
+        .error-modal-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .error-modal-button:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        @@keyframes errorModalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .error-modal-container {
+                width: 95%;
+                margin: 1rem;
+            }
+            
+            .error-modal-header,
+            .error-modal-message {
+                padding: 1.5rem;
+            }
+            
+            .error-modal-title {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
 }
 
 <div class="reservas-container">
@@ -67,8 +182,8 @@
                 <button type="submit" class="btn-reservas-save">
                     <i class="fas fa-plus"></i> Crear Reserva
                 </button>
-                <a href="@Url.Action("Index", "ReservasEspacio")" class="btn-reservas-cancel">
-                    Regresar
+                <a href="@Url.Action("Calendario", "ReservasEspacio")" class="btn-reservas-cancel">
+                    Regresar a la Lista
                 </a>
             </div>
         }
@@ -80,13 +195,60 @@
     
     <script>
         $(document).ready(function() {
+            // Establecer fecha mínima como hoy
+            var hoy = new Date();
+            var fechaMinima = hoy.toISOString().slice(0, 16);
+            $('input[name="FechaInicio"], input[name="FechaFin"]').attr('min', fechaMinima);
+
+            // Validacion de fechas pasadas
+            function validarFechasPasadas() {
+                var fechaInicio = new Date($('input[name="FechaInicio"]').val());
+                var fechaFin = new Date($('input[name="FechaFin"]').val());
+                var hoy = new Date();
+                hoy.setHours(0, 0, 0, 0); // Resetear horas para comparar solo fechas
+
+                if (fechaInicio && fechaInicio < hoy) {
+                    mostrarErrorModal('⚠️ Fecha Inválida', 
+                        'No se pueden crear reservas en fechas pasadas. Por favor, seleccione una fecha igual o posterior a hoy (' + 
+                        hoy.toLocaleDateString('es-ES') + ').');
+                    $('input[name="FechaInicio"]').val('');
+                    return false;
+                }
+
+                if (fechaFin && fechaFin < hoy) {
+                    mostrarErrorModal('⚠️ Fecha Inválida', 
+                        'No se pueden crear reservas en fechas pasadas. Por favor, seleccione una fecha igual o posterior a hoy (' + 
+                        hoy.toLocaleDateString('es-ES') + ').');
+                    $('input[name="FechaFin"]').val('');
+                    return false;
+                }
+
+                return true;
+            }
+
             // Validacion de fechas
+            $('input[name="FechaInicio"]').on('change', function() {
+                if (!validarFechasPasadas()) return;
+                
+                var fechaInicio = new Date($(this).val());
+                var fechaFin = new Date($('input[name="FechaFin"]').val());
+                
+                if (fechaFin && fechaFin <= fechaInicio) {
+                    mostrarErrorModal('⚠️ Fechas Inválidas', 
+                        'La fecha de fin debe ser posterior a la fecha de inicio.');
+                    $('input[name="FechaFin"]').val('');
+                }
+            });
+
             $('input[name="FechaFin"]').on('change', function() {
+                if (!validarFechasPasadas()) return;
+                
                 var fechaInicio = new Date($('input[name="FechaInicio"]').val());
                 var fechaFin = new Date($(this).val());
                 
                 if (fechaFin && fechaInicio && fechaFin <= fechaInicio) {
-                    alert('La fecha de fin debe ser posterior a la fecha de inicio');
+                    mostrarErrorModal('⚠️ Fechas Inválidas', 
+                        'La fecha de fin debe ser posterior a la fecha de inicio.');
                     $(this).val('');
                 }
             });
@@ -108,7 +270,7 @@
                         },
                         success: function(data) {
                             if (!data.disponible) {
-                                alert(data.message);
+                                mostrarErrorModal('⚠️ Espacio No Disponible', data.message);
                             }
                         }
                     });
@@ -116,6 +278,49 @@
             }
 
             $('#IdEspacio, input[name="FechaInicio"], input[name="FechaFin"]').on('change', verificarDisponibilidad);
+
+            // Función para mostrar modal de error personalizado
+            function mostrarErrorModal(titulo, mensaje) {
+                var modalHtml = '<div class="error-modal-overlay" id="errorModal">';
+                modalHtml += '<div class="error-modal-container">';
+                modalHtml += '<div class="error-modal-header">';
+                modalHtml += '<div class="error-modal-icon">';
+                modalHtml += '<i class="fas fa-exclamation-triangle"></i>';
+                modalHtml += '</div>';
+                modalHtml += '<h3 class="error-modal-title">' + titulo + '</h3>';
+                modalHtml += '</div>';
+                modalHtml += '<div class="error-modal-message">';
+                modalHtml += '<p class="error-modal-text">' + mensaje + '</p>';
+                modalHtml += '<button class="error-modal-button" onclick="closeErrorModal()">';
+                modalHtml += '<i class="fas fa-check" style="margin-right: 8px;"></i>';
+                modalHtml += 'Entendido';
+                modalHtml += '</button>';
+                modalHtml += '</div>';
+                modalHtml += '</div>';
+                modalHtml += '</div>';
+                
+                $('body').append(modalHtml);
+                
+                $('#errorModal').on('click', function(e) {
+                    if (e.target === this) {
+                        closeErrorModal();
+                    }
+                });
+                
+                $(document).on('keydown.errorModal', function(e) {
+                    if (e.key === 'Escape') {
+                        closeErrorModal();
+                    }
+                });
+            }
+
+            // Función para cerrar modal de error
+            window.closeErrorModal = function() {
+                $('#errorModal').fadeOut(300, function() {
+                    $(this).remove();
+                    $(document).off('keydown.errorModal');
+                });
+            };
         });
     </script>
 }

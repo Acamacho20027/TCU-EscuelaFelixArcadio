@@ -7,14 +7,475 @@
     <link href="~/Content/reservas.css" rel="stylesheet" />
     <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.css" rel="stylesheet" />
+    
+    <style>
+        /* Estilos para el modal mejorado */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @@keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @@keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .modal-header {
+            padding: 2rem 2rem 1rem 2rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal-subtitle {
+            margin: 0.5rem 0 0 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .modal-form {
+            padding: 2rem;
+        }
+
+        .form-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-section-title {
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+
+        .form-control.textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-footer {
+            padding: 1rem 2rem 2rem 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+            border-radius: 0 0 16px 16px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        /* Estilos para modal de error personalizado */
+        .error-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .error-modal-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 90%;
+            margin: 1rem;
+            animation: errorModalSlideIn 0.3s ease-out;
+            border: 1px solid #e5e7eb;
+        }
+
+        .error-modal-header {
+            padding: 2rem 2rem 1rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .error-modal-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-radius: 50%;
+            margin: 0 auto 1rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+        }
+
+        .error-modal-icon i {
+            color: white;
+            font-size: 24px;
+        }
+
+        .error-modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #dc2626;
+            margin: 0;
+        }
+
+        .error-modal-message {
+            padding: 1.5rem 2rem 2rem 2rem;
+            text-align: center;
+        }
+
+        .error-modal-text {
+            font-size: 1rem;
+            color: #374151;
+            line-height: 1.5;
+            margin: 0 0 1.5rem 0;
+        }
+
+        .error-modal-button {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            width: 100%;
+        }
+
+        .error-modal-button:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        .error-modal-button:active {
+            transform: translateY(0);
+        }
+
+        @@keyframes errorModalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Estilos para modal de opciones de reserva mejorado */
+        .reserva-options-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .reserva-options-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            max-width: 450px;
+            width: 90%;
+            margin: 1rem;
+            animation: modalSlideIn 0.3s ease-out;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .reserva-options-header {
+            padding: 2rem 2rem 1rem 2rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .reserva-options-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .reserva-options-content {
+            padding: 2rem;
+        }
+
+        .reserva-details {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .reserva-detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .reserva-detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .reserva-detail-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reserva-detail-value {
+            color: #6b7280;
+            font-size: 0.9rem;
+            text-align: right;
+            max-width: 60%;
+            font-weight: 500;
+        }
+
+        .reserva-options-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .reserva-options-button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-width: 140px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .reserva-options-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-ver-lista {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+        }
+
+        .btn-ver-lista:hover {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+        }
+
+        .btn-cancelar {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            color: #475569;
+        }
+
+        .btn-cancelar:hover {
+            background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+            color: #334155;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-container {
+                width: 95%;
+                margin: 1rem;
+            }
+            
+            .modal-header,
+            .modal-form,
+            .modal-footer {
+                padding: 1rem;
+            }
+
+            .error-modal-container {
+                margin: 1rem;
+                max-width: calc(100vw - 2rem);
+            }
+
+            .reserva-options-container {
+                margin: 1rem;
+                max-width: calc(100vw - 2rem);
+            }
+
+            .reserva-options-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .reserva-options-button {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .reserva-detail-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+
+            .reserva-detail-value {
+                text-align: left;
+                max-width: 100%;
+            }
+        }
+    </style>
 }
 
 <div class="reservas-container">
     <!-- Header -->
-    <div class="reservas-header">
-        <h1 class="reservas-title">Calendario de Reservas</h1>
-        <div style="display: flex; gap: 1rem;">
-            <a href="@Url.Action("Index", "ReservasEspacio")" class="btn-reservas-cancel">
+    <div class="reservas-header" style="display: flex; align-items: center; justify-content: space-between;">
+        <a href="@Url.Action("Index", "Espacios")" class="btn-reservas-cancel">
+            <i class="fas fa-arrow-left"></i> Volver a Espacios
+        </a>
+        <h1 class="reservas-title" style="margin: 0;">Calendario de Reservas</h1>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <a href="@Url.Action("Index", "ReservasEspacio")" class="btn-reservas-cancel" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white;">
                 <i class="fas fa-list"></i> Ver Lista
             </a>
             <a href="@Url.Action("Create", "ReservasEspacio")" class="btn-create-reservas">
@@ -50,11 +511,6 @@
                     }
                 </select>
             </div>
-            <div class="reservas-filter-group">
-                <button id="btnHoy" class="btn-create-reservas" style="margin-top: 1.5rem;">
-                    <i class="fas fa-calendar-day"></i> Ir a Hoy
-                </button>
-            </div>
         </div>
     </div>
 
@@ -63,18 +519,23 @@
         <div id="calendar"></div>
     </div>
 
-    <!-- Leyenda -->
+    <!-- Leyenda e Instrucciones -->
     <div class="reservas-details-card" style="max-width: 100%; margin-top: 1.5rem;">
-        <h3 class="reservas-details-card-title">Leyenda</h3>
-        <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+        <h3 class="reservas-details-card-title">Leyenda e Instrucciones</h3>
+        <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <div style="width: 20px; height: 20px; background: #0ea5e9; border-radius: 4px;"></div>
+                <div style="width: 20px; height: 20px; background: #10b981; border-radius: 4px;"></div>
                 <span>Activa</span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <div style="width: 20px; height: 20px; background: #6b7280; border-radius: 4px;"></div>
+                <div style="width: 20px; height: 20px; background: #ef4444; border-radius: 4px;"></div>
                 <span>Inactiva/Cancelada</span>
             </div>
+        </div>
+        <div style="text-align: center; color: #6b7280; font-size: 0.9rem;">
+            <p><strong>Instrucciones:</strong></p>
+            <p>• <strong>Clic en una fecha vacía:</strong> Crear nueva reserva</p>
+            <p>• <strong>Clic en una reserva existente:</strong> Ver detalles, editar o eliminar</p>
         </div>
     </div>
 </div>
@@ -85,9 +546,11 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/locales/es.js"></script>
     
     <script>
+        var calendar; // Variable global para el calendario
+        
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
+            calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'es',
                 headerToolbar: {
@@ -102,6 +565,9 @@
                     day: 'Dia'
                 },
                 events: function(info, successCallback, failureCallback) {
+                    console.log('Cargando eventos del calendario...');
+                    console.log('Rango de fechas solicitado:', info.start, 'a', info.end);
+                    
                     var idEspacio = $('#filtroEspacio').val();
                     var params = {
                         fechaInicio: info.start.toISOString(),
@@ -110,37 +576,46 @@
                     
                     if (idEspacio) {
                         params.idEspacio = idEspacio;
+                        console.log('Filtrando por espacio:', idEspacio);
                     }
 
                     $.ajax({
                         url: '@Url.Action("GetReservasPorFecha", "ReservasEspacio")',
                         type: 'GET',
                         data: params,
+                        cache: false, // Evitar caché
                         success: function(data) {
+                            console.log('✅ Respuesta del servidor recibida');
+                            console.log('Total de eventos:', data.length);
+                            
+                            if (data.length > 0) {
+                                console.log('Primer evento completo:', data[0]);
+                                console.log('Fecha de inicio:', data[0].start);
+                                console.log('Fecha de fin:', data[0].end);
+                                console.log('Título:', data[0].title);
+                            } else {
+                                console.log('⚠️ No se encontraron eventos en el rango de fechas');
+                            }
+                            
                             successCallback(data);
+                            console.log('Eventos pasados a FullCalendar');
                         },
-                        error: function() {
+                        error: function(xhr, status, error) {
+                            console.error('❌ Error al cargar eventos:', error);
+                            console.error('Status:', status);
+                            console.error('Response:', xhr.responseText);
                             failureCallback();
-                            alert('Error al cargar las reservas del calendario');
+                            showErrorModal('Error al cargar las reservas del calendario. Por favor, recarga la página.');
                         }
                     });
                 },
                 eventClick: function(info) {
                     var reserva = info.event.extendedProps;
-                    var mensaje = 'RESERVA: ' + info.event.title + '\n\n';
-                    mensaje += 'Espacio: ' + reserva.espacioNombre + '\n';
-                    mensaje += 'Usuario: ' + reserva.usuarioNombre + '\n';
-                    mensaje += 'Email: ' + reserva.usuarioEmail + '\n';
-                    mensaje += 'Estado: ' + reserva.estadoDescripcion + '\n';
-                    mensaje += 'Inicio: ' + info.event.start.toLocaleString('es-ES') + '\n';
-                    mensaje += 'Fin: ' + info.event.end.toLocaleString('es-ES') + '\n';
-                    if (reserva.notas !== 'Sin notas') {
-                        mensaje += 'Notas: ' + reserva.notas;
-                    }
-                    
-                    if (confirm(mensaje + '\n\n¿Desea ver los detalles completos?')) {
-                        window.location.href = '/ReservasEspacio/Details/' + reserva.idReserva;
-                    }
+                    showReservaOptions(reserva, info.event);
+                },
+                dateClick: function(info) {
+                    // Permitir crear reservas haciendo clic en fechas
+                    showCreateReservaModal(info.date);
                 },
                 eventDidMount: function(info) {
                     info.el.style.cursor = 'pointer';
@@ -160,15 +635,401 @@
                 calendar.refetchEvents();
             });
 
-            // Boton ir a hoy
-            $('#btnHoy').on('click', function() {
-                calendar.today();
-            });
-
             // Auto-ocultar mensajes
             setTimeout(function() {
                 $('.reservas-alert').fadeOut();
             }, 5000);
         });
+
+        // Función para mostrar opciones de reserva mejorada
+        function showReservaOptions(reserva, event) {
+            var modalHtml = '<div id="reservaOptionsModal" class="reserva-options-modal">';
+            modalHtml += '<div class="reserva-options-container">';
+            
+            // Header
+            modalHtml += '<div class="reserva-options-header">';
+            modalHtml += '<h3 class="reserva-options-title">Opciones de Reserva</h3>';
+            modalHtml += '</div>';
+            
+            // Content
+            modalHtml += '<div class="reserva-options-content">';
+            
+            // Details
+            modalHtml += '<div class="reserva-details">';
+            modalHtml += '<div class="reserva-detail-item">';
+            modalHtml += '<span class="reserva-detail-label"><i class="fas fa-calendar-check"></i> Reserva</span>';
+            modalHtml += '<span class="reserva-detail-value">' + event.title + '</span>';
+            modalHtml += '</div>';
+            
+            modalHtml += '<div class="reserva-detail-item">';
+            modalHtml += '<span class="reserva-detail-label"><i class="fas fa-building"></i> Espacio</span>';
+            modalHtml += '<span class="reserva-detail-value">' + reserva.espacioNombre + '</span>';
+            modalHtml += '</div>';
+            
+            modalHtml += '<div class="reserva-detail-item">';
+            modalHtml += '<span class="reserva-detail-label"><i class="fas fa-user"></i> Usuario</span>';
+            modalHtml += '<span class="reserva-detail-value">' + reserva.usuarioNombre + '</span>';
+            modalHtml += '</div>';
+            
+            modalHtml += '<div class="reserva-detail-item">';
+            modalHtml += '<span class="reserva-detail-label"><i class="fas fa-envelope"></i> Email</span>';
+            modalHtml += '<span class="reserva-detail-value">' + reserva.usuarioEmail + '</span>';
+            modalHtml += '</div>';
+            
+            modalHtml += '<div class="reserva-detail-item">';
+            modalHtml += '<span class="reserva-detail-label"><i class="fas fa-info-circle"></i> Estado</span>';
+            modalHtml += '<span class="reserva-detail-value">' + reserva.estadoDescripcion + '</span>';
+            modalHtml += '</div>';
+            
+            modalHtml += '<div class="reserva-detail-item">';
+            modalHtml += '<span class="reserva-detail-label"><i class="fas fa-play"></i> Inicio</span>';
+            modalHtml += '<span class="reserva-detail-value">' + event.start.toLocaleString('es-ES') + '</span>';
+            modalHtml += '</div>';
+            
+            modalHtml += '<div class="reserva-detail-item">';
+            modalHtml += '<span class="reserva-detail-label"><i class="fas fa-stop"></i> Fin</span>';
+            modalHtml += '<span class="reserva-detail-value">' + event.end.toLocaleString('es-ES') + '</span>';
+            modalHtml += '</div>';
+            
+            if (reserva.notas !== 'Sin notas') {
+                modalHtml += '<div class="reserva-detail-item">';
+                modalHtml += '<span class="reserva-detail-label"><i class="fas fa-sticky-note"></i> Notas</span>';
+                modalHtml += '<span class="reserva-detail-value">' + reserva.notas + '</span>';
+                modalHtml += '</div>';
+            }
+            
+            modalHtml += '</div>';
+            
+            // Buttons
+            modalHtml += '<div class="reserva-options-buttons">';
+            modalHtml += '<button class="reserva-options-button btn-ver-lista" onclick="verListaReservas()">';
+            modalHtml += '<i class="fas fa-list"></i> Ver Lista';
+            modalHtml += '</button>';
+            modalHtml += '<button class="reserva-options-button btn-cancelar" onclick="cerrarReservaOptionsModal()">';
+            modalHtml += '<i class="fas fa-times"></i> Cancelar';
+            modalHtml += '</button>';
+            modalHtml += '</div>';
+            
+            modalHtml += '</div>';
+            modalHtml += '</div>';
+            modalHtml += '</div>';
+            
+            $('body').append(modalHtml);
+            
+            // Cerrar modal al hacer clic fuera de él
+            $('#reservaOptionsModal').on('click', function(e) {
+                if (e.target === this) {
+                    cerrarReservaOptionsModal();
+                }
+            });
+            
+            // Cerrar modal con tecla Escape
+            $(document).on('keydown.reservaOptions', function(e) {
+                if (e.key === 'Escape') {
+                    cerrarReservaOptionsModal();
+                }
+            });
+        }
+
+        // Función para ir a la lista de reservas
+        function verListaReservas() {
+            cerrarReservaOptionsModal();
+            window.location.href = '@Url.Action("Index", "ReservasEspacio")';
+        }
+
+        // Función para cerrar modal de opciones de reserva
+        function cerrarReservaOptionsModal() {
+            $('#reservaOptionsModal').fadeOut(300, function() {
+                $(this).remove();
+                // Limpiar event listeners
+                $(document).off('keydown.reservaOptions');
+            });
+        }
+
+        // Función para mostrar mensaje de éxito
+        function showSuccessMessage(message) {
+            var alertDiv = '<div class="reservas-alert reservas-alert-success" style="position: fixed; top: 20px; right: 20px; z-index: 2000; max-width: 300px; background: #10b981; color: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideInRight 0.3s ease-out;">';
+            alertDiv += '<i class="fas fa-check-circle" style="margin-right: 8px;"></i> ' + message;
+            alertDiv += '</div>';
+            
+            $('body').append(alertDiv);
+            
+            // Auto-ocultar después de 3 segundos
+            setTimeout(function() {
+                $('.reservas-alert').fadeOut(function() {
+                    $(this).remove();
+                });
+            }, 3000);
+        }
+
+        // Función para mostrar indicador de carga
+        function showLoadingMessage() {
+            var loadingDiv = '<div id="loadingMessage" style="position: fixed; top: 20px; right: 20px; z-index: 2000; max-width: 300px; background: #3b82f6; color: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">';
+            loadingDiv += '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Creando reserva...';
+            loadingDiv += '</div>';
+            
+            $('body').append(loadingDiv);
+        }
+
+        // Función para ocultar indicador de carga
+        function hideLoadingMessage() {
+            $('#loadingMessage').remove();
+        }
+
+        // Función para mostrar modal de error personalizado
+        function showErrorModal(message) {
+            var modalHtml = '<div class="error-modal-overlay" id="errorModal">';
+            modalHtml += '<div class="error-modal-container">';
+            modalHtml += '<div class="error-modal-header">';
+            modalHtml += '<div class="error-modal-icon">';
+            modalHtml += '<i class="fas fa-exclamation-triangle"></i>';
+            modalHtml += '</div>';
+            modalHtml += '<h3 class="error-modal-title">Error</h3>';
+            modalHtml += '</div>';
+            modalHtml += '<div class="error-modal-message">';
+            modalHtml += '<p class="error-modal-text">' + message + '</p>';
+            modalHtml += '<button class="error-modal-button" onclick="closeErrorModal()">';
+            modalHtml += '<i class="fas fa-check" style="margin-right: 8px;"></i>';
+            modalHtml += 'Aceptar';
+            modalHtml += '</button>';
+            modalHtml += '</div>';
+            modalHtml += '</div>';
+            modalHtml += '</div>';
+            
+            $('body').append(modalHtml);
+            
+            // Cerrar modal al hacer clic fuera de él
+            $('#errorModal').on('click', function(e) {
+                if (e.target === this) {
+                    closeErrorModal();
+                }
+            });
+            
+            // Cerrar modal con tecla Escape
+            $(document).on('keydown.errorModal', function(e) {
+                if (e.key === 'Escape') {
+                    closeErrorModal();
+                }
+            });
+        }
+
+        // Función para cerrar modal de error
+        function closeErrorModal() {
+            $('#errorModal').fadeOut(300, function() {
+                $(this).remove();
+                // Limpiar event listeners
+                $(document).off('keydown.errorModal');
+            });
+        }
+
+        // Función para mostrar modal de crear reserva
+        function showCreateReservaModal(date) {
+            // Validar que la fecha seleccionada no sea pasada
+            var hoy = new Date();
+            hoy.setHours(0, 0, 0, 0); // Resetear horas para comparar solo fechas
+            var fechaSeleccionada = new Date(date);
+            fechaSeleccionada.setHours(0, 0, 0, 0);
+            
+            if (fechaSeleccionada < hoy) {
+                showErrorModal('⚠️ Fecha Inválida', 
+                    'No se pueden crear reservas en fechas pasadas. Por favor, seleccione una fecha igual o posterior a hoy (' + 
+                    hoy.toLocaleDateString('es-ES') + ').');
+                return;
+            }
+            
+            var fechaInicio = date.toISOString().slice(0, 16);
+            var fechaFin = new Date(date.getTime() + 60 * 60 * 1000).toISOString().slice(0, 16); // +1 hora
+            
+            // Establecer fecha mínima como hoy
+            var fechaMinima = hoy.toISOString().slice(0, 16);
+            
+            var modal = '<div id="createReservaModal" class="modal-overlay">';
+            modal += '<div class="modal-container">';
+            modal += '<div class="modal-header">';
+            modal += '<h3 class="modal-title">Crear Nueva Reserva</h3>';
+            modal += '<p class="modal-subtitle">Fecha seleccionada: ' + date.toLocaleDateString('es-ES') + '</p>';
+            modal += '</div>';
+            modal += '<form id="createReservaForm" class="modal-form">';
+            modal += '<div class="form-section">';
+            modal += '<h4 class="form-section-title">Información de la Reserva</h4>';
+            modal += '<div class="form-grid">';
+            modal += '<div class="form-group">';
+            modal += '<label class="form-label">Espacio</label>';
+            modal += '<select id="espacioSelect" class="form-control" required>';
+            modal += '<option value="">Seleccionar espacio...</option>';
+            modal += '</select>';
+            modal += '</div>';
+            modal += '<div class="form-group">';
+            modal += '<label class="form-label">Usuario</label>';
+            modal += '<select id="usuarioSelect" class="form-control" required>';
+            modal += '<option value="">Seleccionar usuario...</option>';
+            modal += '</select>';
+            modal += '</div>';
+            modal += '</div>';
+            modal += '<div class="form-grid">';
+            modal += '<div class="form-group">';
+            modal += '<label class="form-label">Fecha y Hora de Inicio</label>';
+            modal += '<input type="datetime-local" id="fechaInicio" value="' + fechaInicio + '" min="' + fechaMinima + '" class="form-control" required>';
+            modal += '</div>';
+            modal += '<div class="form-group">';
+            modal += '<label class="form-label">Fecha y Hora de Fin</label>';
+            modal += '<input type="datetime-local" id="fechaFin" value="' + fechaFin + '" min="' + fechaMinima + '" class="form-control" required>';
+            modal += '</div>';
+            modal += '</div>';
+            modal += '<div class="form-group">';
+            modal += '<label class="form-label">Notas</label>';
+            modal += '<textarea id="notas" class="form-control textarea" placeholder="Notas adicionales..." rows="3"></textarea>';
+            modal += '</div>';
+            modal += '</div>';
+            modal += '<div class="modal-footer">';
+            modal += '<button type="button" onclick="closeCreateReservaModal()" class="btn btn-secondary">Cancelar</button>';
+            modal += '<button type="submit" class="btn btn-primary">Crear Reserva</button>';
+            modal += '</div>';
+            modal += '</form>';
+            modal += '</div>';
+            modal += '</div>';
+            
+            $('body').append(modal);
+            
+            // Cargar espacios y usuarios
+            loadEspacios();
+            loadUsuarios();
+            
+            // Manejar envío del formulario
+            $('#createReservaForm').on('submit', function(e) {
+                e.preventDefault();
+                createReserva();
+            });
+        }
+
+        // Función para cerrar modal
+        function closeCreateReservaModal() {
+            $('#createReservaModal').remove();
+        }
+
+        // Función para cargar espacios
+        function loadEspacios() {
+            $.ajax({
+                url: '@Url.Action("GetEspacios", "ReservasEspacio")',
+                type: 'GET',
+                success: function(data) {
+                    var select = $('#espacioSelect');
+                    select.empty();
+                    select.append('<option value="">Seleccionar espacio...</option>');
+                    data.forEach(function(espacio) {
+                        select.append('<option value="' + espacio.IdEspacio + '">' + espacio.Nombre + '</option>');
+                    });
+                },
+                error: function() {
+                    alert('Error al cargar espacios');
+                }
+            });
+        }
+
+        // Función para cargar usuarios
+        function loadUsuarios() {
+            $.ajax({
+                url: '@Url.Action("GetUsuarios", "ReservasEspacio")',
+                type: 'GET',
+                success: function(data) {
+                    var select = $('#usuarioSelect');
+                    select.empty();
+                    select.append('<option value="">Seleccionar usuario...</option>');
+                    
+                    if (data && data.length > 0) {
+                        data.forEach(function(usuario) {
+                            if (usuario.Id && usuario.UserName) {
+                                select.append('<option value="' + usuario.Id + '">' + usuario.UserName + '</option>');
+                            }
+                        });
+                    } else {
+                        select.append('<option value="" disabled>No hay usuarios disponibles</option>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al cargar usuarios:', error);
+                    var select = $('#usuarioSelect');
+                    select.empty();
+                    select.append('<option value="">Seleccionar usuario...</option>');
+                    select.append('<option value="" disabled>Error al cargar usuarios</option>');
+                }
+            });
+        }
+
+        // Función para crear reserva
+        function createReserva() {
+            // Validar fechas antes de enviar
+            var fechaInicio = new Date($('#fechaInicio').val());
+            var fechaFin = new Date($('#fechaFin').val());
+            var hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            
+            if (fechaInicio < hoy) {
+                showErrorModal('⚠️ Fecha Inválida', 
+                    'No se pueden crear reservas en fechas pasadas. Por favor, seleccione una fecha igual o posterior a hoy (' + 
+                    hoy.toLocaleDateString('es-ES') + ').');
+                return;
+            }
+            
+            if (fechaFin < hoy) {
+                showErrorModal('⚠️ Fecha Inválida', 
+                    'No se pueden crear reservas en fechas pasadas. Por favor, seleccione una fecha igual o posterior a hoy (' + 
+                    hoy.toLocaleDateString('es-ES') + ').');
+                return;
+            }
+            
+            // Mostrar indicador de carga
+            showLoadingMessage();
+            
+            var formData = {
+                IdEspacio: $('#espacioSelect').val(),
+                IdUsuario: $('#usuarioSelect').val(),
+                FechaInicio: $('#fechaInicio').val(),
+                FechaFin: $('#fechaFin').val(),
+                Notas: $('#notas').val(),
+                IdEstado: 1 // Estado activo
+            };
+
+            $.ajax({
+                url: '@Url.Action("CreateFromCalendar", "ReservasEspacio")',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    // Ocultar indicador de carga
+                    hideLoadingMessage();
+                    
+                    if (response.success) {
+                        console.log('✅ Reserva creada exitosamente con ID:', response.idReserva);
+                        
+                        closeCreateReservaModal();
+                        
+                        // Verificar que el calendario existe
+                        if (typeof calendar !== 'undefined' && calendar !== null) {
+                            console.log('🔄 Refrescando calendario...');
+                            console.log('📅 Llamando a calendar.refetchEvents()...');
+                            
+                            // Forzar la recarga de eventos desde el servidor
+                            calendar.refetchEvents();
+                            
+                            console.log('✅ refetchEvents() ejecutado - el calendario debería actualizarse');
+                        } else {
+                            console.error('❌ Error: Variable calendar no está definida');
+                            console.log('Tipo de calendar:', typeof calendar);
+                            console.log('Valor de calendar:', calendar);
+                        }
+                        
+                        // Mostrar mensaje de éxito
+                        showSuccessMessage('Reserva creada exitosamente');
+                    } else {
+                        showErrorModal(response.message);
+                    }
+                },
+                error: function() {
+                    // Ocultar indicador de carga
+                    hideLoadingMessage();
+                    showErrorModal('Error al crear la reserva. Por favor, inténtalo de nuevo.');
+                }
+            });
+        }
     </script>
 }
