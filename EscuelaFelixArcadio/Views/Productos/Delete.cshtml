@@ -1,0 +1,87 @@
+﻿@model EscuelaFelixArcadio.Models.Producto
+
+@{
+    ViewBag.Title = "Eliminar Producto";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/productos.css?v=12" rel="stylesheet" />
+}
+
+<div class="productos-container">
+    <div class="productos-delete-container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc2626; margin-bottom: 1rem;"></i>
+            <h2 class="productos-delete-title">¿Eliminar Producto?</h2>
+            <p class="productos-delete-message">
+                Esta accion es permanente y no se puede deshacer. ¿Esta seguro de que desea eliminar este producto?
+            </p>
+        </div>
+
+        <div class="productos-delete-info">
+            <h3 class="productos-delete-info-title">
+                <i class="fas fa-info-circle"></i> Informacion del Producto a Eliminar
+            </h3>
+            <div class="productos-delete-info-details">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <strong>ID:</strong> #@Model.IdProducto
+                    </div>
+                    <div>
+                        <strong>Codigo:</strong> @Model.Codigo
+                    </div>
+                    <div>
+                        <strong>Nombre:</strong> @Model.Nombre
+                    </div>
+                    <div>
+                        <strong>Marca:</strong> @(Model.Marca ?? "No especificada")
+                    </div>
+                    <div>
+                        <strong>Categoria:</strong> @(Model.Categoria?.Nombre ?? "Sin categoria")
+                    </div>
+                    <div>
+                        <strong>Estado:</strong> @(Model.Estado?.Descripcion ?? "Sin estado")
+                    </div>
+                    <div>
+                        <strong>Tipo:</strong> @(Model.EsServicio ? "Servicio" : "Producto Fisico")
+                    </div>
+                    <div>
+                        <strong>Fecha de Creacion:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Descripcion))
+                {
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #fecaca;">
+                        <strong>Descripcion:</strong><br />
+                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: #fff7f7; border-radius: 4px; max-height: 150px; overflow-y: auto;">
+                            @Model.Descripcion
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="productos-delete-info">
+            <h3 class="productos-delete-info-title">
+                <i class="fas fa-exclamation-triangle"></i> Advertencia:
+            </h3>
+            <div class="productos-delete-info-details">
+                Al eliminar este producto, se perdera todo el historial asociado. Esta accion no puede revertirse.
+            </div>
+        </div>
+
+        @using (Html.BeginForm("Delete", "Productos", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            
+            <div class="productos-form-buttons">
+                <button type="submit" class="btn-productos-delete-confirm">
+                    <i class="fas fa-trash"></i>
+                    Eliminar Definitivamente
+                </button>
+                @Html.ActionLink("Regresar a la Lista", "Index", "Productos", null, new { @class = "btn-productos-cancel" })
+            </div>
+        }
+    </div>
+</div>

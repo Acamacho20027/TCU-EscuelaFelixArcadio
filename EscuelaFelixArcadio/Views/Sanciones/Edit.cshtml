@@ -28,9 +28,6 @@
                     <div class="sanciones-form-group">
                         <label class="sanciones-form-label">Usuario Sancionado</label>
                         <input type="text" id="usuarioDisplay" name="usuarioDisplay" class="sanciones-form-control" value="@(Model.ApplicationUser?.UserName ?? "Usuario no encontrado")" readonly />
-                        <small style="color: #6b7280; font-size: 0.8rem; margin-top: 0.25rem; display: block;">
-                            El usuario no puede modificarse una vez creada la sancion
-                        </small>
                     </div>
 
                     <div class="sanciones-form-group">
@@ -69,9 +66,6 @@
                         @Html.LabelFor(model => model.FechaFin, "Fecha de Fin (Opcional)", new { @class = "sanciones-form-label" })
                         @Html.TextBoxFor(model => model.FechaFin, "{0:yyyy-MM-dd}", new { @class = "sanciones-form-control", type = "date" })
                         @Html.ValidationMessageFor(model => model.FechaFin, "", new { @class = "text-danger" })
-                        <small style="color: #6b7280; font-size: 0.8rem; margin-top: 0.25rem; display: block;">
-                            Dejar vacío si la sanción está en curso
-                        </small>
                     </div>
                 </div>
 
@@ -79,9 +73,6 @@
                     @Html.LabelFor(model => model.IdPrestamo, "Préstamo Relacionado (Opcional)", new { @class = "sanciones-form-label" })
                     @Html.DropDownList("IdPrestamo", null, "Seleccione un préstamo (opcional)", new { @class = "sanciones-form-control" })
                     @Html.ValidationMessageFor(model => model.IdPrestamo, "", new { @class = "text-danger" })
-                    <small style="color: #6b7280; font-size: 0.8rem; margin-top: 0.25rem; display: block;">
-                        Si la sanción está relacionada con un préstamo específico
-                    </small>
                 </div>
 
                 <div class="sanciones-form-group">

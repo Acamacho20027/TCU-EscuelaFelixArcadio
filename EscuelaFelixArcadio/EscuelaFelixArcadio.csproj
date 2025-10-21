@@ -178,6 +178,7 @@
     <Compile Include="Controllers\InventarioController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\PrestamosController.cs" />
+    <Compile Include="Controllers\ProductosController.cs" />
     <Compile Include="Controllers\ReportesController.cs" />
     <Compile Include="Controllers\ReservasEspacioController.cs" />
     <Compile Include="Controllers\SancionesController.cs" />
@@ -346,6 +347,11 @@
     <Content Include="Views\Espacios\Edit.cshtml" />
     <Content Include="Views\Espacios\Delete.cshtml" />
     <Content Include="Views\Espacios\Mantenimiento.cshtml" />
+    <Content Include="Views\Productos\Index.cshtml" />
+    <Content Include="Views\Productos\Details.cshtml" />
+    <Content Include="Views\Productos\Create.cshtml" />
+    <Content Include="Views\Productos\Edit.cshtml" />
+    <Content Include="Views\Productos\Delete.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
