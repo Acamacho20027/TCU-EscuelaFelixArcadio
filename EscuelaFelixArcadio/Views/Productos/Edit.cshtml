@@ -1,0 +1,172 @@
+﻿@model EscuelaFelixArcadio.Models.Producto
+
+@{
+    ViewBag.Title = "Editar Producto";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/productos.css?v=11" rel="stylesheet" />
+}
+
+<div class="productos-container">
+    <div class="productos-form-container">
+        <h2 class="productos-form-title">Editar Producto</h2>
+
+        @using (Html.BeginForm("Edit", "Productos", FormMethod.Post, new { @class = "productos-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.IdProducto)
+            @Html.HiddenFor(model => model.FechaCreacion)
+            
+            @Html.ValidationSummary(true, "", new { @class = "productos-alert productos-alert-error" })
+
+            <div class="productos-form-section">
+                <h3 class="productos-form-section-title">Información del Producto</h3>
+                
+                <div class="productos-form-grid">
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.Codigo, "Código", new { @class = "productos-form-label" })
+                        @Html.TextBoxFor(model => model.Codigo, new { @class = "productos-form-control", @readonly = "readonly" })
+                    </div>
+
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.Nombre, "Nombre", new { @class = "productos-form-label" })
+                        @Html.TextBoxFor(model => model.Nombre, new { @class = "productos-form-control", @placeholder = "Ingrese el nombre del producto", required = "required" })
+                        @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="productos-form-grid">
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.IdCategoria, "Categoría", new { @class = "productos-form-label" })
+                        @Html.DropDownListFor(model => model.IdCategoria, ViewBag.IdCategoria as SelectList, "Seleccione una categoría", new { @class = "productos-form-control" })
+                        @Html.ValidationMessageFor(model => model.IdCategoria, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.IdEstado, "Estado", new { @class = "productos-form-label" })
+                        @Html.DropDownListFor(model => model.IdEstado, ViewBag.IdEstado as SelectList, "Seleccione un estado", new { @class = "productos-form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.IdEstado, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="productos-form-grid">
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.Marca, "Marca", new { @class = "productos-form-label" })
+                        @Html.TextBoxFor(model => model.Marca, new { @class = "productos-form-control", @id = "marcaInput", @placeholder = "Ingrese la marca del producto" })
+                        @Html.ValidationMessageFor(model => model.Marca, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.EsServicio, "Tipo de producto", new { @class = "productos-form-label" })
+                        @Html.DropDownListFor(model => model.EsServicio, new SelectList(new[] {
+                            new SelectListItem { Text = "No es un servicio", Value = "false" },
+                            new SelectListItem { Text = "Si es un servicio", Value = "true" }
+                        }, "Value", "Text"), "Seleccione el tipo", new { @class = "productos-form-control" })
+                        @Html.ValidationMessageFor(model => model.EsServicio, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="productos-form-group">
+                    <label class="productos-form-label">ID del Producto</label>
+                    <input type="text" class="productos-form-control" value="@Model.IdProducto" readonly />
+                </div>
+            </div>
+
+            <div class="productos-form-section">
+                <h3 class="productos-form-section-title">Descripción del Producto</h3>
+                
+                <div class="productos-form-group">
+                    @Html.LabelFor(model => model.Descripcion, "Descripción", new { @class = "productos-form-label" })
+                    @Html.TextAreaFor(model => model.Descripcion, new { @class = "productos-form-control", @rows = 4, @placeholder = "Ingrese una descripción del producto (opcional)", @maxlength = "1000" })
+                    @Html.ValidationMessageFor(model => model.Descripcion, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="productos-form-buttons">
+                <button type="submit" class="btn-productos-save">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+                <a href="@Url.Action("Index", "Productos")" class="btn-productos-cancel">
+                    Regresar a la Lista
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script>
+        $(document).ready(function() {
+            // Validación para solo permitir letras en el campo marca
+            $('#marcaInput').on('input', function() {
+                var value = $(this).val();
+                var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                $(this).val(lettersOnly);
+                
+                if (lettersOnly !== '') {
+                    $('[data-valmsg-for="Marca"]').text('');
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+            
+            // Prevenir pegar contenido no válido en marca
+            $('#marcaInput').on('paste', function(e) {
+                setTimeout(function() {
+                    var value = $('#marcaInput').val();
+                    var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    $('#marcaInput').val(lettersOnly);
+                }, 10);
+            });
+            
+            // Validación para solo permitir letras en el campo nombre
+            $('input[name="Nombre"]').on('input', function() {
+                var value = $(this).val();
+                var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                $(this).val(lettersOnly);
+                
+                if (lettersOnly !== '') {
+                    $('[data-valmsg-for="Nombre"]').text('');
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+            
+            // Prevenir pegar contenido no válido en nombre
+            $('input[name="Nombre"]').on('paste', function(e) {
+                setTimeout(function() {
+                    var value = $('input[name="Nombre"]').val();
+                    var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    $('input[name="Nombre"]').val(lettersOnly);
+                }, 10);
+            });
+            
+            // Validación del formulario
+            $('.productos-form').on('submit', function(e) {
+                var isValid = true;
+                
+                // Validar campos requeridos
+                $('.productos-form-control[required]').each(function() {
+                    if (!$(this).val().trim()) {
+                        $(this).addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Por favor, complete todos los campos requeridos.');
+                }
+            });
+            
+            // Remover clases de error al escribir
+            $('.productos-form-control').on('input', function() {
+                $(this).removeClass('is-invalid');
+            });
+        });
+    </script>
+}

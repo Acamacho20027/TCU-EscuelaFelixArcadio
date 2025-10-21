@@ -502,9 +502,34 @@ body {
 }
 
 /* LIMPIAR TODO Y EMPEZAR DE NUEVO */
-/* Ocultar solo Reportes (elemento 5) */
+/* Forzar Productos en elemento 5 */
 .nav-section:first-of-type .nav-menu li:nth-child(5) {
-    display: none !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.nav-section:first-of-type .nav-menu li:nth-child(5) .nav-link {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.nav-section:first-of-type .nav-menu li:nth-child(5) .nav-link span {
+    position: relative;
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+.nav-section:first-of-type .nav-menu li:nth-child(5) .nav-link span::before {
+    content: "Productos" !important;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
 }
 
 /* Corregir Préstamos - elemento 3 */

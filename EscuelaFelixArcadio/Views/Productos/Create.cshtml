@@ -1,0 +1,220 @@
+﻿@model EscuelaFelixArcadio.Models.Producto
+
+@{
+    ViewBag.Title = "Crear Producto";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/productos.css?v=7" rel="stylesheet" />
+}
+
+<div class="productos-container">
+    <div class="productos-form-container">
+        <h2 class="productos-form-title">Crear Producto</h2>
+
+        @using (Html.BeginForm("Create", "Productos", FormMethod.Post, new { @class = "productos-form" }))
+        {
+            @Html.AntiForgeryToken()
+            
+            @Html.ValidationSummary(true, "", new { @class = "productos-alert productos-alert-error" })
+
+            <div class="productos-form-section">
+                <h3 class="productos-form-section-title">Información del Producto</h3>
+                
+                <div class="productos-form-grid">
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.Codigo, "Código", new { @class = "productos-form-label" })
+                        @Html.TextBoxFor(model => model.Codigo, new { @class = "productos-form-control", @id = "codigoInput", @placeholder = "Código generado automáticamente" })
+                        @Html.ValidationMessageFor(model => model.Codigo, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.Nombre, "Nombre", new { @class = "productos-form-label" })
+                        @Html.TextBoxFor(model => model.Nombre, new { @class = "productos-form-control", @placeholder = "Ingrese el nombre del producto", required = "required" })
+                        @Html.ValidationMessageFor(model => model.Nombre, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="productos-form-grid">
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.IdCategoria, "Categoría", new { @class = "productos-form-label" })
+                        @Html.DropDownListFor(model => model.IdCategoria, ViewBag.IdCategoria as SelectList, "Seleccione una categoría", new { @class = "productos-form-control" })
+                        @Html.ValidationMessageFor(model => model.IdCategoria, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.IdEstado, "Estado", new { @class = "productos-form-label" })
+                        @Html.DropDownListFor(model => model.IdEstado, ViewBag.IdEstado as SelectList, "Seleccione un estado", new { @class = "productos-form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.IdEstado, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="productos-form-grid">
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.Marca, "Marca", new { @class = "productos-form-label" })
+                        @Html.TextBoxFor(model => model.Marca, new { @class = "productos-form-control", @placeholder = "Ingrese la marca del producto" })
+                        @Html.ValidationMessageFor(model => model.Marca, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="productos-form-group">
+                        @Html.LabelFor(model => model.EsServicio, "Tipo de producto", new { @class = "productos-form-label" })
+                        @Html.DropDownListFor(model => model.EsServicio, new SelectList(new[] {
+                            new SelectListItem { Text = "No es un servicio", Value = "false" },
+                            new SelectListItem { Text = "Si es un servicio", Value = "true" }
+                        }, "Value", "Text"), "Seleccione el tipo", new { @class = "productos-form-control" })
+                        @Html.ValidationMessageFor(model => model.EsServicio, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="productos-form-section">
+                <h3 class="productos-form-section-title">Descripción del Producto</h3>
+                
+                <div class="productos-form-group">
+                    @Html.LabelFor(model => model.Descripcion, "Descripción", new { @class = "productos-form-label" })
+                    @Html.TextAreaFor(model => model.Descripcion, new { @class = "productos-form-control", @rows = 4, @placeholder = "Ingrese una descripción del producto (opcional)", @maxlength = "1000" })
+                    @Html.ValidationMessageFor(model => model.Descripcion, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="productos-form-buttons">
+                <button type="submit" class="btn-productos-save">
+                    <i class="fas fa-plus"></i> Crear Producto
+                </button>
+                <a href="@Url.Action("Index", "Productos")" class="btn-productos-cancel">
+                    Regresar a la Lista
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script>
+        $(document).ready(function() {
+            // Generar código automático si el campo está vacío
+            function generateProductCode() {
+                var codigoInput = $('#codigoInput');
+                if (!codigoInput.val().trim()) {
+                    // Generar código basado en timestamp y caracteres aleatorios
+                    var timestamp = Date.now().toString().slice(-4); // Últimos 4 dígitos del timestamp
+                    var randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    var randomCode = '';
+                    for (var i = 0; i < 3; i++) {
+                        randomCode += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+                    }
+                    var autoCode = randomCode + timestamp;
+                    codigoInput.val(autoCode);
+                }
+            }
+            
+            // Validación para solo permitir letras en el código
+            $('#codigoInput').on('input', function() {
+                var value = $(this).val();
+                var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, '');
+                $(this).val(lettersOnly);
+                
+                if (lettersOnly !== '') {
+                    $('[data-valmsg-for="Codigo"]').text('');
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+            
+            // Prevenir pegar contenido no válido en código
+            $('#codigoInput').on('paste', function(e) {
+                setTimeout(function() {
+                    var value = $('#codigoInput').val();
+                    var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, '');
+                    $('#codigoInput').val(lettersOnly);
+                }, 10);
+            });
+            
+            // Validación para solo permitir letras en el campo marca
+            $('input[name="Marca"]').on('input', function() {
+                var value = $(this).val();
+                var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                $(this).val(lettersOnly);
+                
+                if (lettersOnly !== '') {
+                    $('[data-valmsg-for="Marca"]').text('');
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+            
+            // Prevenir pegar contenido no válido en marca
+            $('input[name="Marca"]').on('paste', function(e) {
+                setTimeout(function() {
+                    var value = $('input[name="Marca"]').val();
+                    var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    $('input[name="Marca"]').val(lettersOnly);
+                }, 10);
+            });
+            
+            // Validación para solo permitir letras en el campo nombre
+            $('input[name="Nombre"]').on('input', function() {
+                var value = $(this).val();
+                var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                $(this).val(lettersOnly);
+                
+                if (lettersOnly !== '') {
+                    $('[data-valmsg-for="Nombre"]').text('');
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+            
+            // Prevenir pegar contenido no válido en nombre
+            $('input[name="Nombre"]').on('paste', function(e) {
+                setTimeout(function() {
+                    var value = $('input[name="Nombre"]').val();
+                    var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    $('input[name="Nombre"]').val(lettersOnly);
+                }, 10);
+            });
+            
+            // Generar código automático inmediatamente al cargar la página
+            generateProductCode();
+            
+            // Generar código automático al enviar el formulario si está vacío (por seguridad)
+            $('.productos-form').on('submit', function(e) {
+                if (!$('#codigoInput').val().trim()) {
+                    generateProductCode();
+                }
+            });
+            
+            // Generar código automático cuando el campo pierde el foco y está vacío
+            $('#codigoInput').on('blur', function() {
+                if (!$(this).val().trim()) {
+                    generateProductCode();
+                }
+            });
+            
+            // Validación del formulario
+            $('.productos-form').on('submit', function(e) {
+                var isValid = true;
+                
+                // Validar campos requeridos
+                $('.productos-form-control[required]').each(function() {
+                    if (!$(this).val().trim()) {
+                        $(this).addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Por favor, complete todos los campos requeridos.');
+                }
+            });
+            
+            // Remover clases de error al escribir
+            $('.productos-form-control').on('input', function() {
+                $(this).removeClass('is-invalid');
+            });
+        });
+    </script>
+}

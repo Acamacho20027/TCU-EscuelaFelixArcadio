@@ -1,0 +1,440 @@
+﻿@model IEnumerable<EscuelaFelixArcadio.Models.Producto>
+
+@{
+    ViewBag.Title = "Productos";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/productos.css?v=6" rel="stylesheet" />
+}
+
+<div class="productos-container">
+    <!-- Header with title and create button -->
+    <div class="productos-header">
+        <h1 class="productos-title">Productos</h1>
+        <a href="@Url.Action("Create", "Productos")" class="btn-create-productos">
+            <i class="fas fa-plus"></i>
+            Crear Producto
+        </a>
+    </div>
+
+    <!-- Success/Error messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="productos-alert productos-alert-success">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="productos-alert productos-alert-error">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Filters and search panel -->
+    <div class="productos-filters-panel">
+        <!-- Search bar -->
+        <div class="productos-search-bar" style="position: relative;">
+            <i class="fas fa-search productos-search-icon"></i>
+            <input type="text" id="searchInput" class="productos-search-input" placeholder="Buscar por nombre, código, categoría o marca...">
+        </div>
+
+        <!-- Filter dropdowns -->
+        <div class="productos-filters-row">
+            <div class="productos-filter-group">
+                <label class="productos-filter-label">Categoría</label>
+                <select id="categoriaFilter" class="productos-filter-select">
+                    <option value="">Todas las categorías</option>
+                    @foreach (var categoria in ViewBag.Categorias as SelectList)
+                    {
+                        <option value="@categoria.Value">@categoria.Text</option>
+                    }
+                </select>
+            </div>
+
+            <div class="productos-filter-group">
+                <label class="productos-filter-label">Estado</label>
+                <select id="estadoFilter" class="productos-filter-select">
+                    <option value="">Todos los estados</option>
+                    @foreach (var estado in ViewBag.Estados as SelectList)
+                    {
+                        <option value="@estado.Value">@estado.Text</option>
+                    }
+                </select>
+            </div>
+
+            <div class="productos-filter-group">
+                <label class="productos-filter-label">Tipo</label>
+                <select id="tipoFilter" class="productos-filter-select">
+                    <option value="">Todos los tipos</option>
+                    <option value="false">Producto</option>
+                    <option value="true">Servicio</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Controls row -->
+        <div class="productos-controls-row">
+            <div class="productos-sort-group">
+                <label class="productos-sort-label">Ordenar por:</label>
+                <select id="sortBy" class="productos-filter-select">
+                    <option value="nombre">Nombre</option>
+                    <option value="codigo">Código</option>
+                    <option value="categoria">Categoría</option>
+                    <option value="estado">Estado</option>
+                    <option value="marca">Marca</option>
+                    <option value="fecha">Fecha</option>
+                </select>
+                <select id="sortOrder" class="productos-filter-select">
+                    <option value="asc">Ascendente</option>
+                    <option value="desc">Descendente</option>
+                </select>
+            </div>
+
+            <div class="productos-items-per-page">
+                <label class="productos-items-label">Mostrar:</label>
+                <select id="pageSize" class="productos-filter-select">
+                    <option value="12">12</option>
+                    <option value="24">24</option>
+                    <option value="48">48</option>
+                </select>
+            </div>
+
+            <button id="clearFilters" class="productos-clear-filters">
+                <i class="fas fa-times"></i> Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="productos-loading" style="display: none;">
+        <div class="productos-spinner"></div>
+        <span>Cargando productos...</span>
+    </div>
+
+    <!-- Productos cards grid -->
+    <div id="productosGrid" class="productos-cards-grid">
+        @foreach (var item in Model)
+        {
+            var statusClass = "";
+            var estadoDescripcion = item.Estado?.Descripcion?.ToLower() ?? "";
+            
+            if (estadoDescripcion.Contains("activ") && !estadoDescripcion.Contains("inactiv"))
+            {
+                statusClass = "activo";
+            }
+            else if (estadoDescripcion.Contains("inactivo"))
+            {
+                statusClass = "inactivo";
+            }
+            else
+            {
+                statusClass = "activo";
+            }
+
+            <div class="productos-card">
+                <span class="productos-card-status @statusClass">@(item.Estado?.Descripcion ?? "Sin estado")</span>
+                
+                <div class="productos-card-header">
+                    <h3 class="productos-card-product">@item.Nombre</h3>
+                    <p class="productos-card-category">@(item.Categoria?.Nombre ?? "Sin categoría")</p>
+                </div>
+
+                <div class="productos-card-code">@item.Codigo</div>
+
+                <div class="productos-card-details">
+                    @if (!string.IsNullOrEmpty(item.Marca))
+                    {
+                        <div class="productos-card-detail">
+                            <span class="productos-card-detail-label">Marca:</span>
+                            <span class="productos-card-detail-value">@item.Marca</span>
+                        </div>
+                    }
+                    <div class="productos-card-detail">
+                        <span class="productos-card-detail-label">Tipo:</span>
+                        <span class="productos-card-detail-value">@(item.EsServicio ? "Servicio" : "Producto")</span>
+                    </div>
+                    <div class="productos-card-detail">
+                        <span class="productos-card-detail-label">Estado:</span>
+                        <span class="productos-card-detail-value">@(item.Estado?.Descripcion ?? "Sin estado")</span>
+                    </div>
+                    <div class="productos-card-detail">
+                        <span class="productos-card-detail-label">Fecha:</span>
+                        <span class="productos-card-detail-value">@item.FechaCreacion.ToString("dd/MM/yyyy")</span>
+                    </div>
+                </div>
+
+                <div class="productos-card-footer">
+                    <span class="productos-card-id">
+                        <i class="fas fa-hashtag"></i> ID: @item.IdProducto
+                    </span>
+                    <div class="productos-card-actions">
+                        <a href="@Url.Action("Details", new { id = item.IdProducto })" class="btn-productos-action btn-productos-details">
+                            <i class="fas fa-eye"></i> Detalle
+                        </a>
+                        <a href="@Url.Action("Delete", new { id = item.IdProducto })" class="btn-productos-action btn-productos-delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="productos-pagination">
+        <!-- La paginación se genera dinámicamente con JavaScript -->
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let currentPage = @(ViewBag.CurrentPage ?? 1);
+            let pageSize = @(ViewBag.PageSize ?? 12);
+            let totalItems = @(ViewBag.TotalItems ?? 0);
+            let totalPages = @(ViewBag.TotalPages ?? 1);
+            
+            console.log('Pagination values:', {
+                currentPage: currentPage,
+                pageSize: pageSize,
+                totalItems: totalItems,
+                totalPages: totalPages
+            });
+
+            // Función para actualizar la visualización de productos
+            function loadProductos() {
+                const search = $('#searchInput').val();
+                const categoria = $('#categoriaFilter').val();
+                const estado = $('#estadoFilter').val();
+                const tipo = $('#tipoFilter').val();
+                const sortBy = $('#sortBy').val();
+                const sortOrder = $('#sortOrder').val();
+                
+                $('#loadingIndicator').show();
+                $('#productosGrid').hide();
+
+                $.ajax({
+                    url: '@Url.Action("Index", "Productos")',
+                    type: 'GET',
+                    data: {
+                        search: search,
+                        categoria: categoria,
+                        estado: estado,
+                        tipo: tipo,
+                        sortBy: sortBy,
+                        sortOrder: sortOrder,
+                        page: currentPage,
+                        pageSize: pageSize
+                    },
+                    success: function(data) {
+                        // Extraer el contenido del grid de productos
+                        const $newContent = $(data);
+                        const $newGrid = $newContent.find('#productosGrid');
+                        
+                        if ($newGrid.length > 0) {
+                            $('#productosGrid').html($newGrid.html());
+                        }
+                        
+                        // Actualizar paginación dinámicamente como en inventario
+                        updatePagination({
+                            currentPage: currentPage,
+                            totalPages: totalPages,
+                            totalItems: totalItems
+                        });
+                        
+                        $('#loadingIndicator').hide();
+                        $('#productosGrid').show();
+                    },
+                    error: function() {
+                        $('#loadingIndicator').hide();
+                        $('#productosGrid').show();
+                        alert('Error al cargar los productos');
+                    }
+                });
+            }
+
+            // Función para renderizar los productos
+            function renderProductos(productos) {
+                let html = '';
+                
+                if (productos.length === 0) {
+                    html = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #6b7280;">' +
+                           '<i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>' +
+                           '<p style="font-size: 1.1rem;">No se encontraron productos</p>' +
+                           '</div>';
+                } else {
+                    productos.forEach(function(item) {
+                        let statusClass = getStatusClass(item.EstadoDescripcion);
+                        
+                        html += '<div class="productos-card">';
+                        html += '<span class="productos-card-status ' + statusClass + '">' + item.EstadoDescripcion + '</span>';
+                        html += '<div class="productos-card-header">';
+                        html += '<h3 class="productos-card-product">' + item.Nombre + '</h3>';
+                        html += '<p class="productos-card-category">' + item.CategoriaNombre + '</p>';
+                        html += '</div>';
+                        html += '<div class="productos-card-code">' + item.Codigo + '</div>';
+                        html += '<div class="productos-card-details">';
+                        
+                        if (item.Marca && item.Marca !== '') {
+                            html += '<div class="productos-card-detail">';
+                            html += '<span class="productos-card-detail-label">Marca:</span>';
+                            html += '<span class="productos-card-detail-value">' + item.Marca + '</span>';
+                            html += '</div>';
+                        }
+                        
+                        html += '<div class="productos-card-detail">';
+                        html += '<span class="productos-card-detail-label">Tipo:</span>';
+                        html += '<span class="productos-card-detail-value">' + (item.EsServicio ? 'Servicio' : 'Producto') + '</span>';
+                        html += '</div>';
+                        html += '<div class="productos-card-detail">';
+                        html += '<span class="productos-card-detail-label">Estado:</span>';
+                        html += '<span class="productos-card-detail-value">' + item.EstadoDescripcion + '</span>';
+                        html += '</div>';
+                        html += '<div class="productos-card-detail">';
+                        html += '<span class="productos-card-detail-label">Fecha:</span>';
+                        html += '<span class="productos-card-detail-value">' + item.FechaCreacion + '</span>';
+                        html += '</div>';
+                        html += '</div>';
+                        html += '<div class="productos-card-footer">';
+                        html += '<span class="productos-card-id"><i class="fas fa-hashtag"></i> ID: ' + item.IdProducto + '</span>';
+                        html += '<div class="productos-card-actions">';
+                        html += '<a href="/Productos/Details/' + item.IdProducto + '" class="btn-productos-action btn-productos-details"><i class="fas fa-eye"></i> Detalle</a>';
+                        html += '<a href="/Productos/Delete/' + item.IdProducto + '" class="btn-productos-action btn-productos-delete"><i class="fas fa-trash-alt"></i></a>';
+                        html += '</div></div></div>';
+                    });
+                }
+                
+                $('#productosGrid').html(html);
+            }
+
+            // Función para obtener la clase de estado
+            function getStatusClass(descripcion) {
+                let desc = descripcion.toLowerCase();
+                if (desc.includes('activ') && !desc.includes('inactiv')) return 'activo';
+                if (desc.includes('inactivo')) return 'inactivo';
+                return 'activo';
+            }
+
+            // Función para actualizar la paginación (igual que inventario)
+            function updatePagination(data) {
+                console.log('updatePagination called with:', data);
+                var currentPageData = data.currentPage || 1;
+                var totalPages = data.totalPages || 1;
+                var totalItems = data.totalItems || 0;
+                var pagination = $('#pagination');
+                pagination.empty();
+
+                // Si hay solo 1 página, mostrar solo el número de página
+                if (totalPages <= 1) {
+                    pagination.append('<span class="productos-pagination-btn active" style="background-color: #0ea5e9 !important; border-color: #0ea5e9 !important; color: white !important;">1</span>');
+                    return;
+                }
+
+                // Botones de navegación
+                if (currentPageData > 1) {
+                    pagination.append('<a href="#" class="productos-pagination-btn" onclick="changePage(1)">Primera</a>');
+                    pagination.append('<a href="#" class="productos-pagination-btn" onclick="changePage(' + (currentPageData - 1) + ')">Anterior</a>');
+                } else {
+                    pagination.append('<span class="productos-pagination-btn" disabled>Primera</span>');
+                    pagination.append('<span class="productos-pagination-btn" disabled>Anterior</span>');
+                }
+
+                // Números de página
+                var startPage = Math.max(1, currentPageData - 2);
+                var endPage = Math.min(totalPages, currentPageData + 2);
+
+                if (startPage > 1) {
+                    pagination.append('<span class="productos-pagination-dots">...</span>');
+                }
+
+                for (var i = startPage; i <= endPage; i++) {
+                    if (i === currentPageData) {
+                        console.log('Creating active button for page:', i);
+                        pagination.append('<span class="productos-pagination-btn active" id="active-page-' + i + '" style="background-color: #0ea5e9 !important; border-color: #0ea5e9 !important; color: white !important;">' + i + '</span>');
+                    } else {
+                        pagination.append('<a href="#" class="productos-pagination-btn" onclick="changePage(' + i + ')">' + i + '</a>');
+                    }
+                }
+
+                if (endPage < totalPages) {
+                    pagination.append('<span class="productos-pagination-dots">...</span>');
+                }
+
+                if (currentPageData < totalPages) {
+                    pagination.append('<a href="#" class="productos-pagination-btn" onclick="changePage(' + (currentPageData + 1) + ')">Siguiente</a>');
+                    pagination.append('<a href="#" class="productos-pagination-btn" onclick="changePage(' + totalPages + ')">Ultima</a>');
+                } else {
+                    pagination.append('<span class="productos-pagination-btn" disabled>Siguiente</span>');
+                    pagination.append('<span class="productos-pagination-btn" disabled>Ultima</span>');
+                }
+            }
+
+            // Cambiar página
+            window.changePage = function(page) {
+                currentPage = page;
+                loadProductos();
+            };
+
+            // Event listeners para filtros
+            $('#searchInput').on('keyup', debounce(function() {
+                currentPage = 1;
+                loadProductos();
+            }, 500));
+
+            $('#categoriaFilter, #estadoFilter, #tipoFilter, #sortBy, #sortOrder').on('change', function() {
+                currentPage = 1;
+                loadProductos();
+            });
+
+            $('#pageSize').on('change', function() {
+                pageSize = parseInt($(this).val());
+                currentPage = 1;
+                loadProductos();
+            });
+
+            // La paginación ahora usa onclick="changePage()" generado dinámicamente
+
+            // Limpiar filtros
+            $('#clearFilters').on('click', function() {
+                $('#searchInput').val('');
+                $('#categoriaFilter').val('');
+                $('#estadoFilter').val('');
+                $('#tipoFilter').val('');
+                $('#sortBy').val('nombre');
+                $('#sortOrder').val('asc');
+                $('#pageSize').val('12');
+                pageSize = 12;
+                currentPage = 1;
+                loadProductos();
+            });
+
+            // Función debounce para el buscador
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Auto-ocultar mensajes de éxito/error después de 5 segundos
+            setTimeout(function() {
+                $('.productos-alert').fadeOut();
+            }, 5000);
+
+            // Inicializar paginación después de que todas las funciones estén definidas
+            updatePagination({
+                currentPage: currentPage,
+                totalPages: totalPages,
+                totalItems: totalItems
+            });
+        });
+    </script>
+}

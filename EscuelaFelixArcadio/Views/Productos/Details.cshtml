@@ -1,0 +1,204 @@
+﻿@model EscuelaFelixArcadio.Models.Producto
+
+@{
+    ViewBag.Title = "Detalles del Producto";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    var statusClass = "";
+    var estadoDescripcion = Model.Estado?.Descripcion?.ToLower() ?? "";
+    
+    if (estadoDescripcion.Contains("inactivo") || estadoDescripcion.Contains("cancelada"))
+    {
+        statusClass = "error"; // Inactivo = rojo
+    }
+    else if (estadoDescripcion.Contains("activ"))
+    {
+        statusClass = "success"; // Activo = verde
+    }
+    else if (estadoDescripcion.Contains("pendiente"))
+    {
+        statusClass = "warning";
+    }
+    else if (estadoDescripcion.Contains("finalizada") || estadoDescripcion.Contains("completada") || estadoDescripcion.Contains("pagada"))
+    {
+        statusClass = "success";
+    }
+    else
+    {
+        statusClass = "warning";
+    }
+}
+
+@section Styles {
+    <link href="~/Content/productos.css?v=13" rel="stylesheet" />
+}
+
+<div class="productos-container">
+    <div class="productos-details-container">
+        <h2 class="productos-details-title">Detalles del Producto</h2>
+
+        <!-- Información principal -->
+        <div class="productos-details-card">
+            <h3 class="productos-details-card-title">
+                <i class="fas fa-box"></i> Información General
+            </h3>
+            <div class="productos-details-grid">
+                <div class="productos-details-field">
+                    <label class="productos-details-label">ID del Producto</label>
+                    <div class="productos-details-value">
+                        <i class="fas fa-hashtag"></i> @Model.IdProducto
+                    </div>
+                </div>
+
+                <div class="productos-details-field">
+                    <label class="productos-details-label">Código</label>
+                    <div class="productos-details-value">
+                        <i class="fas fa-barcode"></i> @Model.Codigo
+                    </div>
+                </div>
+
+                <div class="productos-details-field">
+                    <label class="productos-details-label">Nombre</label>
+                    <div class="productos-details-value">
+                        <i class="fas fa-tag"></i> @Model.Nombre
+                    </div>
+                </div>
+
+                <div class="productos-details-field">
+                    <label class="productos-details-label">Marca</label>
+                    <div class="productos-details-value">
+                        <i class="fas fa-award"></i> @(Model.Marca ?? "No especificada")
+                    </div>
+                </div>
+
+                <div class="productos-details-field">
+                    <label class="productos-details-label">Categoría</label>
+                    <div class="productos-details-value">
+                        <i class="fas fa-folder"></i> @(Model.Categoria?.Nombre ?? "Sin categoría")
+                    </div>
+                </div>
+
+                <div class="productos-details-field">
+                    <label class="productos-details-label">Estado</label>
+                    <div class="productos-details-value">
+                        @if (Model.Estado != null)
+                        {
+                            var estadoDescripcionLocal = Model.Estado.Descripcion.ToLower();
+                            var estadoColorClass = "";
+                            
+                            if (estadoDescripcionLocal.Contains("inactivo"))
+                            {
+                                estadoColorClass = "color-red";
+                            }
+                            else if (estadoDescripcionLocal.Contains("activ"))
+                            {
+                                estadoColorClass = "color-green";
+                            }
+                            else
+                            {
+                                estadoColorClass = "";
+                            }
+                            
+                            <span class="@estadoColorClass" style="font-weight: 600;">
+                                @Model.Estado.Descripcion
+                            </span>
+                        }
+                        else
+                        {
+                            <span>Sin estado</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de tipo y clasificación -->
+        <div class="productos-details-card">
+            <h3 class="productos-details-card-title">
+                <i class="fas fa-cogs"></i> Clasificación del Producto
+            </h3>
+            <div class="productos-details-grid">
+                <div class="productos-details-field">
+                    <label class="productos-details-label">Tipo de Producto</label>
+                    <div class="productos-details-value">
+                        @if (Model.EsServicio)
+                        {
+                            <span class="productos-status-badge success">
+                                <i class="fas fa-cog"></i> Servicio
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="productos-status-badge warning">
+                                <i class="fas fa-box"></i> Producto Físico
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div class="productos-details-field">
+                    <label class="productos-details-label">Estado del Registro</label>
+                    <div class="productos-details-value">
+                        @if (Model.Eliminado)
+                        {
+                            <span class="productos-status-badge error">
+                                <i class="fas fa-trash"></i> Eliminado
+                            </span>
+                        }
+                        else if (Model.Estado != null && Model.Estado.Descripcion.ToLower().Contains("inactivo"))
+                        {
+                            <span class="color-red" style="font-weight: 600;">
+                                <i class="fas fa-times-circle"></i> Inactivo
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="productos-status-badge success">
+                                <i class="fas fa-check-circle"></i> Activo
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div class="productos-details-field">
+                    <label class="productos-details-label">Fecha de Creación</label>
+                    <div class="productos-details-value">
+                        <i class="fas fa-calendar-plus"></i> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+
+                <div class="productos-details-field">
+                    <label class="productos-details-label">Última Modificación</label>
+                    <div class="productos-details-value">
+                        <i class="fas fa-calendar-check"></i> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Descripción del producto -->
+        @if (!string.IsNullOrEmpty(Model.Descripcion))
+        {
+            <div class="productos-details-card">
+                <h3 class="productos-details-card-title">
+                    <i class="fas fa-sticky-note"></i> Descripción del Producto
+                </h3>
+                <div class="productos-details-field" style="grid-column: 1 / -1;">
+                    <div class="productos-details-value" style="white-space: pre-wrap; line-height: 1.6;">
+                        @Model.Descripcion
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Botones de acción -->
+        <div class="productos-form-buttons">
+            <a href="@Url.Action("Edit", new { id = Model.IdProducto })" class="btn-productos-save">
+                <i class="fas fa-edit"></i> Editar Producto
+            </a>
+            <a href="@Url.Action("Index")" class="btn-productos-cancel">
+                Regresar a la Lista
+            </a>
+        </div>
+    </div>
+</div>
