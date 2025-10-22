@@ -1,0 +1,142 @@
+﻿@model EscuelaFelixArcadio.Models.Documento
+
+@{
+    ViewBag.Title = "Editar Documento";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/documento.css?v=1" rel="stylesheet" />
+}
+
+<div class="documento-container">
+    <div class="documento-form-container">
+        <h2 class="documento-form-title">Editar Documento</h2>
+
+        @using (Html.BeginForm("Edit", "Documento", FormMethod.Post, new { @class = "documento-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.IdDocumento)
+            @Html.HiddenFor(model => model.NombreArchivo)
+            @Html.HiddenFor(model => model.RutaArchivo)
+            @Html.HiddenFor(model => model.TamanoArchivo)
+            @Html.HiddenFor(model => model.FechaSubida)
+            @Html.HiddenFor(model => model.Id)
+            @Html.HiddenFor(model => model.Activo)
+            
+            @Html.ValidationSummary(true, "", new { @class = "documento-alert documento-alert-error" })
+
+            <div class="documento-form-section">
+                <h3 class="documento-form-section-title">Archivo Actual</h3>
+                
+                <div class="documento-current-file-display">
+                    <div class="documento-current-file-info">
+                        <i class="fas fa-file-pdf documento-file-icon"></i>
+                        <div class="documento-file-details">
+                            <div class="documento-file-name">@Model.NombreArchivo</div>
+                            <div class="documento-file-meta">
+                                <i class="fas fa-database"></i> @Model.TamanoFormateado • 
+                                <i class="fas fa-calendar"></i> Subido el @Model.FechaSubida.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="documento-form-section">
+                <h3 class="documento-form-section-title">Información del Documento</h3>
+                
+                <div class="documento-form-grid">
+                    <div class="documento-form-group">
+                        @Html.LabelFor(model => model.Titulo, "Título", new { @class = "documento-form-label" })
+                        @Html.TextBoxFor(model => model.Titulo, new { @class = "documento-form-control", @placeholder = "Ingrese el título del documento", required = "required" })
+                        @Html.ValidationMessageFor(model => model.Titulo, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="documento-form-group">
+                        @Html.LabelFor(model => model.TipoDocumento, "Tipo de Documento", new { @class = "documento-form-label" })
+                        @Html.DropDownList("TipoDocumento", (SelectList)ViewBag.TiposDocumento, "Seleccione un tipo", new { @class = "documento-form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.TipoDocumento, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="documento-form-group">
+                    @Html.LabelFor(model => model.Descripcion, "Descripción", new { @class = "documento-form-label" })
+                    @Html.TextAreaFor(model => model.Descripcion, new { @class = "documento-form-control", @rows = 4, @placeholder = "Ingrese una descripción del documento (opcional)", @maxlength = "1000" })
+                    @Html.ValidationMessageFor(model => model.Descripcion, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="documento-form-group">
+                    <label class="documento-form-label">Visibilidad</label>
+                    @Html.DropDownListFor(model => model.Publico, new SelectList(new[] {
+                        new SelectListItem { Text = "Público", Value = "true", Selected = Model.Publico },
+                        new SelectListItem { Text = "Privado", Value = "false", Selected = !Model.Publico }
+                    }, "Value", "Text"), new { @class = "documento-form-control" })
+                </div>
+            </div>
+
+            <div class="documento-form-buttons">
+                <button type="submit" class="btn-documento-save">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+                <a href="@Url.Action("Index", "Documento")" class="btn-documento-cancel">
+                    Regresar a la Lista
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script>
+        $(document).ready(function() {
+            // Validación para solo permitir letras en el campo título
+            $('input[name="Titulo"]').on('input', function() {
+                var value = $(this).val();
+                var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                $(this).val(lettersOnly);
+                
+                if (lettersOnly !== '') {
+                    $('[data-valmsg-for="Titulo"]').text('');
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+            
+            // Prevenir pegar contenido no válido en título
+            $('input[name="Titulo"]').on('paste', function(e) {
+                setTimeout(function() {
+                    var value = $('input[name="Titulo"]').val();
+                    var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    $('input[name="Titulo"]').val(lettersOnly);
+                }, 10);
+            });
+
+            // Validación del formulario
+            $('.documento-form').on('submit', function(e) {
+                var isValid = true;
+                
+                // Validar campos requeridos
+                $('.documento-form-control[required]').each(function() {
+                    if (!$(this).val().trim()) {
+                        $(this).addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Por favor, complete todos los campos requeridos.');
+                }
+            });
+            
+            // Remover clases de error al escribir
+            $('.documento-form-control').on('input', function() {
+                $(this).removeClass('is-invalid');
+            });
+        });
+    </script>
+}

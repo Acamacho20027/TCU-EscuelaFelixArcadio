@@ -171,7 +171,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdministrativoController.cs" />
     <Compile Include="Controllers\CategoriaController.cs" />
-    <Compile Include="Controllers\DeportivoController.cs" />
+    <Compile Include="Controllers\DocumentoController.cs" />
     <Compile Include="Controllers\EspaciosController.cs" />
     <Compile Include="Controllers\EstadisticasController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -192,6 +192,10 @@
     <Compile Include="Migrations\202510172107255_AgregarCamposAvanzadosPrestamo.cs" />
     <Compile Include="Migrations\202510172107255_AgregarCamposAvanzadosPrestamo.Designer.cs">
       <DependentUpon>202510172107255_AgregarCamposAvanzadosPrestamo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202510220055024_AgregarCamposArchivoDocumento.cs" />
+    <Compile Include="Migrations\202510220055024_AgregarCamposArchivoDocumento.Designer.cs">
+      <DependentUpon>202510220055024_AgregarCamposArchivoDocumento.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -244,11 +248,15 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\categoria.css" />
+    <Content Include="Content\documento.css" />
+    <Content Include="Content\espacios.css" />
     <Content Include="Content\images\escudo_escuela_felix_arcadio.jpg" />
     <Content Include="Content\images\escuela_parque.jpg" />
     <Content Include="Content\images\herramientas-deportivas.jpg" />
     <Content Include="Content\inventario.css" />
     <Content Include="Content\prestamos.css" />
+    <Content Include="Content\productos.css" />
+    <Content Include="Content\reservas.css" />
     <Content Include="Content\sanciones.css" />
     <Content Include="Content\sports-buttons-fix.css" />
     <Content Include="favicon.ico" />
@@ -260,6 +268,8 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Documentos\Deportivos\20251021232521_81135e54_guia-entrenamiento-avanzado.pdf" />
+    <Content Include="Documentos\Deportivos\20251022001832_d3376751_usda_nutritionguide_spanish2018.pdf" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -312,7 +322,6 @@
     <Content Include="Views\Account\RecuperarContrasenaConfirmacion.cshtml" />
     <Content Include="Views\Administrativo\Index.cshtml" />
     <Content Include="Views\Categoria\Index.cshtml" />
-    <Content Include="Views\Deportivo\Index.cshtml" />
     <Content Include="Views\Estadisticas\Index.cshtml" />
     <Content Include="Views\Inventario\Index.cshtml" />
     <Content Include="Views\Prestamos\Index.cshtml" />
@@ -352,6 +361,12 @@
     <Content Include="Views\Productos\Create.cshtml" />
     <Content Include="Views\Productos\Edit.cshtml" />
     <Content Include="Views\Productos\Delete.cshtml" />
+    <Content Include="Views\Documento\Index.cshtml" />
+    <Content Include="Views\Documento\Details.cshtml" />
+    <Content Include="Views\Documento\Create.cshtml" />
+    <Content Include="Views\Documento\Edit.cshtml" />
+    <Content Include="Views\Documento\Delete.cshtml" />
+    <Content Include="Views\Documento\View.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -389,6 +404,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202510172107255_AgregarCamposAvanzadosPrestamo.resx">
       <DependentUpon>202510172107255_AgregarCamposAvanzadosPrestamo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202510220055024_AgregarCamposArchivoDocumento.resx">
+      <DependentUpon>202510220055024_AgregarCamposArchivoDocumento.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

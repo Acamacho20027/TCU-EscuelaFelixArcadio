@@ -1,0 +1,238 @@
+﻿@model EscuelaFelixArcadio.Models.Documento
+
+@{
+    ViewBag.Title = "Subir Documento";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/documento.css" rel="stylesheet" />
+}
+
+<div class="documento-container">
+    <div class="documento-form-container">
+        <h2 class="documento-form-title">Subir Documento Deportivo</h2>
+        @using (Html.BeginForm("Create", "Documento", FormMethod.Post, new { enctype = "multipart/form-data", id = "formDocumento" }))
+        {
+            @Html.AntiForgeryToken()
+            
+            @Html.ValidationSummary(true, "", new { @class = "documento-alert documento-alert-error" })
+
+            <div class="documento-form-section">
+                <h3 class="documento-form-section-title">Archivo PDF</h3>
+                
+                <div class="documento-form-group">
+                    <label for="archivo" class="documento-form-label">Seleccionar Archivo</label>
+                    
+                    <div class="documento-file-upload-area" id="fileUploadArea">
+                        <i class="fas fa-cloud-upload-alt documento-file-upload-icon"></i>
+                        <p class="documento-file-upload-text">
+                            <strong>Haz clic aquí</strong> o arrastra un archivo PDF
+                        </p>
+                        <p class="documento-file-upload-hint">
+                            Tamaño máximo: 10 MB | Solo archivos PDF
+                        </p>
+                        <input type="file" name="archivo" id="archivo" accept=".pdf" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;" />
+                    </div>
+
+                    <div class="documento-file-info" id="fileInfo">
+                        <div class="documento-file-info-content">
+                            <i class="fas fa-file-pdf documento-file-info-icon"></i>
+                            <div class="documento-file-info-details">
+                                <div class="documento-file-info-name" id="fileName"></div>
+                                <div class="documento-file-info-size" id="fileSize"></div>
+                            </div>
+                            <button type="button" class="documento-btn-remove-file" id="btnRemoveFile">
+                                <i class="fas fa-times"></i> Remover
+                            </button>
+                        </div>
+                    </div>
+                    @Html.ValidationMessage("", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="documento-form-section">
+                <h3 class="documento-form-section-title">Información del Documento</h3>
+                
+                <div class="documento-form-grid">
+                    <div class="documento-form-group">
+                        @Html.LabelFor(model => model.Titulo, "Título del Documento", new { @class = "documento-form-label" })
+                        @Html.TextBoxFor(model => model.Titulo, new { @class = "documento-form-control", placeholder = "Ej: Rutina de Entrenamiento Semana 1", required = "required" })
+                        @Html.ValidationMessageFor(model => model.Titulo, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="documento-form-group">
+                        @Html.LabelFor(model => model.TipoDocumento, "Tipo de Documento", new { @class = "documento-form-label" })
+                        @Html.DropDownList("TipoDocumento", (SelectList)ViewBag.TiposDocumento, "Seleccione un tipo", new { @class = "documento-form-control", required = "required" })
+                        @Html.ValidationMessageFor(model => model.TipoDocumento, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="documento-form-group">
+                    @Html.LabelFor(model => model.Descripcion, "Descripción", new { @class = "documento-form-label" })
+                    @Html.TextAreaFor(model => model.Descripcion, new { @class = "documento-form-control", rows = 4, placeholder = "Describe el contenido del documento..." })
+                    @Html.ValidationMessageFor(model => model.Descripcion, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="documento-form-group">
+                    @Html.LabelFor(model => model.Publico, "Documento Público", new { @class = "documento-form-label" })
+                    @Html.DropDownListFor(model => model.Publico, new SelectList(new[] {
+                        new SelectListItem { Text = "No", Value = "false" },
+                        new SelectListItem { Text = "Sí", Value = "true" }
+                    }, "Value", "Text"), "Seleccione una opción", new { @class = "documento-form-control" })
+                    @Html.ValidationMessageFor(model => model.Publico, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="documento-form-buttons">
+                <button type="submit" class="btn-documento-save">
+                    <i class="fas fa-plus"></i> Crear Documento
+                </button>
+                <a href="@Url.Action("Index", "Documento")" class="btn-documento-cancel">
+                    Regresar a la Lista
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script>
+        $(document).ready(function() {
+            const fileInput = $('#archivo');
+            const fileUploadArea = $('#fileUploadArea');
+            const fileInfo = $('#fileInfo');
+            const fileName = $('#fileName');
+            const fileSize = $('#fileSize');
+            const btnRemoveFile = $('#btnRemoveFile');
+            let isClicking = false;
+
+            // El input file ahora está superpuesto sobre el área de subida
+            // No necesitamos manejar clicks manualmente
+
+            // Prevenir comportamiento por defecto en drag & drop
+            fileUploadArea.on('dragover dragenter', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).addClass('dragover');
+            });
+
+            fileUploadArea.on('dragleave dragend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+            });
+
+            // Manejar drop
+            fileUploadArea.on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).removeClass('dragover');
+                
+                const files = e.originalEvent.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput[0].files = files;
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            // Doble click como alternativa
+            fileUploadArea.on('dblclick', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileInput[0].click();
+            });
+
+            // Manejar cambio en input file
+            fileInput.on('change', function() {
+                const files = this.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            // Remover archivo
+            btnRemoveFile.on('click', function(e) {
+                e.stopPropagation();
+                fileInput.val('');
+                fileInfo.removeClass('show');
+                fileUploadArea.show();
+            });
+
+            // Función para manejar selección de archivo
+            function handleFileSelect(file) {
+                // Validar que sea PDF
+                if (file.type !== 'application/pdf') {
+                    alert('Solo se permiten archivos PDF');
+                    fileInput.val('');
+                    return;
+                }
+
+                // Validar tamaño (10 MB)
+                const maxSize = 10 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    alert('El archivo no puede exceder 10 MB');
+                    fileInput.val('');
+                    return;
+                }
+
+                // Mostrar información del archivo
+                fileName.text(file.name);
+                fileSize.text(formatBytes(file.size));
+                fileInfo.addClass('show');
+                fileUploadArea.hide();
+            }
+
+            // Formatear bytes
+            function formatBytes(bytes) {
+                if (bytes < 1024) return bytes + ' bytes';
+                else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+                else return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+
+            // Validación para solo permitir letras en el título
+            $('input[name="Titulo"]').on('input', function() {
+                var value = $(this).val();
+                var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                $(this).val(lettersOnly);
+                
+                if (lettersOnly !== '') {
+                    $('[data-valmsg-for="Titulo"]').text('');
+                    $(this).removeClass('input-validation-error');
+                }
+            });
+            
+            // Prevenir pegar contenido no válido en el título
+            $('input[name="Titulo"]').on('paste', function(e) {
+                setTimeout(function() {
+                    var value = $('input[name="Titulo"]').val();
+                    var lettersOnly = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+                    $('input[name="Titulo"]').val(lettersOnly);
+                }, 10);
+            });
+
+            // Validar formulario antes de enviar
+            $('#formDocumento').on('submit', function(e) {
+                console.log('Formulario enviándose...');
+                console.log('Archivo seleccionado:', fileInput[0].files.length > 0 ? fileInput[0].files[0].name : 'Ninguno');
+                console.log('Título:', $('input[name="Titulo"]').val());
+                console.log('Tipo:', $('select[name="TipoDocumento"]').val());
+                console.log('Público:', $('select[name="Publico"]').val());
+                
+                if (!fileInput[0].files || fileInput[0].files.length === 0) {
+                    e.preventDefault();
+                    alert('Debe seleccionar un archivo PDF');
+                    return false;
+                }
+                
+                // Deshabilitar botón de envío para evitar doble clic
+                $('.btn-documento-save').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Subiendo...');
+                
+                console.log('Formulario enviado correctamente');
+            });
+        });
+    </script>
+}
+

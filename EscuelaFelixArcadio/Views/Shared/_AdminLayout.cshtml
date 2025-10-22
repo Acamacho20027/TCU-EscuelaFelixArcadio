@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="~/Content/admin-layout.css?v=2" rel="stylesheet" />
+    <link href="~/Content/documento.css?v=1" rel="stylesheet" />
     @RenderSection("Styles", required: false)
 </head>
 <body>
@@ -95,7 +96,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="@Url.Action("Index", "Deportivo")" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Deportivo" ? "active" : "")">
+                            <a href="@Url.Action("Index", "Documento")" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Documento" ? "active" : "")">
                                 <i class="fas fa-running"></i>
                                 <span>Deportivo</span>
                             </a>
