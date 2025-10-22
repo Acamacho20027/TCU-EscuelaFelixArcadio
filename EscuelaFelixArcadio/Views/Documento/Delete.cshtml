@@ -1,0 +1,87 @@
+﻿@model EscuelaFelixArcadio.Models.Documento
+
+@{
+    ViewBag.Title = "Eliminar Documento";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/documento.css?v=1" rel="stylesheet" />
+}
+
+<div class="documento-container">
+    <div class="documento-delete-container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc2626; margin-bottom: 1rem;"></i>
+            <h2 class="documento-delete-title">¿Eliminar Documento?</h2>
+            <p class="documento-delete-message">
+                Esta accion es permanente y no se puede deshacer. ¿Esta seguro de que desea eliminar este documento?
+            </p>
+        </div>
+
+        <div class="documento-delete-info">
+            <h3 class="documento-delete-info-title">
+                <i class="fas fa-info-circle"></i> Informacion del Documento a Eliminar
+            </h3>
+            <div class="documento-delete-info-details">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <strong>ID:</strong> #@Model.IdDocumento
+                    </div>
+                    <div>
+                        <strong>Titulo:</strong> @Model.Titulo
+                    </div>
+                    <div>
+                        <strong>Tipo:</strong> @Model.TipoDocumento
+                    </div>
+                    <div>
+                        <strong>Archivo:</strong> @Model.NombreArchivo
+                    </div>
+                    <div>
+                        <strong>Tamaño:</strong> @Model.TamanoFormateado
+                    </div>
+                    <div>
+                        <strong>Visibilidad:</strong> @(Model.Publico ? "Público" : "Privado")
+                    </div>
+                    <div>
+                        <strong>Subido por:</strong> @(Model.ApplicationUser?.UserName ?? "Desconocido")
+                    </div>
+                    <div>
+                        <strong>Fecha de Subida:</strong> @Model.FechaSubida.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Descripcion))
+                {
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #fecaca;">
+                        <strong>Descripcion:</strong><br />
+                        <div style="margin-top: 0.5rem; padding: 0.5rem; background: #fff7f7; border-radius: 4px; max-height: 150px; overflow-y: auto;">
+                            @Model.Descripcion
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="documento-delete-info">
+            <h3 class="documento-delete-info-title">
+                <i class="fas fa-exclamation-triangle"></i> Advertencia:
+            </h3>
+            <div class="documento-delete-info-details">
+                Al eliminar este documento, se perdera todo el historial asociado. Esta accion no puede revertirse.
+            </div>
+        </div>
+
+        @using (Html.BeginForm("Delete", "Documento", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            
+            <div class="documento-form-buttons">
+                <button type="submit" class="btn-documento-delete-confirm">
+                    <i class="fas fa-trash"></i>
+                    Eliminar Definitivamente
+                </button>
+                @Html.ActionLink("Regresar a la Lista", "Index", "Documento", null, new { @class = "btn-documento-cancel" })
+            </div>
+        }
+    </div>
+</div>

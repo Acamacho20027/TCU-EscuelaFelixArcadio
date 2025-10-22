@@ -1,0 +1,175 @@
+﻿@model EscuelaFelixArcadio.Models.Documento
+@using Microsoft.AspNet.Identity
+
+@{
+    ViewBag.Title = "Detalles del Documento";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    var statusClass = "";
+    if (Model.Activo)
+    {
+        statusClass = "success";
+    }
+    else
+    {
+        statusClass = "error";
+    }
+    
+    var visibilityClass = "";
+    if (Model.Publico)
+    {
+        visibilityClass = "success";
+    }
+    else
+    {
+        visibilityClass = "warning";
+    }
+}
+
+@section Styles {
+    <link href="~/Content/documento.css" rel="stylesheet" />
+}
+
+<div class="documento-container">
+    <div class="documento-details-container">
+        <h2 class="documento-details-title">Detalles del Documento</h2>
+
+        <!-- Información principal -->
+        <div class="documento-details-card">
+            <h3 class="documento-details-card-title">
+                <i class="fas fa-file-pdf"></i> Información General
+            </h3>
+            <div class="documento-details-grid">
+                <div class="documento-details-field">
+                    <label class="documento-details-label">ID del Documento</label>
+                    <div class="documento-details-value">
+                        <i class="fas fa-hashtag"></i> @Model.IdDocumento
+                    </div>
+                </div>
+
+                <div class="documento-details-field">
+                    <label class="documento-details-label">Título</label>
+                    <div class="documento-details-value">
+                        <i class="fas fa-file-alt"></i> @Model.Titulo
+                    </div>
+                </div>
+
+                <div class="documento-details-field">
+                    <label class="documento-details-label">Tipo de Documento</label>
+                    <div class="documento-details-value">
+                        <i class="fas fa-tag"></i> @Model.TipoDocumento
+                    </div>
+                </div>
+
+                <div class="documento-details-field">
+                    <label class="documento-details-label">Nombre del Archivo</label>
+                    <div class="documento-details-value">
+                        <i class="fas fa-file"></i> @Model.NombreArchivo
+                    </div>
+                </div>
+
+                <div class="documento-details-field">
+                    <label class="documento-details-label">Tamaño</label>
+                    <div class="documento-details-value">
+                        <i class="fas fa-database"></i> @Model.TamanoFormateado
+                    </div>
+                </div>
+
+                <div class="documento-details-field">
+                    <label class="documento-details-label">Estado</label>
+                    <div class="documento-details-value">
+                        @if (Model.Activo)
+                        {
+                            <span class="documento-status-badge success">
+                                <i class="fas fa-check-circle"></i> Activo
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="documento-status-badge error">
+                                <i class="fas fa-times-circle"></i> Inactivo
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de clasificación -->
+        <div class="documento-details-card">
+            <h3 class="documento-details-card-title">
+                <i class="fas fa-cogs"></i> Clasificación del Documento
+            </h3>
+            <div class="documento-details-grid">
+                <div class="documento-details-field">
+                    <label class="documento-details-label">Tipo de Archivo</label>
+                    <div class="documento-details-value">
+                        <span class="documento-status-badge warning">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </span>
+                    </div>
+                </div>
+
+                <div class="documento-details-field">
+                    <label class="documento-details-label">Visibilidad</label>
+                    <div class="documento-details-value">
+                        @if (Model.Publico)
+                        {
+                            <span class="documento-status-badge success">
+                                <i class="fas fa-globe"></i> Público
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="documento-status-badge warning">
+                                <i class="fas fa-lock"></i> Privado
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div class="documento-details-field">
+                    <label class="documento-details-label">Subido por</label>
+                    <div class="documento-details-value">
+                        <i class="fas fa-user"></i> @(Model.ApplicationUser?.UserName ?? "Usuario no encontrado")
+                    </div>
+                </div>
+
+                <div class="documento-details-field">
+                    <label class="documento-details-label">Fecha de Subida</label>
+                    <div class="documento-details-value">
+                        <i class="fas fa-calendar-plus"></i> @Model.FechaSubida.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Descripción del documento -->
+        @if (!string.IsNullOrEmpty(Model.Descripcion))
+        {
+            <div class="documento-details-card">
+                <h3 class="documento-details-card-title">
+                    <i class="fas fa-sticky-note"></i> Descripción del Documento
+                </h3>
+                <div class="documento-details-field" style="grid-column: 1 / -1;">
+                    <div class="documento-details-value" style="white-space: pre-wrap; line-height: 1.6;">
+                        @Model.Descripcion
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Botones de acción -->
+        <div class="documento-form-buttons">
+            @if (User.IsInRole("Administrador") || (Model.ApplicationUser != null && Model.Id == User.Identity.GetUserId()))
+            {
+                <a href="@Url.Action("Edit", new { id = Model.IdDocumento })" class="btn-documento-save">
+                    <i class="fas fa-edit"></i> Editar Documento
+                </a>
+            }
+            <a href="@Url.Action("Index")" class="btn-documento-cancel">
+                Regresar a la Lista
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,273 @@
+﻿@model IEnumerable<EscuelaFelixArcadio.Models.Documento>
+@using Microsoft.AspNet.Identity
+
+@{
+    ViewBag.Title = "Documentos Deportivos";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/documento.css" rel="stylesheet" />
+}
+
+<div class="documento-container">
+    <!-- Header with title and create button -->
+    <div class="documento-header">
+        <h1 class="documento-title">Documentos Deportivos</h1>
+        @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
+        {
+            <a href="@Url.Action("Create", "Documento")" class="btn-create-documento">
+                <i class="fas fa-plus"></i>
+                Subir Documento
+            </a>
+        }
+    </div>
+
+    <!-- Alerts -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="documento-alert documento-alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span>@TempData["Success"]</span>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="documento-alert documento-alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>@TempData["Error"]</span>
+        </div>
+    }
+
+    <!-- Filters and search panel -->
+    <div class="documento-filters-panel">
+        <!-- Search bar -->
+        <div class="documento-search-bar" style="position: relative;">
+            <i class="fas fa-search documento-search-icon"></i>
+            <input type="text" id="searchInput" class="documento-search-input" placeholder="Buscar por título, descripción o tipo...">
+        </div>
+
+        <!-- Filter dropdowns -->
+        <div class="documento-filters-row">
+            <div class="documento-filter-group">
+                <label class="documento-filter-label">Tipo de Documento</label>
+                <select id="tipoFilter" class="documento-filter-select">
+                    <option value="">Todos los tipos</option>
+                    @if (ViewBag.TiposDocumento != null)
+                    {
+                        foreach (var tipo in ViewBag.TiposDocumento)
+                        {
+                            <option value="@tipo">@tipo</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="documento-filter-group">
+                <label class="documento-filter-label">Ordenar por</label>
+                <select id="sortBy" class="documento-filter-select">
+                    <option value="fecha">Fecha de Subida</option>
+                    <option value="titulo">Título</option>
+                    <option value="tipo">Tipo</option>
+                    <option value="tamano">Tamaño</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Controls row -->
+        <div class="documento-controls-row">
+            <div class="documento-sort-group">
+                <label class="documento-sort-label">Mostrar:</label>
+                <select id="pageSize" class="documento-filter-select">
+                    <option value="12">12</option>
+                    <option value="24">24</option>
+                    <option value="48">48</option>
+                </select>
+            </div>
+
+            <button id="clearFilters" class="documento-clear-filters">
+                <i class="fas fa-times"></i> Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Document Cards -->
+    @if (Model != null && Model.Any())
+    {
+        <p class="documento-page-info">Mostrando @Model.Count() de @ViewBag.TotalItems documentos</p>
+        
+        <div class="documento-cards-container">
+            @foreach (var documento in Model)
+            {
+                var statusClass = documento.Publico ? "publico" : "privado";
+                
+                <div class="documento-card">
+                    <span class="documento-card-status @statusClass">@(documento.Publico ? "Público" : "Privado")</span>
+                    
+                    <div class="documento-card-header">
+                        <h3 class="documento-card-title">@documento.Titulo</h3>
+                        <p class="documento-card-user">
+                            <i class="fas fa-user"></i> @(documento.ApplicationUser?.UserName ?? "Usuario no encontrado")
+                        </p>
+                    </div>
+
+                    <div class="documento-card-details">
+                        <div class="documento-card-detail">
+                            <span class="documento-card-detail-label">Tipo de Documento</span>
+                            <span class="documento-card-detail-value">@documento.TipoDocumento</span>
+                        </div>
+                        <div class="documento-card-detail">
+                            <span class="documento-card-detail-label">Tamaño</span>
+                            <span class="documento-card-detail-value">@documento.TamanoFormateado</span>
+                        </div>
+                        <div class="documento-card-detail">
+                            <span class="documento-card-detail-label">Fecha de Subida</span>
+                            <span class="documento-card-detail-value">@documento.FechaSubida.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="documento-card-detail">
+                            <span class="documento-card-detail-label">Estado</span>
+                            <span class="documento-card-detail-value">@(documento.Activo ? "Activo" : "Inactivo")</span>
+                        </div>
+                    </div>
+
+                    <div class="documento-card-footer">
+                        <span class="documento-card-id">
+                            <i class="fas fa-hashtag"></i> ID: @documento.IdDocumento
+                        </span>
+                        <div class="documento-card-actions">
+                            <a href="@Url.Action("View", "Documento", new { id = documento.IdDocumento })" class="btn-documento-action btn-documento-view">
+                                <i class="fas fa-eye"></i> Ver
+                            </a>
+                            <a href="@Url.Action("Download", "Documento", new { id = documento.IdDocumento })" class="btn-documento-action btn-documento-download">
+                                <i class="fas fa-download"></i> Descargar
+                            </a>
+                            <a href="@Url.Action("Details", "Documento", new { id = documento.IdDocumento })" class="btn-documento-action btn-documento-details">
+                                <i class="fas fa-info-circle"></i> Detalles
+                            </a>
+                            @if (User.IsInRole("Administrador") || (documento.ApplicationUser != null && documento.Id == User.Identity.GetUserId()))
+                            {
+                                <a href="@Url.Action("Delete", "Documento", new { id = documento.IdDocumento })" class="btn-documento-action btn-documento-delete">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <text>
+        @if (ViewBag.TotalPages != null && ViewBag.TotalPages > 1)
+        {
+            <div class="documento-pagination">
+                @if (ViewBag.CurrentPage > 1)
+                {
+                    <a href="@Url.Action("Index", new { search = ViewBag.Search, tipo = ViewBag.Tipo, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder, page = ViewBag.CurrentPage - 1 })" class="documento-page-link">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </a>
+                }
+
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <a href="@Url.Action("Index", new { search = ViewBag.Search, tipo = ViewBag.Tipo, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder, page = i })" 
+                       class="documento-page-link @(i == ViewBag.CurrentPage ? "active" : "")">
+                        @i
+                    </a>
+                }
+
+                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                {
+                    <a href="@Url.Action("Index", new { search = ViewBag.Search, tipo = ViewBag.Tipo, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder, page = ViewBag.CurrentPage + 1 })" class="documento-page-link">
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </a>
+                }
+            </div>
+        }
+        </text>
+    }
+    else
+    {
+        <div class="documento-empty-state">
+            <i class="fas fa-folder-open"></i>
+            <h3>No hay documentos disponibles</h3>
+            <p>
+                @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
+                {
+                    <text>Comienza subiendo tu primer documento deportivo.</text>
+                }
+                else
+                {
+                    <text>Aún no se han subido documentos deportivos.</text>
+                }
+            </p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Obtener elementos del DOM
+            const searchInput = $('#searchInput');
+            const tipoFilter = $('#tipoFilter');
+            const sortBy = $('#sortBy');
+            const pageSize = $('#pageSize');
+            const clearFilters = $('#clearFilters');
+
+            // Función para aplicar filtros
+            function applyFilters() {
+                const search = searchInput.val();
+                const tipo = tipoFilter.val();
+                const sort = sortBy.val();
+                const size = pageSize.val();
+
+                // Construir URL con parámetros
+                const url = new URL(window.location);
+                url.searchParams.set('search', search);
+                url.searchParams.set('tipo', tipo);
+                url.searchParams.set('sortBy', sort);
+                url.searchParams.set('pageSize', size);
+                url.searchParams.set('page', '1'); // Resetear a página 1
+
+                // Redirigir con filtros
+                window.location.href = url.toString();
+            }
+
+            // Event listeners para filtros
+            searchInput.on('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    applyFilters();
+                }
+            });
+
+            tipoFilter.on('change', function() {
+                applyFilters();
+            });
+
+            sortBy.on('change', function() {
+                applyFilters();
+            });
+
+            pageSize.on('change', function() {
+                applyFilters();
+            });
+
+            // Botón limpiar filtros
+            clearFilters.on('click', function() {
+                searchInput.val('');
+                tipoFilter.val('');
+                sortBy.val('fecha');
+                pageSize.val('12');
+                applyFilters();
+            });
+
+            // Mantener valores de filtros actuales
+            const urlParams = new URLSearchParams(window.location.search);
+            searchInput.val(urlParams.get('search') || '');
+            tipoFilter.val(urlParams.get('tipo') || '');
+            sortBy.val(urlParams.get('sortBy') || 'fecha');
+            pageSize.val(urlParams.get('pageSize') || '12');
+        });
+    </script>
+}
