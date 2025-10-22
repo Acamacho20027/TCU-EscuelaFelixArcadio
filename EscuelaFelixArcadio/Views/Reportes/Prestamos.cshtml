@@ -1,0 +1,228 @@
+﻿@model List<EscuelaFelixArcadio.Models.ViewModels.ReportePrestamosViewModel>
+
+@{
+    ViewBag.Title = "Reportes de Préstamos";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reportes.css" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <!-- Header -->
+    <div class="reportes-header">
+        <h1>
+            <i class="fas fa-hand-holding header-icon"></i>
+            @ViewBag.Title
+        </h1>
+        <div class="header-subtitle">
+            Análisis de préstamos, devoluciones y patrones de uso del material deportivo
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-section">
+        <div class="filtros-header">
+            <i class="fas fa-filter filtros-icon"></i>
+            <h3>Filtros de Búsqueda</h3>
+        </div>
+        
+        @using (Html.BeginForm("Prestamos", "Reportes", FormMethod.Get, new { @class = "filtros-form" }))
+        {
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label for="fechaInicio">Fecha Inicio</label>
+                    <input type="date" id="fechaInicio" name="fechaInicio" value="@Request.QueryString["fechaInicio"]" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="fechaFin">Fecha Fin</label>
+                    <input type="date" id="fechaFin" name="fechaFin" value="@Request.QueryString["fechaFin"]" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="usuarios">Usuarios</label>
+                    <select id="usuarios" name="usuarios" multiple>
+                        @if (ViewBag.Usuarios != null)
+                        {
+                            foreach (var usuario in (List<EscuelaFelixArcadio.Models.ApplicationUser>)ViewBag.Usuarios)
+                            {
+                                <option value="@usuario.Id">@usuario.UserName</option>
+                            }
+                        }
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="estados">Estados</label>
+                    <select id="estados" name="estados" multiple>
+                        @if (ViewBag.Estados != null)
+                        {
+                            foreach (var estado in (List<EscuelaFelixArcadio.Models.Estado>)ViewBag.Estados)
+                            {
+                                <option value="@estado.IdEstado">@estado.Descripcion</option>
+                            }
+                        }
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="devueltos">Estado de Devolución</label>
+                    <select id="devueltos" name="devueltos">
+                        <option value="">Todos</option>
+                        <option value="true" @(Request.QueryString["devueltos"] == "true" ? "selected" : "")>Devueltos</option>
+                        <option value="false" @(Request.QueryString["devueltos"] == "false" ? "selected" : "")>Pendientes</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filtros-actions">
+                <button type="submit" class="btn-filtrar">
+                    <i class="fas fa-search"></i>
+                    Filtrar
+                </button>
+                <button type="button" class="btn-limpiar" onclick="limpiarFiltros()">
+                    <i class="fas fa-eraser"></i>
+                    Limpiar
+                </button>
+            </div>
+        }
+    </div>
+
+    <!-- Datos del Reporte -->
+    <div class="datos-section">
+        <div class="datos-header">
+            <h3>
+                <i class="fas fa-table"></i>
+                Datos de Préstamos
+            </h3>
+            <div class="datos-actions">
+                <a href="@Url.Action("ExportarPDF", new { tipoReporte = "prestamos", filtros = Request.QueryString.ToString() })" class="btn-exportar">
+                    <i class="fas fa-file-pdf"></i>
+                    Exportar PDF
+                </a>
+                <a href="@Url.Action("ExportarExcel", new { tipoReporte = "prestamos", filtros = Request.QueryString.ToString() })" class="btn-exportar btn-excel">
+                    <i class="fas fa-file-excel"></i>
+                    Exportar Excel
+                </a>
+            </div>
+        </div>
+        
+        <div class="tabla-responsive">
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Número</th>
+                        <th>Usuario</th>
+                        <th>Nombre Completo</th>
+                        <th>Estado</th>
+                        <th>Fecha Creación</th>
+                        <th>Fecha Devolución</th>
+                        <th>Fecha Vencimiento</th>
+                        <th>Devuelto</th>
+                        <th>Motivo</th>
+                        <th>Urgente</th>
+                        <th>Días Retraso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.IdPrestamo</td>
+                                <td>@item.NumeroPrestamo</td>
+                                <td>@item.Usuario</td>
+                                <td>@item.NombreCompleto</td>
+                                <td>@item.Estado</td>
+                                <td>@item.FechadeCreacion.ToString("dd/MM/yyyy")</td>
+                                <td>@(item.FechaDevolucion?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                <td>@(item.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                <td>
+                                    @if (item.Devolucion)
+                                    {
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-check"></i>
+                                            Sí
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-warning">
+                                            <i class="fas fa-clock"></i>
+                                            No
+                                        </span>
+                                    }
+                                </td>
+                                <td>@(item.MotivoPrestamo ?? "N/A")</td>
+                                <td>
+                                    @if (item.EsUrgente)
+                                    {
+                                        <span class="badge badge-danger">
+                                            <i class="fas fa-exclamation"></i>
+                                            Urgente
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Normal</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.DiasRetraso > 0)
+                                    {
+                                        <span class="badge badge-danger">@item.DiasRetraso días</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-success">Al día</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="12" class="text-center">
+                                <div class="loading">Cargando datos...</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Inicializar select múltiple
+            $('#usuarios, #estados').select2({
+                placeholder: 'Seleccionar opciones',
+                allowClear: true,
+                width: '100%'
+            });
+            
+            // Cargar datos si hay filtros aplicados
+            if (window.location.search) {
+                cargarDatosPrestamos();
+            }
+        });
+
+        function limpiarFiltros() {
+            $('#fechaInicio, #fechaFin').val('');
+            $('#usuarios, #estados').val(null).trigger('change');
+            $('#devueltos').val('');
+            window.location.href = '@Url.Action("Prestamos")';
+        }
+
+        function cargarDatosPrestamos() {
+            console.log('Cargando datos de préstamos...');
+        }
+    </script>
+}

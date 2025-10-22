@@ -1,0 +1,208 @@
+﻿@model List<EscuelaFelixArcadio.Models.ViewModels.ReporteSancionesViewModel>
+
+@{
+    ViewBag.Title = "Reportes de Sanciones";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reportes.css" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <!-- Header -->
+    <div class="reportes-header">
+        <h1>
+            <i class="fas fa-exclamation-triangle header-icon"></i>
+            @ViewBag.Title
+        </h1>
+        <div class="header-subtitle">
+            Análisis de sanciones, montos y comportamiento de usuarios
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-section">
+        <div class="filtros-header">
+            <i class="fas fa-filter filtros-icon"></i>
+            <h3>Filtros de Búsqueda</h3>
+        </div>
+        
+        @using (Html.BeginForm("Sanciones", "Reportes", FormMethod.Get, new { @class = "filtros-form" }))
+        {
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label for="fechaInicio">Fecha Inicio</label>
+                    <input type="date" id="fechaInicio" name="fechaInicio" value="@Request.QueryString["fechaInicio"]" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="fechaFin">Fecha Fin</label>
+                    <input type="date" id="fechaFin" name="fechaFin" value="@Request.QueryString["fechaFin"]" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="usuarios">Usuarios</label>
+                    <select id="usuarios" name="usuarios" multiple>
+                        @if (ViewBag.Usuarios != null)
+                        {
+                            foreach (var usuario in (List<EscuelaFelixArcadio.Models.ApplicationUser>)ViewBag.Usuarios)
+                            {
+                                <option value="@usuario.Id">@usuario.UserName</option>
+                            }
+                        }
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="estados">Estados</label>
+                    <select id="estados" name="estados" multiple>
+                        @if (ViewBag.Estados != null)
+                        {
+                            foreach (var estado in (List<EscuelaFelixArcadio.Models.Estado>)ViewBag.Estados)
+                            {
+                                <option value="@estado.IdEstado">@estado.Descripcion</option>
+                            }
+                        }
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="tipos">Tipos de Sanción</label>
+                    <select id="tipos" name="tipos" multiple>
+                        <option value="Retraso">Retraso</option>
+                        <option value="Daño">Daño</option>
+                        <option value="Pérdida">Pérdida</option>
+                        <option value="Mal Uso">Mal Uso</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filtros-actions">
+                <button type="submit" class="btn-filtrar">
+                    <i class="fas fa-search"></i>
+                    Filtrar
+                </button>
+                <button type="button" class="btn-limpiar" onclick="limpiarFiltros()">
+                    <i class="fas fa-eraser"></i>
+                    Limpiar
+                </button>
+            </div>
+        }
+    </div>
+
+    <!-- Datos del Reporte -->
+    <div class="datos-section">
+        <div class="datos-header">
+            <h3>
+                <i class="fas fa-table"></i>
+                Datos de Sanciones
+            </h3>
+            <div class="datos-actions">
+                <a href="@Url.Action("ExportarPDF", new { tipoReporte = "sanciones", filtros = Request.QueryString.ToString() })" class="btn-exportar">
+                    <i class="fas fa-file-pdf"></i>
+                    Exportar PDF
+                </a>
+                <a href="@Url.Action("ExportarExcel", new { tipoReporte = "sanciones", filtros = Request.QueryString.ToString() })" class="btn-exportar btn-excel">
+                    <i class="fas fa-file-excel"></i>
+                    Exportar Excel
+                </a>
+            </div>
+        </div>
+        
+        <div class="tabla-responsive">
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Nombre Completo</th>
+                        <th>Estado</th>
+                        <th>Tipo</th>
+                        <th>Motivo</th>
+                        <th>Monto</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Préstamo Relacionado</th>
+                        <th>Sanción Activa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.IdSancion</td>
+                                <td>@item.Usuario</td>
+                                <td>@item.NombreCompleto</td>
+                                <td>@item.Estado</td>
+                                <td>
+                                    <span class="badge badge-info">@item.Tipo</span>
+                                </td>
+                                <td>@item.Motivo</td>
+                                <td>₡@item.Monto.ToString("N2")</td>
+                                <td>@item.FechaInicio.ToString("dd/MM/yyyy")</td>
+                                <td>@(item.FechaFin?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                <td>@item.PrestamoRelacionado</td>
+                                <td>
+                                    @if (item.SancionActiva)
+                                    {
+                                        <span class="badge badge-danger">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Activa
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-check"></i>
+                                            Finalizada
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" class="text-center">
+                                <div class="loading">Cargando datos...</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Inicializar select múltiple
+            $('#usuarios, #estados, #tipos').select2({
+                placeholder: 'Seleccionar opciones',
+                allowClear: true,
+                width: '100%'
+            });
+            
+            // Cargar datos si hay filtros aplicados
+            if (window.location.search) {
+                cargarDatosSanciones();
+            }
+        });
+
+        function limpiarFiltros() {
+            $('#fechaInicio, #fechaFin').val('');
+            $('#usuarios, #estados, #tipos').val(null).trigger('change');
+            window.location.href = '@Url.Action("Sanciones")';
+        }
+
+        function cargarDatosSanciones() {
+            console.log('Cargando datos de sanciones...');
+        }
+    </script>
+}

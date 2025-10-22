@@ -197,30 +197,48 @@
     <Compile Include="Migrations\202510220055024_AgregarCamposArchivoDocumento.Designer.cs">
       <DependentUpon>202510220055024_AgregarCamposArchivoDocumento.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202510221925491_AgregarSistemaReportesCompleto.cs" />
+    <Compile Include="Migrations\202510221925491_AgregarSistemaReportesCompleto.Designer.cs">
+      <DependentUpon>202510221925491_AgregarSistemaReportesCompleto.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\AlertaReporte.cs" />
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\ApplicationRol.cs" />
     <Compile Include="Models\ApplicationUser.cs" />
     <Compile Include="Models\Categoria.cs" />
+    <Compile Include="Models\ComentarioReporte.cs" />
+    <Compile Include="Models\ConfiguracionReporte.cs" />
     <Compile Include="Models\Documento.cs" />
     <Compile Include="Models\Espacio.cs" />
     <Compile Include="Models\Estado.cs" />
+    <Compile Include="Models\HistorialAprobacionPrestamo.cs" />
     <Compile Include="Models\Inventario.cs" />
+    <Compile Include="Models\LogAccesoReporte.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\MantenimientoEspacio.cs" />
     <Compile Include="Models\MovimientoInventario.cs" />
     <Compile Include="Models\NumeroSerieProducto.cs" />
+    <Compile Include="Models\PermisoReporte.cs" />
+    <Compile Include="Models\PlantillaReporte.cs" />
     <Compile Include="Models\Prestamo.cs" />
     <Compile Include="Models\Producto.cs" />
     <Compile Include="Models\RecuperacionContrasena.cs" />
+    <Compile Include="Models\ReporteGuardado.cs" />
     <Compile Include="Models\Reserva.cs" />
     <Compile Include="Models\ReservaEspacio.cs" />
     <Compile Include="Models\RolInitialize.cs" />
     <Compile Include="Models\Sancion.cs" />
     <Compile Include="Models\TipoMovimientoInventario.cs" />
     <Compile Include="Models\VarianteProducto.cs" />
+    <Compile Include="Models\ViewModels\EstadisticasAprobacionesViewModel.cs" />
+    <Compile Include="Models\ViewModels\ReporteInventarioViewModel.cs" />
+    <Compile Include="Models\ViewModels\ReportePrestamosViewModel.cs" />
+    <Compile Include="Models\ViewModels\ReporteSancionesViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ExportacionService.cs" />
+    <Compile Include="Services\ReportesService.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -256,6 +274,7 @@
     <Content Include="Content\inventario.css" />
     <Content Include="Content\prestamos.css" />
     <Content Include="Content\productos.css" />
+    <Content Include="Content\reportes.css" />
     <Content Include="Content\reservas.css" />
     <Content Include="Content\sanciones.css" />
     <Content Include="Content\sports-buttons-fix.css" />
@@ -325,7 +344,6 @@
     <Content Include="Views\Estadisticas\Index.cshtml" />
     <Content Include="Views\Inventario\Index.cshtml" />
     <Content Include="Views\Prestamos\Index.cshtml" />
-    <Content Include="Views\Reportes\Index.cshtml" />
     <Content Include="Views\Sanciones\Index.cshtml" />
     <Content Include="Views\Shared\_AdminLayout.cshtml" />
     <Content Include="Views\Inventario\Details.cshtml" />
@@ -367,6 +385,22 @@
     <Content Include="Views\Documento\Edit.cshtml" />
     <Content Include="Views\Documento\Delete.cshtml" />
     <Content Include="Views\Documento\View.cshtml" />
+    <Content Include="Views\Reportes\Index.cshtml" />
+    <Content Include="Views\Reportes\Inventario.cshtml" />
+    <Content Include="Views\Reportes\Prestamos.cshtml" />
+    <Content Include="Views\Reportes\Sanciones.cshtml" />
+    <Content Include="Views\Reportes\ConfiguracionPersonalizada.cshtml" />
+    <Content Include="Views\Reportes\Plantillas.cshtml" />
+    <Content Include="Views\Reportes\GenerarPorPlantilla.cshtml" />
+    <Content Include="Views\Reportes\CrearPlantilla.cshtml" />
+    <Content Include="Views\Reportes\CompararPeriodos.cshtml" />
+    <Content Include="Views\Reportes\GraficosInteractivos.cshtml" />
+    <Content Include="Views\Reportes\Alertas.cshtml" />
+    <Content Include="Views\Reportes\PermisosReporte.cshtml" />
+    <Content Include="Views\Reportes\LogsAcceso.cshtml" />
+    <Content Include="Views\Reportes\VerReporte.cshtml" />
+    <Content Include="Views\Reportes\HistorialAprobaciones.cshtml" />
+    <Content Include="Views\Reportes\VistaPlantilla.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -407,6 +441,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202510220055024_AgregarCamposArchivoDocumento.resx">
       <DependentUpon>202510220055024_AgregarCamposArchivoDocumento.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202510221925491_AgregarSistemaReportesCompleto.resx">
+      <DependentUpon>202510221925491_AgregarSistemaReportesCompleto.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

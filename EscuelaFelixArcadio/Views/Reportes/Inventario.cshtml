@@ -1,0 +1,196 @@
+﻿@model List<EscuelaFelixArcadio.Models.ViewModels.ReporteInventarioViewModel>
+
+@{
+    ViewBag.Title = "Reportes de Inventario";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reportes.css" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <!-- Header -->
+    <div class="reportes-header">
+        <h1>
+            <i class="fas fa-boxes header-icon"></i>
+            @ViewBag.Title
+        </h1>
+        <div class="header-subtitle">
+            Análisis detallado del inventario y stock de productos deportivos
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-section">
+        <div class="filtros-header">
+            <i class="fas fa-filter filtros-icon"></i>
+            <h3>Filtros de Búsqueda</h3>
+        </div>
+        
+        @using (Html.BeginForm("Inventario", "Reportes", FormMethod.Get, new { @class = "filtros-form" }))
+        {
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label for="fechaInicio">Fecha Inicio</label>
+                    <input type="date" id="fechaInicio" name="fechaInicio" value="@Request.QueryString["fechaInicio"]" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="fechaFin">Fecha Fin</label>
+                    <input type="date" id="fechaFin" name="fechaFin" value="@Request.QueryString["fechaFin"]" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="categorias">Categorías</label>
+                    <select id="categorias" name="categorias" multiple>
+                        @if (ViewBag.Categorias != null)
+                        {
+                            foreach (var categoria in (List<EscuelaFelixArcadio.Models.Categoria>)ViewBag.Categorias)
+                            {
+                                <option value="@categoria.IdCategoria">@categoria.Nombre</option>
+                            }
+                        }
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="estados">Estados</label>
+                    <select id="estados" name="estados" multiple>
+                        @if (ViewBag.Estados != null)
+                        {
+                            foreach (var estado in (List<EscuelaFelixArcadio.Models.Estado>)ViewBag.Estados)
+                            {
+                                <option value="@estado.IdEstado">@estado.Descripcion</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filtros-actions">
+                <button type="submit" class="btn-filtrar">
+                    <i class="fas fa-search"></i>
+                    Filtrar
+                </button>
+                <button type="button" class="btn-limpiar" onclick="limpiarFiltros()">
+                    <i class="fas fa-eraser"></i>
+                    Limpiar
+                </button>
+            </div>
+        }
+    </div>
+
+    <!-- Datos del Reporte -->
+    <div class="datos-section">
+        <div class="datos-header">
+            <h3>
+                <i class="fas fa-table"></i>
+                Datos de Inventario
+            </h3>
+            <div class="datos-actions">
+                <a href="@Url.Action("ExportarPDF", new { tipoReporte = "inventario", filtros = Request.QueryString.ToString() })" class="btn-exportar">
+                    <i class="fas fa-file-pdf"></i>
+                    Exportar PDF
+                </a>
+                <a href="@Url.Action("ExportarExcel", new { tipoReporte = "inventario", filtros = Request.QueryString.ToString() })" class="btn-exportar btn-excel">
+                    <i class="fas fa-file-excel"></i>
+                    Exportar Excel
+                </a>
+            </div>
+        </div>
+        
+        <div class="tabla-responsive">
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Producto</th>
+                        <th>Código</th>
+                        <th>Categoría</th>
+                        <th>Estado</th>
+                        <th>Cantidad</th>
+                        <th>Mínimo</th>
+                        <th>Máximo</th>
+                        <th>Variante</th>
+                        <th>Última Actualización</th>
+                        <th>Alerta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.IdInventario</td>
+                                <td>@item.Producto</td>
+                                <td>@item.Codigo</td>
+                                <td>@item.Categoria</td>
+                                <td>@item.Estado</td>
+                                <td>@item.Cantidad</td>
+                                <td>@item.Minimo</td>
+                                <td>@item.Maximo</td>
+                                <td>@item.Variante</td>
+                                <td>@item.FechaActualizacion.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @if (item.AlertaStockBajo)
+                                    {
+                                        <span class="badge badge-danger">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Stock Bajo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-check"></i>
+                                            Normal
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" class="text-center">
+                                <div class="loading">Cargando datos...</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Inicializar select múltiple
+            $('#categorias, #estados').select2({
+                placeholder: 'Seleccionar opciones',
+                allowClear: true,
+                width: '100%'
+            });
+            
+            // Cargar datos si hay filtros aplicados
+            if (window.location.search) {
+                cargarDatosInventario();
+            }
+        });
+
+        function limpiarFiltros() {
+            $('#fechaInicio, #fechaFin').val('');
+            $('#categorias, #estados').val(null).trigger('change');
+            window.location.href = '@Url.Action("Inventario")';
+        }
+
+        function cargarDatosInventario() {
+            // Esta función se puede usar para cargar datos dinámicamente
+            console.log('Cargando datos de inventario...');
+        }
+    </script>
+}

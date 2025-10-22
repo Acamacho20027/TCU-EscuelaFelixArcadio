@@ -1,0 +1,429 @@
+﻿@{
+    ViewBag.Title = "Comparación de Períodos";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reportes.css" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <!-- Header -->
+    <div class="reportes-header">
+        <h1>
+            <i class="fas fa-balance-scale header-icon"></i>
+            @ViewBag.Title
+        </h1>
+        <div class="header-subtitle">
+            Compara datos entre diferentes períodos para analizar tendencias y cambios en el sistema
+        </div>
+    </div>
+
+    <!-- Formulario de comparación -->
+    <div class="form-section">
+        <div class="filtros-header">
+            <i class="fas fa-calendar-alt filtros-icon"></i>
+            <h3>Configurar Comparación</h3>
+        </div>
+        
+        <form id="formComparacion">
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label for="tipoReporte">Tipo de Reporte</label>
+                    <select id="tipoReporte" name="tipoReporte" required>
+                        <option value="">Seleccionar tipo</option>
+                        <option value="prestamos">Préstamos</option>
+                        <option value="inventario">Inventario</option>
+                        <option value="sanciones">Sanciones</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label for="periodo1Inicio">Período 1 - Fecha Inicio</label>
+                    <input type="date" id="periodo1Inicio" name="periodo1Inicio" required />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="periodo1Fin">Período 1 - Fecha Fin</label>
+                    <input type="date" id="periodo1Fin" name="periodo1Fin" required />
+                </div>
+            </div>
+            
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label for="periodo2Inicio">Período 2 - Fecha Inicio</label>
+                    <input type="date" id="periodo2Inicio" name="periodo2Inicio" required />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="periodo2Fin">Período 2 - Fecha Fin</label>
+                    <input type="date" id="periodo2Fin" name="periodo2Fin" required />
+                </div>
+            </div>
+            
+            <div class="filtros-actions">
+                <button type="submit" class="btn-filtrar">
+                    <i class="fas fa-chart-line"></i>
+                    Generar Comparación
+                </button>
+                <button type="button" class="btn-limpiar" onclick="limpiarFormulario()">
+                    <i class="fas fa-eraser"></i>
+                    Limpiar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Resultados de la comparación -->
+    <div class="comparacion-container" id="resultadosComparacion" style="display: none;">
+        <div class="filtros-header">
+            <i class="fas fa-chart-bar filtros-icon"></i>
+            <h3>Resultados de la Comparación</h3>
+        </div>
+        
+        <div class="comparacion-grid" id="comparacionGrid">
+            <!-- Los resultados se cargarán aquí dinámicamente -->
+        </div>
+    </div>
+
+    <!-- Opciones rápidas -->
+    <div class="form-section">
+        <div class="filtros-header">
+            <i class="fas fa-bolt filtros-icon"></i>
+            <h3>Comparaciones Rápidas</h3>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>
+                    <i class="fas fa-calendar-week card-icon"></i>
+                    Mes Actual vs Mes Anterior
+                </h3>
+                <div class="card-description">
+                    Compara el mes actual con el mes anterior para ver tendencias mensuales.
+                </div>
+                <button type="button" class="card-action" onclick="comparacionRapida('mes-actual-anterior')">
+                    <i class="fas fa-play"></i>
+                    Comparar
+                </button>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>
+                    <i class="fas fa-calendar-alt card-icon"></i>
+                    Trimestre Actual vs Anterior
+                </h3>
+                <div class="card-description">
+                    Compara el trimestre actual con el trimestre anterior.
+                </div>
+                <button type="button" class="card-action" onclick="comparacionRapida('trimestre-actual-anterior')">
+                    <i class="fas fa-play"></i>
+                    Comparar
+                </button>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>
+                    <i class="fas fa-calendar card-icon"></i>
+                    Año Actual vs Año Anterior
+                </h3>
+                <div class="card-description">
+                    Compara el año actual con el año anterior para análisis anual.
+                </div>
+                <button type="button" class="card-action" onclick="comparacionRapida('año-actual-anterior')">
+                    <i class="fas fa-play"></i>
+                    Comparar
+                </button>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>
+                    <i class="fas fa-calendar-day card-icon"></i>
+                    Últimos 30 días vs 30 días anteriores
+                </h3>
+                <div class="card-description">
+                    Compara los últimos 30 días con los 30 días anteriores.
+                </div>
+                <button type="button" class="card-action" onclick="comparacionRapida('30-dias')">
+                    <i class="fas fa-play"></i>
+                    Comparar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Configurar formulario
+            $('#formComparacion').on('submit', function(e) {
+                e.preventDefault();
+                generarComparacion();
+            });
+            
+            // Establecer fechas por defecto
+            establecerFechasPorDefecto();
+        });
+
+        function establecerFechasPorDefecto() {
+            var hoy = new Date();
+            var mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+            var finMesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+            
+            // Mes actual
+            $('#periodo1Inicio').val(hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-01');
+            $('#periodo1Fin').val(hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0'));
+            
+            // Mes anterior
+            $('#periodo2Inicio').val(mesAnterior.getFullYear() + '-' + String(mesAnterior.getMonth() + 1).padStart(2, '0') + '-01');
+            $('#periodo2Fin').val(finMesAnterior.getFullYear() + '-' + String(finMesAnterior.getMonth() + 1).padStart(2, '0') + '-' + String(finMesAnterior.getDate()).padStart(2, '0'));
+        }
+
+        function generarComparacion() {
+            var tipoReporte = $('#tipoReporte').val();
+            var periodo1Inicio = $('#periodo1Inicio').val();
+            var periodo1Fin = $('#periodo1Fin').val();
+            var periodo2Inicio = $('#periodo2Inicio').val();
+            var periodo2Fin = $('#periodo2Fin').val();
+            
+            if (!tipoReporte || !periodo1Inicio || !periodo1Fin || !periodo2Inicio || !periodo2Fin) {
+                alert('Por favor completa todos los campos');
+                return;
+            }
+            
+            // Mostrar loading
+            $('#resultadosComparacion').show();
+            $('#comparacionGrid').html('<div class="loading">Generando comparación...</div>');
+            
+            $.ajax({
+                url: '@Url.Action("GenerarComparacion")',
+                type: 'POST',
+                data: {
+                    tipoReporte: tipoReporte,
+                    periodo1Inicio: periodo1Inicio,
+                    periodo1Fin: periodo1Fin,
+                    periodo2Inicio: periodo2Inicio,
+                    periodo2Fin: periodo2Fin
+                },
+                success: function(response) {
+                    if (response.success) {
+                        mostrarResultadosComparacion(response.data);
+                    } else {
+                        $('#comparacionGrid').html('<div class="text-center p-4"><i class="fas fa-exclamation-triangle text-warning"></i><br>Error al generar la comparación</div>');
+                    }
+                },
+                error: function() {
+                    $('#comparacionGrid').html('<div class="text-center p-4"><i class="fas fa-exclamation-triangle text-danger"></i><br>Error al generar la comparación</div>');
+                }
+            });
+        }
+
+        function mostrarResultadosComparacion(datos) {
+            var html = '';
+            
+            // Período 1
+            html += '<div class="comparacion-periodo">';
+            html += '<h4>Período 1</h4>';
+            html += '<div class="comparacion-metrica">';
+            html += '<div class="metrica-label">Fecha Inicio</div>';
+            html += '<div class="metrica-valor">' + datos.Periodo1.Inicio + '</div>';
+            html += '</div>';
+            html += '<div class="comparacion-metrica">';
+            html += '<div class="metrica-label">Fecha Fin</div>';
+            html += '<div class="metrica-valor">' + datos.Periodo1.Fin + '</div>';
+            html += '</div>';
+            
+            // Métricas específicas según el tipo de reporte
+            if (datos.Periodo1.TotalPrestamos !== undefined) {
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Total Préstamos</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo1.TotalPrestamos + '</div>';
+                html += '</div>';
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Devueltos</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo1.Devueltos + '</div>';
+                html += '</div>';
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Tasa Devolución</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo1.TasaDevolucion.toFixed(1) + '%</div>';
+                html += '</div>';
+            } else if (datos.Periodo1.TotalItems !== undefined) {
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Total Items</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo1.TotalItems + '</div>';
+                html += '</div>';
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Alertas Stock</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo1.AlertasStockBajo + '</div>';
+                html += '</div>';
+            } else if (datos.Periodo1.TotalSanciones !== undefined) {
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Total Sanciones</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo1.TotalSanciones + '</div>';
+                html += '</div>';
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Monto Total</div>';
+                html += '<div class="metrica-valor">₡' + datos.Periodo1.MontoTotal.toFixed(2) + '</div>';
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            
+            // Período 2
+            html += '<div class="comparacion-periodo">';
+            html += '<h4>Período 2</h4>';
+            html += '<div class="comparacion-metrica">';
+            html += '<div class="metrica-label">Fecha Inicio</div>';
+            html += '<div class="metrica-valor">' + datos.Periodo2.Inicio + '</div>';
+            html += '</div>';
+            html += '<div class="comparacion-metrica">';
+            html += '<div class="metrica-label">Fecha Fin</div>';
+            html += '<div class="metrica-valor">' + datos.Periodo2.Fin + '</div>';
+            html += '</div>';
+            
+            // Métricas específicas según el tipo de reporte
+            if (datos.Periodo2.TotalPrestamos !== undefined) {
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Total Préstamos</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo2.TotalPrestamos + '</div>';
+                html += '</div>';
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Devueltos</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo2.Devueltos + '</div>';
+                html += '</div>';
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Tasa Devolución</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo2.TasaDevolucion.toFixed(1) + '%</div>';
+                html += '</div>';
+            } else if (datos.Periodo2.TotalItems !== undefined) {
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Total Items</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo2.TotalItems + '</div>';
+                html += '</div>';
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Alertas Stock</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo2.AlertasStockBajo + '</div>';
+                html += '</div>';
+            } else if (datos.Periodo2.TotalSanciones !== undefined) {
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Total Sanciones</div>';
+                html += '<div class="metrica-valor">' + datos.Periodo2.TotalSanciones + '</div>';
+                html += '</div>';
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Monto Total</div>';
+                html += '<div class="metrica-valor">₡' + datos.Periodo2.MontoTotal.toFixed(2) + '</div>';
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            
+            // Diferencias
+            html += '<div class="comparacion-diferencias">';
+            html += '<h4>Diferencias</h4>';
+            
+            if (datos.Diferencias.TotalPrestamos !== undefined) {
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Diferencia Préstamos</div>';
+                html += '<div class="metrica-valor">' + datos.Diferencias.TotalPrestamos + ' (' + datos.Diferencias.TotalPrestamosPorc.toFixed(1) + '%)</div>';
+                html += '</div>';
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Diferencia Devueltos</div>';
+                html += '<div class="metrica-valor">' + datos.Diferencias.Devueltos + ' (' + datos.Diferencias.DevueltosPorc.toFixed(1) + '%)</div>';
+                html += '</div>';
+            } else if (datos.Diferencias.TotalItems !== undefined) {
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Diferencia Items</div>';
+                html += '<div class="metrica-valor">' + datos.Diferencias.TotalItems + ' (' + datos.Diferencias.TotalItemsPorc.toFixed(1) + '%)</div>';
+                html += '</div>';
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Diferencia Alertas</div>';
+                html += '<div class="metrica-valor">' + datos.Diferencias.Alertas + '</div>';
+                html += '</div>';
+            } else if (datos.Diferencias.TotalSanciones !== undefined) {
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Diferencia Sanciones</div>';
+                html += '<div class="metrica-valor">' + datos.Diferencias.TotalSanciones + ' (' + datos.Diferencias.TotalSancionesPorc.toFixed(1) + '%)</div>';
+                html += '</div>';
+                html += '<div class="comparacion-metrica">';
+                html += '<div class="metrica-label">Diferencia Monto</div>';
+                html += '<div class="metrica-valor">₡' + datos.Diferencias.MontoTotal.toFixed(2) + ' (' + datos.Diferencias.MontoTotalPorc.toFixed(1) + '%)</div>';
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            
+            $('#comparacionGrid').html(html);
+        }
+
+        function comparacionRapida(tipo) {
+            var hoy = new Date();
+            var fecha1Inicio, fecha1Fin, fecha2Inicio, fecha2Fin;
+            
+            switch (tipo) {
+                case 'mes-actual-anterior':
+                    // Mes actual
+                    fecha1Inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+                    fecha1Fin = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+                    // Mes anterior
+                    fecha2Inicio = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+                    fecha2Fin = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+                    break;
+                    
+                case 'trimestre-actual-anterior':
+                    // Trimestre actual
+                    var trimestreActual = Math.floor(hoy.getMonth() / 3);
+                    fecha1Inicio = new Date(hoy.getFullYear(), trimestreActual * 3, 1);
+                    fecha1Fin = new Date(hoy.getFullYear(), (trimestreActual + 1) * 3, 0);
+                    // Trimestre anterior
+                    fecha2Inicio = new Date(hoy.getFullYear(), (trimestreActual - 1) * 3, 1);
+                    fecha2Fin = new Date(hoy.getFullYear(), trimestreActual * 3, 0);
+                    break;
+                    
+                case 'año-actual-anterior':
+                    // Año actual
+                    fecha1Inicio = new Date(hoy.getFullYear(), 0, 1);
+                    fecha1Fin = new Date(hoy.getFullYear(), 11, 31);
+                    // Año anterior
+                    fecha2Inicio = new Date(hoy.getFullYear() - 1, 0, 1);
+                    fecha2Fin = new Date(hoy.getFullYear() - 1, 11, 31);
+                    break;
+                    
+                case '30-dias':
+                    // Últimos 30 días
+                    fecha1Fin = new Date(hoy);
+                    fecha1Inicio = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    // 30 días anteriores
+                    fecha2Fin = new Date(fecha1Inicio);
+                    fecha2Inicio = new Date(fecha1Inicio.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    break;
+            }
+            
+            // Establecer fechas en el formulario
+            $('#periodo1Inicio').val(formatearFecha(fecha1Inicio));
+            $('#periodo1Fin').val(formatearFecha(fecha1Fin));
+            $('#periodo2Inicio').val(formatearFecha(fecha2Inicio));
+            $('#periodo2Fin').val(formatearFecha(fecha2Fin));
+            
+            // Establecer tipo de reporte por defecto
+            $('#tipoReporte').val('prestamos');
+            
+            // Generar comparación automáticamente
+            generarComparacion();
+        }
+
+        function formatearFecha(fecha) {
+            return fecha.getFullYear() + '-' + 
+                   String(fecha.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(fecha.getDate()).padStart(2, '0');
+        }
+
+        function limpiarFormulario() {
+            $('#formComparacion')[0].reset();
+            $('#resultadosComparacion').hide();
+            establecerFechasPorDefecto();
+        }
+    </script>
+}

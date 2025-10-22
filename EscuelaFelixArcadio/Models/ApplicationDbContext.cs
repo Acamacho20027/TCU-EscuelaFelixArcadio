@@ -36,6 +36,16 @@ namespace EscuelaFelixArcadio.Models
         public DbSet<Documento> Documento { get; set; }
         public DbSet<RecuperacionContrasena> RecuperacionContrasena { get; set; }
 
+        // DbSets para Sistema de Reportes
+        public DbSet<ConfiguracionReporte> ConfiguracionReporte { get; set; }
+        public DbSet<PlantillaReporte> PlantillaReporte { get; set; }
+        public DbSet<ReporteGuardado> ReporteGuardado { get; set; }
+        public DbSet<PermisoReporte> PermisoReporte { get; set; }
+        public DbSet<LogAccesoReporte> LogAccesoReporte { get; set; }
+        public DbSet<ComentarioReporte> ComentarioReporte { get; set; }
+        public DbSet<AlertaReporte> AlertaReporte { get; set; }
+        public DbSet<HistorialAprobacionPrestamo> HistorialAprobacionPrestamo { get; set; }
+
 
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -58,6 +68,17 @@ namespace EscuelaFelixArcadio.Models
             modelBuilder.Entity<MantenimientoEspacio>().ToTable("MantenimientoEspacio");
             modelBuilder.Entity<Documento>().ToTable("Documento");
             modelBuilder.Entity<RecuperacionContrasena>().ToTable("RecuperacionContrasena");
+
+            // Tablas para Sistema de Reportes
+            modelBuilder.Entity<ConfiguracionReporte>().ToTable("ConfiguracionReporte");
+            modelBuilder.Entity<PlantillaReporte>().ToTable("PlantillaReporte");
+            modelBuilder.Entity<ReporteGuardado>().ToTable("ReporteGuardado");
+            modelBuilder.Entity<PermisoReporte>().ToTable("PermisoReporte");
+            modelBuilder.Entity<LogAccesoReporte>().ToTable("LogAccesoReporte");
+            modelBuilder.Entity<ComentarioReporte>().ToTable("ComentarioReporte");
+            modelBuilder.Entity<AlertaReporte>().ToTable("AlertaReporte");
+            modelBuilder.Entity<HistorialAprobacionPrestamo>().ToTable("HistorialAprobacionPrestamo");
+
             modelBuilder.Entity<Categoria>()
            .HasRequired(m => m.Estado)           // la propiedad de navegación
            .WithMany()                           // si no hay colección inversa
@@ -108,6 +129,25 @@ namespace EscuelaFelixArcadio.Models
            .WithMany()                           // si no hay colección inversa
            .HasForeignKey(m => m.IdEstado)       // clave foránea
            .WillCascadeOnDelete(false);
+
+            // Configuraciones para evitar cascada en tablas de Reportes
+            modelBuilder.Entity<HistorialAprobacionPrestamo>()
+                .HasRequired(h => h.UsuarioSolicitante)
+                .WithMany()
+                .HasForeignKey(h => h.IdUsuarioSolicitante)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<HistorialAprobacionPrestamo>()
+                .HasRequired(h => h.UsuarioRevisor)
+                .WithMany()
+                .HasForeignKey(h => h.IdUsuarioRevisor)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<HistorialAprobacionPrestamo>()
+                .HasRequired(h => h.Prestamo)
+                .WithMany()
+                .HasForeignKey(h => h.IdPrestamo)
+                .WillCascadeOnDelete(false);
         }
 
         public System.Data.Entity.DbSet<EscuelaFelixArcadio.Models.ApplicationRol> IdentityRoles { get; set; }
