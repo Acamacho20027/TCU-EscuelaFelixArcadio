@@ -156,35 +156,6 @@
                 </div>
             }
         </div>
-
-        <text>
-        @if (ViewBag.TotalPages != null && ViewBag.TotalPages > 1)
-        {
-            <div class="documento-pagination">
-                @if (ViewBag.CurrentPage > 1)
-                {
-                    <a href="@Url.Action("Index", new { search = ViewBag.Search, tipo = ViewBag.Tipo, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder, page = ViewBag.CurrentPage - 1 })" class="documento-page-link">
-                        <i class="fas fa-chevron-left"></i> Anterior
-                    </a>
-                }
-
-                @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                {
-                    <a href="@Url.Action("Index", new { search = ViewBag.Search, tipo = ViewBag.Tipo, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder, page = i })" 
-                       class="documento-page-link @(i == ViewBag.CurrentPage ? "active" : "")">
-                        @i
-                    </a>
-                }
-
-                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-                {
-                    <a href="@Url.Action("Index", new { search = ViewBag.Search, tipo = ViewBag.Tipo, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder, page = ViewBag.CurrentPage + 1 })" class="documento-page-link">
-                        Siguiente <i class="fas fa-chevron-right"></i>
-                    </a>
-                }
-            </div>
-        }
-        </text>
     }
     else
     {
@@ -203,6 +174,47 @@
             </p>
         </div>
     }
+
+    <!-- Pagination -->
+    <div id="pagination" class="documento-pagination">
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <a href="@Url.Action("Index", new { search = ViewBag.Search, tipo = ViewBag.Tipo, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder, page = 1, pageSize = ViewBag.PageSize })" class="documento-pagination-btn">Primera</a>
+            <a href="@Url.Action("Index", new { search = ViewBag.Search, tipo = ViewBag.Tipo, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder, page = ViewBag.CurrentPage - 1, pageSize = ViewBag.PageSize })" class="documento-pagination-btn">Anterior</a>
+        }
+        else
+        {
+            <button class="documento-pagination-btn" disabled>Primera</button>
+            <button class="documento-pagination-btn" disabled>Anterior</button>
+        }
+
+        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+        {
+            if (i == ViewBag.CurrentPage)
+            {
+                <span class="documento-pagination-btn active" style="background-color: #0ea5e9 !important; border-color: #0ea5e9 !important; color: white !important;">@i</span>
+            }
+            else if (i == 1 || i == ViewBag.TotalPages || (i >= ViewBag.CurrentPage - 2 && i <= ViewBag.CurrentPage + 2))
+            {
+                <a href="@Url.Action("Index", new { search = ViewBag.Search, tipo = ViewBag.Tipo, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder, page = i, pageSize = ViewBag.PageSize })" class="documento-pagination-btn">@i</a>
+            }
+            else if (i == ViewBag.CurrentPage - 3 || i == ViewBag.CurrentPage + 3)
+            {
+                <span class="documento-pagination-dots">...</span>
+            }
+        }
+
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <a href="@Url.Action("Index", new { search = ViewBag.Search, tipo = ViewBag.Tipo, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder, page = ViewBag.CurrentPage + 1, pageSize = ViewBag.PageSize })" class="documento-pagination-btn">Siguiente</a>
+            <a href="@Url.Action("Index", new { search = ViewBag.Search, tipo = ViewBag.Tipo, sortBy = ViewBag.SortBy, sortOrder = ViewBag.SortOrder, page = ViewBag.TotalPages, pageSize = ViewBag.PageSize })" class="documento-pagination-btn">Ultima</a>
+        }
+        else
+        {
+            <button class="documento-pagination-btn" disabled>Siguiente</button>
+            <button class="documento-pagination-btn" disabled>Ultima</button>
+        }
+    </div>
 </div>
 
 @section Scripts {
