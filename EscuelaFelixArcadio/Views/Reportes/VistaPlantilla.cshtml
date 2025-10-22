@@ -1,0 +1,229 @@
+@{
+    ViewBag.Title = "Vista de Plantilla";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reportes.css" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <!-- Header -->
+    <div class="reportes-header">
+        <h1>
+            <i class="fas fa-file-alt header-icon"></i>
+            @ViewBag.Title
+        </h1>
+        <div class="header-subtitle">
+            Reporte generado desde plantilla: @(ViewBag.Plantilla?.Nombre ?? "Plantilla")
+        </div>
+    </div>
+
+    <!-- Información de la plantilla -->
+    @if (ViewBag.Plantilla != null)
+    {
+        <div class="form-section">
+            <div class="filtros-header">
+                <i class="fas fa-info-circle filtros-icon"></i>
+                <h3>Información de la Plantilla</h3>
+            </div>
+            
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label>Nombre de la Plantilla</label>
+                    <input type="text" value="@ViewBag.Plantilla.Nombre" readonly />
+                </div>
+                
+                <div class="filtro-group">
+                    <label>Tipo de Reporte</label>
+                    <input type="text" value="@ViewBag.Plantilla.TipoReporte" readonly />
+                </div>
+                
+                <div class="filtro-group">
+                    <label>Descripción</label>
+                    <textarea readonly rows="2">@ViewBag.Plantilla.Descripcion</textarea>
+                </div>
+                
+                <div class="filtro-group">
+                    <label>Fecha de Creación</label>
+                    <input type="text" value="@ViewBag.Plantilla.FechaCreacion.ToString("dd/MM/yyyy HH:mm")" readonly />
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Datos del reporte -->
+    <div class="datos-section">
+        <div class="datos-header">
+            <h3>
+                <i class="fas fa-table"></i>
+                Datos del Reporte
+            </h3>
+            <div class="datos-actions">
+                <a href="@Url.Action("ExportarPDF", new { tipoReporte = ViewBag.Plantilla?.TipoReporte ?? "plantilla", filtros = Request.QueryString.ToString() })" class="btn-exportar">
+                    <i class="fas fa-file-pdf"></i>
+                    Exportar PDF
+                </a>
+                <a href="@Url.Action("ExportarExcel", new { tipoReporte = ViewBag.Plantilla?.TipoReporte ?? "plantilla", filtros = Request.QueryString.ToString() })" class="btn-exportar btn-excel">
+                    <i class="fas fa-file-excel"></i>
+                    Exportar Excel
+                </a>
+            </div>
+        </div>
+        
+        <div class="tabla-responsive">
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        @if (ViewBag.Datos != null && ((IEnumerable<dynamic>)ViewBag.Datos).Any())
+                        {
+                            var primerElemento = ((IEnumerable<dynamic>)ViewBag.Datos).First();
+                            foreach (var propiedad in primerElemento.GetType().GetProperties())
+                            {
+                                <th>@propiedad.Name</th>
+                            }
+                        }
+                        else
+                        {
+                            <th>No hay datos disponibles</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.Datos != null)
+                    {
+                        foreach (var item in (IEnumerable<dynamic>)ViewBag.Datos)
+                        {
+                            <tr>
+                                @foreach (var propiedad in item.GetType().GetProperties())
+                                {
+                                    <td>@propiedad.GetValue(item)</td>
+                                }
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="100%" class="text-center">
+                                <div class="loading">No hay datos para mostrar</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Acciones adicionales -->
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <h3>
+                <i class="fas fa-save card-icon"></i>
+                Guardar Reporte
+            </h3>
+            <div class="card-description">
+                Guarda este reporte para acceso futuro y compartir con otros usuarios.
+            </div>
+            <button type="button" class="card-action" onclick="guardarReporte()">
+                <i class="fas fa-save"></i>
+                Guardar
+            </button>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>
+                <i class="fas fa-share card-icon"></i>
+                Compartir Reporte
+            </h3>
+            <div class="card-description">
+                Genera un enlace para compartir este reporte con otros usuarios del sistema.
+            </div>
+            <button type="button" class="card-action" onclick="compartirReporte()">
+                <i class="fas fa-share"></i>
+                Compartir
+            </button>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>
+                <i class="fas fa-calendar card-icon"></i>
+                Programar Reporte
+            </h3>
+            <div class="card-description">
+                Programa la generación automática de este reporte en intervalos regulares.
+            </div>
+            <button type="button" class="card-action" onclick="programarReporte()">
+                <i class="fas fa-calendar"></i>
+                Programar
+            </button>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>
+                <i class="fas fa-cog card-icon"></i>
+                Personalizar Plantilla
+            </h3>
+            <div class="card-description">
+                Modifica esta plantilla para crear una versión personalizada.
+            </div>
+            <button type="button" class="card-action" onclick="personalizarPlantilla()">
+                <i class="fas fa-cog"></i>
+                Personalizar
+            </button>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Inicializar funcionalidades
+            console.log('Vista de plantilla cargada');
+        });
+
+        function guardarReporte() {
+            var nombreReporte = prompt('Ingresa un nombre para el reporte:');
+            if (nombreReporte && nombreReporte.trim() !== '') {
+                // Aquí se implementaría la lógica para guardar el reporte
+                alert('Reporte guardado como: ' + nombreReporte);
+            }
+        }
+
+        function compartirReporte() {
+            var url = window.location.href;
+            
+            // Crear enlace de compartir
+            var enlaceCompartir = prompt('Enlace para compartir:', url);
+            
+            if (enlaceCompartir) {
+                // Copiar al portapapeles
+                navigator.clipboard.writeText(enlaceCompartir).then(function() {
+                    alert('Enlace copiado al portapapeles');
+                });
+            }
+        }
+
+        function programarReporte() {
+            var frecuencia = prompt('Ingresa la frecuencia (diario, semanal, mensual):');
+            if (frecuencia && ['diario', 'semanal', 'mensual'].includes(frecuencia.toLowerCase())) {
+                alert('Reporte programado para generarse ' + frecuencia);
+            } else {
+                alert('Frecuencia no válida. Usa: diario, semanal o mensual');
+            }
+        }
+
+        function personalizarPlantilla() {
+            if (confirm('¿Quieres crear una copia personalizada de esta plantilla?')) {
+                // Redirigir a crear plantilla con datos predefinidos
+                var url = '@Url.Action("CrearPlantilla")' + 
+                    '?nombre=' + encodeURIComponent('@ViewBag.Plantilla?.Nombre' + ' - Personalizada') +
+                    '&descripcion=' + encodeURIComponent('@ViewBag.Plantilla?.Descripcion') +
+                    '&tipoReporte=' + encodeURIComponent('@ViewBag.Plantilla?.TipoReporte') +
+                    '&configuracionJSON=' + encodeURIComponent('@ViewBag.Plantilla?.ConfiguracionJSON');
+                
+                window.location.href = url;
+            }
+        }
+    </script>
+}

@@ -1,0 +1,527 @@
+@{
+    ViewBag.Title = "Alertas Activas";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reportes.css" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <!-- Header -->
+    <div class="reportes-header">
+        <h1>
+            <i class="fas fa-bell header-icon"></i>
+            @ViewBag.Title
+        </h1>
+        <div class="header-subtitle">
+            Monitorea y gestiona las alertas activas del sistema
+        </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="form-section">
+        <div class="datos-header">
+            <h3>
+                <i class="fas fa-tools"></i>
+                Acciones Rápidas
+            </h3>
+            <div class="datos-actions">
+                <button type="button" class="btn-filtrar" onclick="generarAlertasAutomaticas()">
+                    <i class="fas fa-sync"></i>
+                    Generar Alertas
+                </button>
+                <button type="button" class="btn-limpiar" onclick="marcarTodasComoLeidas()">
+                    <i class="fas fa-check-double"></i>
+                    Marcar Todas Leídas
+                </button>
+                <button type="button" class="btn-exportar" onclick="exportarAlertas()">
+                    <i class="fas fa-download"></i>
+                    Exportar Alertas
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros de alertas -->
+    <div class="filtros-section">
+        <div class="filtros-header">
+            <i class="fas fa-filter filtros-icon"></i>
+            <h3>Filtrar Alertas</h3>
+        </div>
+        
+        <div class="filtros-grid">
+            <div class="filtro-group">
+                <label for="filtroSeveridad">Severidad</label>
+                <select id="filtroSeveridad">
+                    <option value="">Todas</option>
+                    <option value="critica">Crítica</option>
+                    <option value="alta">Alta</option>
+                    <option value="media">Media</option>
+                    <option value="baja">Baja</option>
+                </select>
+            </div>
+            
+            <div class="filtro-group">
+                <label for="filtroTipo">Tipo de Alerta</label>
+                <select id="filtroTipo">
+                    <option value="">Todos</option>
+                    <option value="StockBajo">Stock Bajo</option>
+                    <option value="PrestamoVencido">Préstamo Vencido</option>
+                    <option value="SancionActiva">Sanción Activa</option>
+                    <option value="UsuarioBloqueado">Usuario Bloqueado</option>
+                    <option value="SistemaError">Error del Sistema</option>
+                </select>
+            </div>
+            
+            <div class="filtro-group">
+                <label for="filtroEstado">Estado</label>
+                <select id="filtroEstado">
+                    <option value="">Todos</option>
+                    <option value="no-leidas">No Leídas</option>
+                    <option value="leidas">Leídas</option>
+                    <option value="resueltas">Resueltas</option>
+                </select>
+            </div>
+            
+            <div class="filtro-group">
+                <label for="filtroFecha">Fecha</label>
+                <select id="filtroFecha">
+                    <option value="">Todas</option>
+                    <option value="hoy">Hoy</option>
+                    <option value="ayer">Ayer</option>
+                    <option value="semana">Esta Semana</option>
+                    <option value="mes">Este Mes</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="filtros-actions">
+            <button type="button" class="btn-filtrar" onclick="aplicarFiltros()">
+                <i class="fas fa-search"></i>
+                Filtrar
+            </button>
+            <button type="button" class="btn-limpiar" onclick="limpiarFiltros()">
+                <i class="fas fa-eraser"></i>
+                Limpiar
+            </button>
+        </div>
+    </div>
+
+    <!-- Estadísticas de alertas -->
+    <div class="estadisticas-grid">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalAlertas">@(ViewBag.TotalAlertas ?? 0)</div>
+            <div class="estadistica-label">Total Alertas</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="alertasCriticas">@(ViewBag.AlertasCriticas ?? 0)</div>
+            <div class="estadistica-label">Críticas</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="alertasNoLeidas">@(ViewBag.AlertasNoLeidas ?? 0)</div>
+            <div class="estadistica-label">No Leídas</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="requierenAccion">@(ViewBag.RequierenAccion ?? 0)</div>
+            <div class="estadistica-label">Requieren Acción</div>
+        </div>
+    </div>
+
+    <!-- Lista de alertas -->
+    <div class="alertas-container">
+        <div class="filtros-header">
+            <i class="fas fa-exclamation-triangle filtros-icon"></i>
+            <h3>Alertas del Sistema</h3>
+            <span class="badge badge-info" id="contadorAlertas">@(ViewBag.TotalAlertas ?? 0)</span>
+        </div>
+        
+        <div id="listaAlertas">
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var alerta in Model)
+                {
+                    <div class="alerta-item @alerta.Severidad.ToLower() @(alerta.Leida ? "leida" : "")" 
+                         data-id="@alerta.IdAlerta" 
+                         data-severidad="@alerta.Severidad.ToLower()" 
+                         data-tipo="@alerta.TipoAlerta" 
+                         data-leida="@alerta.Leida.ToString().ToLower()" 
+                         data-accion="@alerta.RequiereAccion.ToString().ToLower()">
+                        
+                        <i class="fas fa-exclamation-circle alerta-icon"></i>
+                        <div class="alerta-content">
+                            <div class="alerta-titulo">
+                                @alerta.TipoAlerta
+                                @if (alerta.RequiereAccion)
+                                {
+                                    <span class="badge badge-warning">
+                                        <i class="fas fa-exclamation"></i>
+                                        Requiere Acción
+                                    </span>
+                                }
+                                @if (alerta.Leida)
+                                {
+                                    <span class="badge badge-success">
+                                        <i class="fas fa-check"></i>
+                                        Leída
+                                    </span>
+                                }
+                                @if (alerta.AccionTomada)
+                                {
+                                    <span class="badge badge-info">
+                                        <i class="fas fa-check-circle"></i>
+                                        Resuelta
+                                    </span>
+                                }
+                            </div>
+                            <div class="alerta-descripcion">@alerta.Descripcion</div>
+                            <div class="alerta-fecha">
+                                Generada: @alerta.FechaGeneracion.ToString("dd/MM/yyyy HH:mm")
+                                @if (alerta.FechaLectura.HasValue)
+                                {
+                                    <span> | Leída: @alerta.FechaLectura.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                }
+                                @if (alerta.FechaResolucion.HasValue)
+                                {
+                                    <span> | Resuelta: @alerta.FechaResolucion.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="alerta-actions">
+                            @if (!alerta.Leida)
+                            {
+                                <button type="button" class="btn-exportar btn-excel" onclick="marcarComoLeida(@alerta.IdAlerta)">
+                                    <i class="fas fa-check"></i>
+                                    Marcar Leída
+                                </button>
+                            }
+                            @if (alerta.RequiereAccion && !alerta.AccionTomada)
+                            {
+                                <button type="button" class="btn-exportar" onclick="tomarAccion(@alerta.IdAlerta)">
+                                    <i class="fas fa-tools"></i>
+                                    Tomar Acción
+                                </button>
+                            }
+                            @if (alerta.Leida && !alerta.AccionTomada)
+                            {
+                                <button type="button" class="btn-exportar" onclick="marcarComoResuelta(@alerta.IdAlerta)">
+                                    <i class="fas fa-check-circle"></i>
+                                    Marcar Resuelta
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center p-5">
+                    <i class="fas fa-check-circle" style="font-size: 3rem; color: #28a745; margin-bottom: 1rem;"></i>
+                    <h4 style="color: #28a745;">¡Excelente!</h4>
+                    <p style="color: #6c757d;">No hay alertas activas en el sistema</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Configuración de alertas automáticas -->
+    <div class="form-section">
+        <div class="filtros-header">
+            <i class="fas fa-cog filtros-icon"></i>
+            <h3>Configuración de Alertas Automáticas</h3>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>
+                    <i class="fas fa-boxes card-icon"></i>
+                    Alertas de Stock
+                </h3>
+                <div class="card-description">
+                    Configura alertas automáticas cuando el stock esté bajo.
+                </div>
+                <button type="button" class="card-action" onclick="configurarAlertasStock()">
+                    <i class="fas fa-cog"></i>
+                    Configurar
+                </button>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>
+                    <i class="fas fa-hand-holding card-icon"></i>
+                    Alertas de Préstamos
+                </h3>
+                <div class="card-description">
+                    Configura alertas para préstamos vencidos y retrasos.
+                </div>
+                <button type="button" class="card-action" onclick="configurarAlertasPrestamos()">
+                    <i class="fas fa-cog"></i>
+                    Configurar
+                </button>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>
+                    <i class="fas fa-exclamation-triangle card-icon"></i>
+                    Alertas de Sanciones
+                </h3>
+                <div class="card-description">
+                    Configura alertas para sanciones activas y montos altos.
+                </div>
+                <button type="button" class="card-action" onclick="configurarAlertasSanciones()">
+                    <i class="fas fa-cog"></i>
+                    Configurar
+                </button>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>
+                    <i class="fas fa-user-slash card-icon"></i>
+                    Alertas de Usuarios
+                </h3>
+                <div class="card-description">
+                    Configura alertas para usuarios bloqueados y actividad sospechosa.
+                </div>
+                <button type="button" class="card-action" onclick="configurarAlertasUsuarios()">
+                    <i class="fas fa-cog"></i>
+                    Configurar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Configurar filtros
+            $('#filtroSeveridad, #filtroTipo, #filtroEstado, #filtroFecha').on('change', aplicarFiltros);
+            
+            // Auto-refresh cada 2 minutos
+            setInterval(actualizarAlertas, 120000);
+        });
+
+        function aplicarFiltros() {
+            var severidad = $('#filtroSeveridad').val();
+            var tipo = $('#filtroTipo').val();
+            var estado = $('#filtroEstado').val();
+            var fecha = $('#filtroFecha').val();
+            
+            $('.alerta-item').each(function() {
+                var $item = $(this);
+                var mostrar = true;
+                
+                if (severidad && $item.data('severidad') !== severidad) mostrar = false;
+                if (tipo && $item.data('tipo') !== tipo) mostrar = false;
+                if (estado === 'no-leidas' && $item.data('leida') === 'true') mostrar = false;
+                if (estado === 'leidas' && $item.data('leida') === 'false') mostrar = false;
+                if (estado === 'resueltas' && !$item.find('.badge-info').length) mostrar = false;
+                
+                // Filtro por fecha
+                if (fecha) {
+                    var fechaAlerta = new Date($item.find('.alerta-fecha').text().split('Generada: ')[1].split(' |')[0]);
+                    var hoy = new Date();
+                    var mostrarFecha = false;
+                    
+                    switch (fecha) {
+                        case 'hoy':
+                            mostrarFecha = fechaAlerta.toDateString() === hoy.toDateString();
+                            break;
+                        case 'ayer':
+                            var ayer = new Date(hoy.getTime() - 24 * 60 * 60 * 1000);
+                            mostrarFecha = fechaAlerta.toDateString() === ayer.toDateString();
+                            break;
+                        case 'semana':
+                            var hace7Dias = new Date(hoy.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            mostrarFecha = fechaAlerta >= hace7Dias;
+                            break;
+                        case 'mes':
+                            var hace30Dias = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
+                            mostrarFecha = fechaAlerta >= hace30Dias;
+                            break;
+                    }
+                    
+                    if (!mostrarFecha) mostrar = false;
+                }
+                
+                if (mostrar) {
+                    $item.show();
+                } else {
+                    $item.hide();
+                }
+            });
+            
+            actualizarContador();
+        }
+
+        function limpiarFiltros() {
+            $('#filtroSeveridad, #filtroTipo, #filtroEstado, #filtroFecha').val('');
+            $('.alerta-item').show();
+            actualizarContador();
+        }
+
+        function actualizarContador() {
+            var visibles = $('.alerta-item:visible').length;
+            $('#contadorAlertas').text(visibles);
+        }
+
+        function marcarComoLeida(idAlerta) {
+            $.ajax({
+                url: '@Url.Action("MarcarAlertaLeida")',
+                type: 'POST',
+                data: { 
+                    idAlerta: idAlerta,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        var $alerta = $('[data-id="' + idAlerta + '"]');
+                        $alerta.addClass('leida');
+                        $alerta.data('leida', 'true');
+                        $alerta.find('.alerta-actions').html('<span class="badge badge-success"><i class="fas fa-check"></i> Leída</span>');
+                        actualizarEstadisticas();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Error al marcar la alerta como leída');
+                }
+            });
+        }
+
+        function marcarTodasComoLeidas() {
+            if (confirm('¿Estás seguro de que quieres marcar todas las alertas como leídas?')) {
+                var alertasNoLeidas = $('.alerta-item[data-leida="false"]');
+                var contador = 0;
+                
+                alertasNoLeidas.each(function() {
+                    var id = $(this).data('id');
+                    marcarComoLeida(id);
+                    contador++;
+                });
+                
+                if (contador === 0) {
+                    alert('No hay alertas sin leer');
+                }
+            }
+        }
+
+        function marcarComoResuelta(idAlerta) {
+            if (confirm('¿Marcar esta alerta como resuelta?')) {
+                $.ajax({
+                    url: '@Url.Action("MarcarAlertaResuelta")',
+                    type: 'POST',
+                    data: { 
+                        idAlerta: idAlerta,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Alerta marcada como resuelta');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Error al marcar la alerta como resuelta');
+                    }
+                });
+            }
+        }
+
+        function tomarAccion(idAlerta) {
+            var accion = prompt('Describe la acción tomada:');
+            if (accion && accion.trim() !== '') {
+                $.ajax({
+                    url: '@Url.Action("RegistrarAccionAlerta")',
+                    type: 'POST',
+                    data: { 
+                        idAlerta: idAlerta,
+                        accion: accion,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Acción registrada exitosamente');
+                            marcarComoLeida(idAlerta);
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Error al registrar la acción');
+                    }
+                });
+            }
+        }
+
+        function generarAlertasAutomaticas() {
+            if (confirm('¿Generar alertas automáticas del sistema?')) {
+                $.ajax({
+                    url: '@Url.Action("GenerarAlertasManual")',
+                    type: 'POST',
+                    data: { __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Alertas generadas exitosamente');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Error al generar alertas');
+                    }
+                });
+            }
+        }
+
+        function exportarAlertas() {
+            var filtros = '?severidad=' + $('#filtroSeveridad').val() + 
+                         '&tipo=' + $('#filtroTipo').val() + 
+                         '&estado=' + $('#filtroEstado').val() + 
+                         '&fecha=' + $('#filtroFecha').val();
+            
+            window.open('@Url.Action("ExportarAlertas")' + filtros, '_blank');
+        }
+
+        function actualizarAlertas() {
+            $.get('@Url.Action("AlertasActivas")', function(response) {
+                if (response.success) {
+                    console.log('Alertas actualizadas');
+                }
+            });
+        }
+
+        function actualizarEstadisticas() {
+            var total = $('.alerta-item').length;
+            var criticas = $('.alerta-item[data-severidad="critica"]').length;
+            var noLeidas = $('.alerta-item[data-leida="false"]').length;
+            var requierenAccion = $('.alerta-item[data-accion="true"]').length;
+            
+            $('#totalAlertas').text(total);
+            $('#alertasCriticas').text(criticas);
+            $('#alertasNoLeidas').text(noLeidas);
+            $('#requierenAccion').text(requierenAccion);
+        }
+
+        // Funciones de configuración
+        function configurarAlertasStock() {
+            alert('Configuración de alertas de stock - Funcionalidad en desarrollo');
+        }
+
+        function configurarAlertasPrestamos() {
+            alert('Configuración de alertas de préstamos - Funcionalidad en desarrollo');
+        }
+
+        function configurarAlertasSanciones() {
+            alert('Configuración de alertas de sanciones - Funcionalidad en desarrollo');
+        }
+
+        function configurarAlertasUsuarios() {
+            alert('Configuración de alertas de usuarios - Funcionalidad en desarrollo');
+        }
+    </script>
+}

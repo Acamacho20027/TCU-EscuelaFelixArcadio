@@ -1,0 +1,334 @@
+﻿@{
+    ViewBag.Title = "Generar por Plantilla";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reportes.css" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <!-- Header -->
+    <div class="reportes-header">
+        <h1>
+            <i class="fas fa-play header-icon"></i>
+            @ViewBag.Title
+        </h1>
+        <div class="header-subtitle">
+            Genera un reporte utilizando la plantilla seleccionada
+        </div>
+    </div>
+
+    <!-- Información de la plantilla -->
+    @if (ViewBag.Plantilla != null)
+    {
+        <div class="form-section">
+            <div class="filtros-header">
+                <i class="fas fa-info-circle filtros-icon"></i>
+                <h3>Plantilla Seleccionada</h3>
+            </div>
+            
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label>Nombre de la Plantilla</label>
+                    <input type="text" value="@ViewBag.Plantilla.Nombre" readonly />
+                </div>
+                
+                <div class="filtro-group">
+                    <label>Tipo de Reporte</label>
+                    <input type="text" value="@ViewBag.Plantilla.TipoReporte" readonly />
+                </div>
+                
+                <div class="filtro-group">
+                    <label>Descripción</label>
+                    <textarea readonly rows="2">@ViewBag.Plantilla.Descripcion</textarea>
+                </div>
+                
+                <div class="filtro-group">
+                    <label>Es Editable</label>
+                    <input type="text" value="@(ViewBag.Plantilla.EsEditable ? "Sí" : "No")" readonly />
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Configuración del reporte -->
+    <div class="form-section">
+        <div class="filtros-header">
+            <i class="fas fa-cog filtros-icon"></i>
+            <h3>Configuración del Reporte</h3>
+        </div>
+        
+        <form id="formGenerarReporte">
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label for="nombreReporte">Nombre del Reporte</label>
+                    <input type="text" id="nombreReporte" name="nombreReporte" required placeholder="Ej: Inventario Enero 2024" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="fechaInicio">Fecha Inicio</label>
+                    <input type="date" id="fechaInicio" name="fechaInicio" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="fechaFin">Fecha Fin</label>
+                    <input type="date" id="fechaFin" name="fechaFin" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="formato">Formato de Salida</label>
+                    <select id="formato" name="formato" required>
+                        <option value="">Seleccionar formato</option>
+                        <option value="PDF">PDF</option>
+                        <option value="Excel">Excel</option>
+                        <option value="CSV">CSV</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Filtros adicionales según el tipo de plantilla -->
+            <div id="filtrosAdicionales">
+                <!-- Se cargarán dinámicamente según la configuración de la plantilla -->
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-play"></i>
+                    Generar Reporte
+                </button>
+                <a href="@Url.Action("Plantillas")" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver a Plantillas
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Vista previa de la configuración -->
+    <div class="form-section" id="vistaPrevia" style="display: none;">
+        <div class="filtros-header">
+            <i class="fas fa-eye filtros-icon"></i>
+            <h3>Vista Previa de la Configuración</h3>
+        </div>
+        
+        <div class="alertas-container">
+            <div class="alerta-item media">
+                <i class="fas fa-info-circle alerta-icon"></i>
+                <div class="alerta-content">
+                    <div class="alerta-titulo">Configuración Aplicada</div>
+                    <div class="alerta-descripcion" id="configuracionAplicada">
+                        <!-- Se mostrará la configuración aplicada -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de reportes generados con esta plantilla -->
+    @if (ViewBag.ReportesGenerados != null && ((List<EscuelaFelixArcadio.Models.ReporteGuardado>)ViewBag.ReportesGenerados).Any())
+    {
+        <div class="datos-section">
+            <div class="datos-header">
+                <h3>
+                    <i class="fas fa-history"></i>
+                    Reportes Generados con esta Plantilla
+                </h3>
+            </div>
+            
+            <div class="tabla-responsive">
+                <table class="tabla-datos">
+                    <thead>
+                        <tr>
+                            <th>Nombre del Reporte</th>
+                            <th>Formato</th>
+                            <th>Fecha de Generación</th>
+                            <th>Generado por</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var reporte in (List<EscuelaFelixArcadio.Models.ReporteGuardado>)ViewBag.ReportesGenerados)
+                        {
+                            <tr>
+                                <td>@reporte.NombreReporte</td>
+                                <td>
+                                    <span class="badge badge-@(reporte.Formato == "PDF" ? "danger" : "success")">
+                                        @reporte.Formato
+                                    </span>
+                                </td>
+                                <td>@reporte.FechaGeneracion.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@reporte.GeneradoPor</td>
+                                <td>
+                                    <a href="@Url.Action("VerReporte", new { id = reporte.IdReporteGuardado })" class="btn-exportar">
+                                        <i class="fas fa-eye"></i>
+                                        Ver
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Configurar formulario
+            $('#formGenerarReporte').on('submit', function(e) {
+                e.preventDefault();
+                generarReporte();
+            });
+            
+            // Establecer fechas por defecto
+            establecerFechasPorDefecto();
+            
+            // Cargar filtros adicionales según la plantilla
+            cargarFiltrosAdicionales();
+            
+            // Mostrar vista previa cuando cambien los filtros
+            $('#formGenerarReporte input, #formGenerarReporte select').on('change', mostrarVistaPrevia);
+        });
+
+        function establecerFechasPorDefecto() {
+            var hoy = new Date();
+            var hace30Dias = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
+            
+            $('#fechaInicio').val(formatearFecha(hace30Dias));
+            $('#fechaFin').val(formatearFecha(hoy));
+        }
+
+        function cargarFiltrosAdicionales() {
+            var configuracionJSON = '@ViewBag.Plantilla?.ConfiguracionJSON';
+            if (configuracionJSON && configuracionJSON !== '') {
+                try {
+                    var config = JSON.parse(configuracionJSON);
+                    var html = '';
+                    
+                    if (config.filtros) {
+                        config.filtros.forEach(function(filtro) {
+                            html += '<div class="filtro-group">';
+                            html += '<label for="' + filtro + '">' + capitalizarPrimeraLetra(filtro) + '</label>';
+                            
+                            switch (filtro) {
+                                case 'usuarios':
+                                    html += '<select id="' + filtro + '" name="' + filtro + '" multiple>';
+                                    html += '<option value="">Seleccionar usuarios</option>';
+                                    html += '</select>';
+                                    break;
+                                case 'categorias':
+                                    html += '<select id="' + filtro + '" name="' + filtro + '" multiple>';
+                                    html += '<option value="">Seleccionar categorías</option>';
+                                    html += '</select>';
+                                    break;
+                                case 'estados':
+                                    html += '<select id="' + filtro + '" name="' + filtro + '" multiple>';
+                                    html += '<option value="">Seleccionar estados</option>';
+                                    html += '</select>';
+                                    break;
+                                default:
+                                    html += '<input type="text" id="' + filtro + '" name="' + filtro + '" />';
+                                    break;
+                            }
+                            
+                            html += '</div>';
+                        });
+                    }
+                    
+                    $('#filtrosAdicionales').html(html);
+                    
+                    // Inicializar select múltiple
+                    $('#filtrosAdicionales select[multiple]').select2({
+                        placeholder: 'Seleccionar opciones',
+                        allowClear: true,
+                        width: '100%'
+                    });
+                    
+                } catch (error) {
+                    console.log('Error al parsear configuración JSON:', error);
+                }
+            }
+        }
+
+        function mostrarVistaPrevia() {
+            var nombreReporte = $('#nombreReporte').val();
+            var fechaInicio = $('#fechaInicio').val();
+            var fechaFin = $('#fechaFin').val();
+            var formato = $('#formato').val();
+            
+            if (nombreReporte && fechaInicio && fechaFin && formato) {
+                var configuracion = {
+                    'Nombre del Reporte': nombreReporte,
+                    'Período': fechaInicio + ' a ' + fechaFin,
+                    'Formato': formato,
+                    'Plantilla': '@ViewBag.Plantilla?.Nombre'
+                };
+                
+                var html = '<ul>';
+                for (var key in configuracion) {
+                    html += '<li><strong>' + key + ':</strong> ' + configuracion[key] + '</li>';
+                }
+                html += '</ul>';
+                
+                $('#configuracionAplicada').html(html);
+                $('#vistaPrevia').show();
+            } else {
+                $('#vistaPrevia').hide();
+            }
+        }
+
+        function generarReporte() {
+            var formData = $('#formGenerarReporte').serialize();
+            var idPlantilla = '@ViewBag.Plantilla?.IdPlantilla';
+            
+            if (!idPlantilla) {
+                alert('Error: No se encontró la plantilla');
+                return;
+            }
+            
+            // Mostrar loading
+            var $submitBtn = $('#formGenerarReporte button[type="submit"]');
+            var originalText = $submitBtn.html();
+            $submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Generando...').prop('disabled', true);
+            
+            $.ajax({
+                url: '@Url.Action("GenerarPorPlantilla")',
+                type: 'POST',
+                data: formData + '&idPlantilla=' + idPlantilla,
+                success: function(response) {
+                    if (response.success) {
+                        alert('Reporte generado exitosamente');
+                        if (response.data && response.data.url) {
+                            window.open(response.data.url, '_blank');
+                        }
+                        // Redirigir a ver el reporte
+                        if (response.data && response.data.idReporte) {
+                            window.location.href = '@Url.Action("VerReporte")' + '?id=' + response.data.idReporte;
+                        }
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Error al generar el reporte');
+                },
+                complete: function() {
+                    $submitBtn.html(originalText).prop('disabled', false);
+                }
+            });
+        }
+
+        function formatearFecha(fecha) {
+            return fecha.getFullYear() + '-' + 
+                   String(fecha.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(fecha.getDate()).padStart(2, '0');
+        }
+
+        function capitalizarPrimeraLetra(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+    </script>
+}

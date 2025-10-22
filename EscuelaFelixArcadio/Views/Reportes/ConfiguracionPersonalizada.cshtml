@@ -1,0 +1,255 @@
+﻿@model List<EscuelaFelixArcadio.Models.ConfiguracionReporte>
+
+@{
+    ViewBag.Title = "Configuración de Reportes Personalizados";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reportes.css" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <!-- Header -->
+    <div class="reportes-header">
+        <h1>
+            <i class="fas fa-cogs header-icon"></i>
+            @ViewBag.Title
+        </h1>
+        <div class="header-subtitle">
+            Crea y gestiona tus propios reportes con filtros y configuraciones personalizadas
+        </div>
+    </div>
+
+    <!-- Botón para crear nueva configuración -->
+    <div class="form-section">
+        <div class="datos-header">
+            <h3>
+                <i class="fas fa-plus"></i>
+                Nueva Configuración
+            </h3>
+            <button type="button" class="btn-primary" onclick="mostrarFormularioConfiguracion()">
+                <i class="fas fa-plus"></i>
+                Crear Configuración
+            </button>
+        </div>
+    </div>
+
+    <!-- Formulario de nueva configuración (oculto inicialmente) -->
+    <div class="form-section" id="formularioConfiguracion" style="display: none;">
+        <div class="filtros-header">
+            <i class="fas fa-cog filtros-icon"></i>
+            <h3>Nueva Configuración de Reporte</h3>
+        </div>
+        
+        @using (Html.BeginForm("GuardarConfiguracion", "Reportes", FormMethod.Post, new { @id = "formConfiguracion" }))
+        {
+            @Html.AntiForgeryToken()
+            
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label for="NombreConfiguracion">Nombre de la Configuración</label>
+                    <input type="text" id="NombreConfiguracion" name="NombreConfiguracion" required />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="TipoReporte">Tipo de Reporte</label>
+                    <select id="TipoReporte" name="TipoReporte" required>
+                        <option value="">Seleccionar tipo</option>
+                        <option value="inventario">Inventario</option>
+                        <option value="prestamos">Préstamos</option>
+                        <option value="sanciones">Sanciones</option>
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="EsPublica">Visibilidad</label>
+                    <select id="EsPublica" name="EsPublica">
+                        <option value="false">Privada</option>
+                        <option value="true">Pública</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filtro-group">
+                <label for="FiltrosJSON">Filtros (JSON)</label>
+                <textarea id="FiltrosJSON" name="FiltrosJSON" rows="4" placeholder='{"fechaInicio": "2024-01-01", "fechaFin": "2024-12-31"}'></textarea>
+            </div>
+            
+            <div class="filtro-group">
+                <label for="ColumnasSeleccionadas">Columnas Seleccionadas (JSON)</label>
+                <textarea id="ColumnasSeleccionadas" name="ColumnasSeleccionadas" rows="3" placeholder='["Id", "Nombre", "Estado", "Fecha"]'></textarea>
+            </div>
+            
+            <div class="filtro-group">
+                <label for="OrdenColumnas">Orden de Columnas (JSON)</label>
+                <textarea id="OrdenColumnas" name="OrdenColumnas" rows="3" placeholder='{"Id": 1, "Nombre": 2, "Estado": 3}'></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i>
+                    Guardar Configuración
+                </button>
+                <button type="button" class="btn-secondary" onclick="ocultarFormularioConfiguracion()">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+            </div>
+        }
+    </div>
+
+    <!-- Lista de configuraciones existentes -->
+    <div class="datos-section">
+        <div class="datos-header">
+            <h3>
+                <i class="fas fa-list"></i>
+                Configuraciones Guardadas
+            </h3>
+        </div>
+        
+        @if (Model != null && Model.Any())
+        {
+            <div class="tabla-responsive">
+                <table class="tabla-datos">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo de Reporte</th>
+                            <th>Visibilidad</th>
+                            <th>Fecha de Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var config in Model)
+                        {
+                            <tr>
+                                <td>@config.NombreConfiguracion</td>
+                                <td>
+                                    <span class="badge badge-info">@config.TipoReporte</span>
+                                </td>
+                                <td>
+                                    @if (config.EsPublica)
+                                    {
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-globe"></i>
+                                            Pública
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">
+                                            <i class="fas fa-lock"></i>
+                                            Privada
+                                        </span>
+                                    }
+                                </td>
+                                <td>@config.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <button type="button" class="btn-exportar" onclick="cargarConfiguracion(@config.IdConfiguracion)">
+                                        <i class="fas fa-edit"></i>
+                                        Cargar
+                                    </button>
+                                    <button type="button" class="btn-exportar btn-excel" onclick="eliminarConfiguracion(@config.IdConfiguracion)">
+                                        <i class="fas fa-trash"></i>
+                                        Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center p-5">
+                <i class="fas fa-cogs" style="font-size: 3rem; color: #6c757d; margin-bottom: 1rem;"></i>
+                <h4 style="color: #6c757d;">No hay configuraciones guardadas</h4>
+                <p style="color: #adb5bd;">Crea tu primera configuración de reporte personalizado</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            // Configurar formulario
+            $('#formConfiguracion').on('submit', function(e) {
+                e.preventDefault();
+                guardarConfiguracion();
+            });
+        });
+
+        function mostrarFormularioConfiguracion() {
+            $('#formularioConfiguracion').slideDown();
+            $('#NombreConfiguracion').focus();
+        }
+
+        function ocultarFormularioConfiguracion() {
+            $('#formularioConfiguracion').slideUp();
+            $('#formConfiguracion')[0].reset();
+        }
+
+        function guardarConfiguracion() {
+            var formData = $('#formConfiguracion').serialize();
+            
+            $.ajax({
+                url: '@Url.Action("GuardarConfiguracion")',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        alert('Configuración guardada exitosamente');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Error al guardar la configuración');
+                }
+            });
+        }
+
+        function cargarConfiguracion(id) {
+            $.get('@Url.Action("CargarConfiguracion")', { id: id }, function(response) {
+                if (response.success) {
+                    var data = response.data;
+                    $('#NombreConfiguracion').val(data.NombreConfiguracion);
+                    $('#TipoReporte').val(data.TipoReporte);
+                    $('#FiltrosJSON').val(data.FiltrosJSON);
+                    $('#ColumnasSeleccionadas').val(data.ColumnasSeleccionadas);
+                    $('#OrdenColumnas').val(data.OrdenColumnas);
+                    
+                    mostrarFormularioConfiguracion();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            });
+        }
+
+        function eliminarConfiguracion(id) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta configuración?')) {
+                $.ajax({
+                    url: '@Url.Action("EliminarConfiguracion")',
+                    type: 'POST',
+                    data: { id: id, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Configuración eliminada exitosamente');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Error al eliminar la configuración');
+                    }
+                });
+            }
+        }
+    </script>
+}

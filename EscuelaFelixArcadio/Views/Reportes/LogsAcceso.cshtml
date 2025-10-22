@@ -1,0 +1,320 @@
+﻿@{
+    ViewBag.Title = "Logs de Acceso a Reportes";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/reportes.css" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <!-- Header -->
+    <div class="reportes-header">
+        <h1>
+            <i class="fas fa-history header-icon"></i>
+            @ViewBag.Title
+        </h1>
+        <div class="header-subtitle">
+            Auditoría completa de accesos y acciones realizadas en el sistema de reportes
+        </div>
+    </div>
+
+    <!-- Filtros de búsqueda -->
+    <div class="filtros-section">
+        <div class="filtros-header">
+            <i class="fas fa-filter filtros-icon"></i>
+            <h3>Filtros de Auditoría</h3>
+        </div>
+        
+        @using (Html.BeginForm("LogsAcceso", "Reportes", FormMethod.Get, new { @class = "filtros-form" }))
+        {
+            <div class="filtros-grid">
+                <div class="filtro-group">
+                    <label for="fechaInicio">Fecha Inicio</label>
+                    <input type="date" id="fechaInicio" name="fechaInicio" value="@Request.QueryString["fechaInicio"]" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="fechaFin">Fecha Fin</label>
+                    <input type="date" id="fechaFin" name="fechaFin" value="@Request.QueryString["fechaFin"]" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="usuario">Usuario</label>
+                    <input type="text" id="usuario" name="usuario" value="@Request.QueryString["usuario"]" placeholder="Nombre de usuario" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="tipoReporte">Tipo de Reporte</label>
+                    <select id="tipoReporte" name="tipoReporte">
+                        <option value="">Todos</option>
+                        <option value="inventario" @(Request.QueryString["tipoReporte"] == "inventario" ? "selected" : "")>Inventario</option>
+                        <option value="prestamos" @(Request.QueryString["tipoReporte"] == "prestamos" ? "selected" : "")>Préstamos</option>
+                        <option value="sanciones" @(Request.QueryString["tipoReporte"] == "sanciones" ? "selected" : "")>Sanciones</option>
+                        <option value="general" @(Request.QueryString["tipoReporte"] == "general" ? "selected" : "")>General</option>
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="accion">Acción</label>
+                    <select id="accion" name="accion">
+                        <option value="">Todas</option>
+                        <option value="Visualizar" @(Request.QueryString["accion"] == "Visualizar" ? "selected" : "")>Visualizar</option>
+                        <option value="Descargar" @(Request.QueryString["accion"] == "Descargar" ? "selected" : "")>Descargar</option>
+                        <option value="Editar" @(Request.QueryString["accion"] == "Editar" ? "selected" : "")>Editar</option>
+                        <option value="Compartir" @(Request.QueryString["accion"] == "Compartir" ? "selected" : "")>Compartir</option>
+                        <option value="Crear" @(Request.QueryString["accion"] == "Crear" ? "selected" : "")>Crear</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filtros-actions">
+                <button type="submit" class="btn-filtrar">
+                    <i class="fas fa-search"></i>
+                    Filtrar
+                </button>
+                <button type="button" class="btn-limpiar" onclick="limpiarFiltros()">
+                    <i class="fas fa-eraser"></i>
+                    Limpiar
+                </button>
+                <button type="button" class="btn-exportar" onclick="exportarLogs()">
+                    <i class="fas fa-download"></i>
+                    Exportar Logs
+                </button>
+            </div>
+        }
+    </div>
+
+    <!-- Estadísticas de logs -->
+    <div class="estadisticas-grid">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalLogs">@(ViewBag.TotalLogs ?? 0)</div>
+            <div class="estadistica-label">Total Accesos</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="usuariosUnicos">@(ViewBag.UsuariosUnicos ?? 0)</div>
+            <div class="estadistica-label">Usuarios Únicos</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="descargas">@(ViewBag.Descargas ?? 0)</div>
+            <div class="estadistica-label">Descargas</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="accesosHoy">@(ViewBag.AccesosHoy ?? 0)</div>
+            <div class="estadistica-label">Accesos Hoy</div>
+        </div>
+    </div>
+
+    <!-- Tabla de logs -->
+    <div class="datos-section">
+        <div class="datos-header">
+            <h3>
+                <i class="fas fa-table"></i>
+                Registro de Accesos
+            </h3>
+            <div class="datos-actions">
+                <button type="button" class="btn-filtrar" onclick="limpiarLogsAntiguos()">
+                    <i class="fas fa-trash"></i>
+                    Limpiar Logs Antiguos
+                </button>
+            </div>
+        </div>
+        
+        <div class="tabla-responsive">
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Tipo Reporte</th>
+                        <th>Acción</th>
+                        <th>Fecha/Hora</th>
+                        <th>Dirección IP</th>
+                        <th>Detalles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var log in Model)
+                        {
+                            <tr>
+                                <td>@log.IdLog</td>
+                                <td>
+                                    <span class="badge badge-primary">@log.IdUsuario</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-info">@log.TipoReporte</span>
+                                </td>
+                                <td>
+                                    @switch (log.Accion)
+                                    {
+                                        case "Visualizar":
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-eye"></i>
+                                                Visualizar
+                                            </span>
+                                            break;
+                                        case "Descargar":
+                                            <span class="badge badge-warning">
+                                                <i class="fas fa-download"></i>
+                                                Descargar
+                                            </span>
+                                            break;
+                                        case "Editar":
+                                            <span class="badge badge-info">
+                                                <i class="fas fa-edit"></i>
+                                                Editar
+                                            </span>
+                                            break;
+                                        case "Compartir":
+                                            <span class="badge badge-secondary">
+                                                <i class="fas fa-share"></i>
+                                                Compartir
+                                            </span>
+                                            break;
+                                        case "Crear":
+                                            <span class="badge badge-primary">
+                                                <i class="fas fa-plus"></i>
+                                                Crear
+                                            </span>
+                                            break;
+                                        default:
+                                            <span class="badge badge-secondary">@log.Accion</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@log.FechaHora.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                <td>@log.DireccionIP</td>
+                                <td>
+                                    <button type="button" class="btn-exportar" onclick="verDetalles(@log.IdLog)">
+                                        <i class="fas fa-info-circle"></i>
+                                        Ver
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                <div class="loading">Cargando logs de acceso...</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Gráfico de actividad -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3>
+                <i class="fas fa-chart-line"></i>
+                Actividad por Día
+            </h3>
+        </div>
+        <div class="grafico-canvas" id="graficoActividad" style="height: 300px;">
+            <div class="loading">Cargando gráfico de actividad...</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Cargar gráfico de actividad
+            cargarGraficoActividad();
+        });
+
+        function limpiarFiltros() {
+            $('#fechaInicio, #fechaFin, #usuario').val('');
+            $('#tipoReporte, #accion').val('');
+            window.location.href = '@Url.Action("LogsAcceso")';
+        }
+
+        function exportarLogs() {
+            var filtros = window.location.search;
+            window.open('@Url.Action("ExportarLogs")' + filtros, '_blank');
+        }
+
+        function limpiarLogsAntiguos() {
+            if (confirm('¿Estás seguro de que quieres eliminar los logs más antiguos de 90 días?')) {
+                $.ajax({
+                    url: '@Url.Action("LimpiarLogsAntiguos")',
+                    type: 'POST',
+                    data: { __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Logs antiguos eliminados exitosamente');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Error al limpiar los logs');
+                    }
+                });
+            }
+        }
+
+        function verDetalles(idLog) {
+            // Aquí se implementaría la lógica para mostrar detalles del log
+            alert('Ver detalles del log ID: ' + idLog);
+        }
+
+        function cargarGraficoActividad() {
+            $.get('@Url.Action("DatosGraficoActividadLogs")', function(response) {
+                if (response.success) {
+                    mostrarGraficoActividad(response.data);
+                } else {
+                    $('#graficoActividad').html('<div class="text-center p-4"><i class="fas fa-exclamation-triangle text-warning"></i><br>Error al cargar datos</div>');
+                }
+            });
+        }
+
+        function mostrarGraficoActividad(datos) {
+            var ctx = document.createElement('canvas');
+            ctx.width = 400;
+            ctx.height = 300;
+            $('#graficoActividad').html(ctx);
+            
+            var labels = datos.map(d => d.Fecha);
+            var accesos = datos.map(d => d.TotalAccesos);
+            var descargas = datos.map(d => d.TotalDescargas);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Accesos',
+                        data: accesos,
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Descargas',
+                        data: descargas,
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}
