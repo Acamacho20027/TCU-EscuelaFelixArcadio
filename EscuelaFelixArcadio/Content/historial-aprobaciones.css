@@ -1,0 +1,571 @@
+/* ========================================
+   HISTORIAL DE APROBACIONES STYLES
+   Escuela Felix Arcadio - Mejoras Visuales
+   ======================================== */
+
+/* ===== MEJORAS EN LA SECCIÓN DE DATOS ===== */
+.datos-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.datos-header {
+    background: #f8f9fa;
+    color: #495057;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.datos-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.datos-header h3 i {
+    font-size: 1.25rem;
+    color: #6c757d;
+}
+
+.datos-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* ===== BOTONES DE EXPORTAR MEJORADOS ===== */
+.btn-exportar {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-exportar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-exportar.btn-excel {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    box-shadow: 0 2px 4px rgba(46, 204, 113, 0.3);
+}
+
+.btn-exportar.btn-excel:hover {
+    box-shadow: 0 4px 8px rgba(46, 204, 113, 0.4);
+}
+
+/* ===== CARDS GRID PARA HISTORIAL ===== */
+.historial-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.historial-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.historial-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.historial-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.historial-card-id {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.historial-card-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.historial-card-status.aprobado {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.historial-card-status.rechazado {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.historial-card-status.pendiente {
+    background: rgba(243, 156, 18, 0.2);
+    color: #f39c12;
+    border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+.historial-card-status.en-revision {
+    background: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.historial-card-body {
+    padding: 1.5rem;
+}
+
+.historial-card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.historial-card-title i {
+    color: #667eea;
+    font-size: 1rem;
+}
+
+.historial-card-code {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 0 0 1rem 0;
+    font-weight: 500;
+}
+
+.historial-card-details {
+    margin-bottom: 1rem;
+}
+
+.historial-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.historial-detail-item:last-child {
+    border-bottom: none;
+}
+
+.historial-detail-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.historial-detail-value {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-align: right;
+    max-width: 60%;
+    word-wrap: break-word;
+}
+
+.historial-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.historial-action-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.historial-action-btn.primary {
+    background: #667eea;
+    color: white;
+}
+
+.historial-action-btn.primary:hover {
+    background: #5a6fd8;
+    color: white;
+    text-decoration: none;
+}
+
+.historial-action-btn.secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.historial-action-btn.secondary:hover {
+    background: #5a6268;
+    color: white;
+    text-decoration: none;
+}
+
+/* ===== ESTADOS MEJORADOS ===== */
+.estado-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
+}
+
+.estado-badge.aprobado {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    color: white;
+}
+
+.estado-badge.rechazado {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+.estado-badge.pendiente {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    color: white;
+}
+
+.estado-badge.en-revision {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+}
+
+/* ===== MENSAJE DE ESTADO VACÍO MEJORADO ===== */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-state h4 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* ===== SECCIÓN DE REGISTRO MEJORADA ===== */
+.registro-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.registro-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.registro-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.registro-header i {
+    font-size: 1.25rem;
+    opacity: 0.9;
+}
+
+.registro-form {
+    padding: 2rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ===== BOTONES DE REGISTRO MEJORADOS ===== */
+.registro-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.btn-registrar {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.btn-registrar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+}
+
+.btn-limpiar-form {
+    background: #6c757d;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-limpiar-form:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+/* ===== MODAL DE ÉXITO BONITO Y VERDE ===== */
+.modal-exito-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-exito-content {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+    max-width: 400px;
+    width: 90%;
+    color: white;
+}
+
+.modal-exito-overlay.show .modal-exito-content {
+    transform: scale(1);
+}
+
+.modal-exito-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+    animation: bounceIn 0.6s ease;
+}
+
+.modal-exito-icon i {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.modal-exito-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.modal-exito-message {
+    font-size: 18px;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.modal-exito-actions {
+    margin-top: 20px;
+}
+
+.btn-modal-exito {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid white;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.btn-modal-exito:hover {
+    background: white;
+    color: #28a745;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== ANIMACIONES PARA EL MODAL ===== */
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .datos-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .datos-actions {
+        justify-content: center;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .registro-actions {
+        flex-direction: column;
+    }
+    
+    .btn-registrar,
+    .btn-limpiar-form {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .datos-header,
+    .registro-header {
+        padding: 1rem;
+    }
+    
+    .registro-form {
+        padding: 1rem;
+    }
+    
+    .historial-table th,
+    .historial-table td {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+}

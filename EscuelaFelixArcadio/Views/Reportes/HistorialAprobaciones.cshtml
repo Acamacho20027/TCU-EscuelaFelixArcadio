@@ -5,18 +5,17 @@
 
 @section Styles {
     <link href="~/Content/reportes.css" rel="stylesheet" />
+    <link href="~/Content/historial-aprobaciones.css" rel="stylesheet" />
 }
 
 <div class="reportes-container">
     <!-- Header -->
-    <div class="reportes-header">
-        <h1>
-            <i class="fas fa-history header-icon"></i>
-            @ViewBag.Title
-        </h1>
-        <div class="header-subtitle">
-            Revisa el historial completo de aprobaciones y rechazos de préstamos con estadísticas detalladas
-        </div>
+    <div class="reportes-header" style="display: flex; align-items: center; justify-content: space-between;">
+        <a href="@Url.Action("Index", "Reportes")" class="btn-reservas-cancel">
+            <i class="fas fa-arrow-left"></i> Volver a Reportes
+        </a>
+        <h1 class="reportes-title" style="margin: 0;">@ViewBag.Title</h1>
+        <div style="width: 200px;"></div>
     </div>
 
     <!-- Estadísticas generales -->
@@ -53,14 +52,15 @@
 
     <!-- Filtros -->
     <div class="filtros-section">
-        <div class="filtros-header">
-            <i class="fas fa-filter filtros-icon"></i>
-            <h3>Filtros de Búsqueda</h3>
+        <!-- Barra de búsqueda -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Buscar por usuario, motivo, estado..." />
         </div>
         
-        @using (Html.BeginForm("HistorialAprobaciones", "Reportes", FormMethod.Get, new { @class = "filtros-form" }))
+        @using (Html.BeginForm("HistorialAprobaciones", "Reportes", FormMethod.Get, new { @class = "filtros-form", @id = "filtrosForm" }))
         {
-            <div class="filtros-grid">
+            <!-- Primera fila de filtros -->
+            <div class="filtros-row">
                 <div class="filtro-group">
                     <label for="fechaInicio">Fecha Inicio</label>
                     <input type="date" id="fechaInicio" name="fechaInicio" value="@Request.QueryString["fechaInicio"]" />
@@ -81,17 +81,13 @@
                         <option value="EnRevision" @(Request.QueryString["accion"] == "EnRevision" ? "selected" : "")>En Revisión</option>
                     </select>
                 </div>
-            </div>
-            
-            <div class="filtros-actions">
-                <button type="submit" class="btn-filtrar">
-                    <i class="fas fa-search"></i>
-                    Filtrar
-                </button>
-                <button type="button" class="btn-limpiar" onclick="limpiarFiltros()">
-                    <i class="fas fa-eraser"></i>
-                    Limpiar
-                </button>
+                
+                <div class="filtro-group">
+                    <button type="button" class="btn-limpiar-filtros" onclick="limpiarFiltros()">
+                        <i class="fas fa-times"></i>
+                        Limpiar Filtros
+                    </button>
+                </div>
             </div>
         }
     </div>
@@ -104,249 +100,376 @@
                 Historial de Aprobaciones
             </h3>
             <div class="datos-actions">
-                <a href="@Url.Action("ExportarPDF", new { tipoReporte = "historial-aprobaciones", filtros = Request.QueryString.ToString() })" class="btn-exportar">
+                <a href="@Url.Action("ExportarPDF", new { tipoReporte = "historialaprobaciones", filtros = Request.QueryString.ToString() })" class="btn-exportar">
                     <i class="fas fa-file-pdf"></i>
                     Exportar PDF
                 </a>
-                <a href="@Url.Action("ExportarExcel", new { tipoReporte = "historial-aprobaciones", filtros = Request.QueryString.ToString() })" class="btn-exportar btn-excel">
+                <a href="@Url.Action("ExportarExcel", new { tipoReporte = "historialaprobaciones", filtros = Request.QueryString.ToString() })" class="btn-exportar btn-excel">
                     <i class="fas fa-file-excel"></i>
                     Exportar Excel
                 </a>
             </div>
         </div>
         
-        <div class="tabla-responsive">
-            <table class="tabla-datos">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Número Préstamo</th>
-                        <th>Solicitante</th>
-                        <th>Revisor</th>
-                        <th>Estado Previo</th>
-                        <th>Estado Nuevo</th>
-                        <th>Acción</th>
-                        <th>Motivo Rechazo</th>
-                        <th>Comentarios</th>
-                        <th>Fecha Revisión</th>
-                        <th>Duración (min)</th>
-                        <th>Prioridad</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null)
+        <!-- Cards Grid -->
+        <div class="inventario-cards-grid">
+                @if (Model != null)
+            {
+                var historial = Model as IEnumerable<object>;
+                if (historial != null && historial.Any())
+                {
+                    foreach (var item in historial)
                     {
-                        var historial = Model as IEnumerable<dynamic>;
-                        if (historial != null && historial.Any())
-                        {
-                            foreach (var item in historial)
-                            {
-                                <tr>
-                                    <td>@item.IdHistorial</td>
-                                    <td>@item.NumeroPrestamo</td>
-                                    <td>@item.Solicitante</td>
-                                    <td>@item.Revisor</td>
-                                    <td>@item.EstadoPrevio</td>
-                                    <td>@item.EstadoNuevo</td>
-                                    <td>
-                                        @{
-                                            string accion = item.Accion;
-                                            switch (accion)
-                                            {
-                                                case "Aprobado":
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-check"></i>
-                                                        Aprobado
-                                                    </span>
-                                                    break;
-                                                case "Rechazado":
-                                                    <span class="badge badge-danger">
-                                                        <i class="fas fa-times"></i>
-                                                        Rechazado
-                                                    </span>
-                                                    break;
-                                                case "Pendiente":
-                                                    <span class="badge badge-warning">
-                                                        <i class="fas fa-clock"></i>
-                                                        Pendiente
-                                                    </span>
-                                                    break;
-                                                case "EnRevision":
-                                                    <span class="badge badge-info">
-                                                        <i class="fas fa-eye"></i>
-                                                        En Revisión
-                                                    </span>
-                                                    break;
-                                                default:
-                                                    <span class="badge badge-secondary">@accion</span>
-                                                    break;
-                                            }
-                                        }
-                                    </td>
-                                    <td>@(item.MotivoRechazo ?? "N/A")</td>
-                                    <td>@(item.ComentariosRevisor ?? "N/A")</td>
-                                    <td>@((DateTime)item.FechaRevision).ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@(item.DuracionRevision?.ToString() ?? "N/A")</td>
-                                    <td>
-                                        @{
-                                            int prioridad = item.Prioridad ?? 0;
-                                            if (prioridad == 2)
-                                            {
-                                                <span class="badge badge-danger">Urgente</span>
-                                            }
-                                            else if (prioridad == 1)
-                                            {
-                                                <span class="badge badge-warning">Alta</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge badge-secondary">Normal</span>
-                                            }
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="12" class="text-center">
-                                    <div class="p-4">No hay historial de aprobaciones disponible</div>
-                                </td>
-                            </tr>
-                        }
+                        var idHistorial = item.GetType().GetProperty("IdHistorial")?.GetValue(item);
+                        var numeroPrestamo = item.GetType().GetProperty("NumeroPrestamo")?.GetValue(item);
+                        var solicitante = item.GetType().GetProperty("Solicitante")?.GetValue(item);
+                        var revisor = item.GetType().GetProperty("Revisor")?.GetValue(item);
+                        var estadoPrevio = item.GetType().GetProperty("EstadoPrevio")?.GetValue(item);
+                        var estadoNuevo = item.GetType().GetProperty("EstadoNuevo")?.GetValue(item);
+                        var accion = item.GetType().GetProperty("Accion")?.GetValue(item);
+                        var motivoRechazo = item.GetType().GetProperty("MotivoRechazo")?.GetValue(item);
+                        var comentariosRevisor = item.GetType().GetProperty("ComentariosRevisor")?.GetValue(item);
+                        var fechaRevision = item.GetType().GetProperty("FechaRevision")?.GetValue(item);
+                        var duracionRevision = item.GetType().GetProperty("DuracionRevision")?.GetValue(item);
+                        var prioridad = item.GetType().GetProperty("Prioridad")?.GetValue(item);
+                        
+                        <div class="inventario-card">
+                            <div class="inventario-card-header">
+                                <div class="inventario-card-id">#@idHistorial</div>
+                                <div class="inventario-card-status @(accion?.ToString()?.ToLower()?.Replace(" ", "-"))">
+                                    @accion
+                                </div>
+                            </div>
+                            
+                            <div class="inventario-card-body">
+                                <h3 class="inventario-card-title">Préstamo #@numeroPrestamo</h3>
+                                <p class="inventario-card-code">Solicitante: @solicitante</p>
+                                
+                                <div class="inventario-card-details">
+                                    <div class="inventario-detail-item">
+                                        <span class="inventario-detail-label">Revisor:</span>
+                                        <span class="inventario-detail-value">@revisor</span>
+                                    </div>
+                                    
+                                    <div class="inventario-detail-item">
+                                        <span class="inventario-detail-label">Estado Previo:</span>
+                                        <span class="inventario-detail-value">@estadoPrevio</span>
+                                    </div>
+                                    
+                                    <div class="inventario-detail-item">
+                                        <span class="inventario-detail-label">Estado Nuevo:</span>
+                                        <span class="inventario-detail-value">@estadoNuevo</span>
+                                    </div>
+                                    
+                                    <div class="inventario-detail-item">
+                                        <span class="inventario-detail-label">Fecha Revisión:</span>
+                                        <span class="inventario-detail-value">@(fechaRevision != null ? ((DateTime)fechaRevision).ToString("dd/MM/yyyy HH:mm") : "-")</span>
+                                    </div>
+                                    
+                                    <div class="inventario-detail-item">
+                                        <span class="inventario-detail-label">Duración:</span>
+                                        <span class="inventario-detail-value">@(duracionRevision != null ? duracionRevision.ToString() + " min" : "-")</span>
+                                    </div>
+                                    
+                                    <div class="inventario-detail-item">
+                                        <span class="inventario-detail-label">Prioridad:</span>
+                                        <span class="inventario-detail-value">@prioridad</span>
+                                    </div>
+                                    
+                                    @if (!string.IsNullOrEmpty(motivoRechazo?.ToString()))
+                                    {
+                                        <div class="inventario-detail-item">
+                                            <span class="inventario-detail-label">Motivo Rechazo:</span>
+                                            <span class="inventario-detail-value">@motivoRechazo</span>
+                                        </div>
+                                    }
+                                    
+                                    @if (!string.IsNullOrEmpty(comentariosRevisor?.ToString()))
+                                    {
+                                        <div class="inventario-detail-item">
+                                            <span class="inventario-detail-label">Comentarios:</span>
+                                            <span class="inventario-detail-value">@comentariosRevisor</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
                     }
-                    else
-                    {
-                        <tr>
-                            <td colspan="12" class="text-center">
-                                <div class="loading">Cargando historial...</div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h4>No hay historial de aprobaciones disponible</h4>
+                        <p>No se encontraron registros que coincidan con los filtros seleccionados.</p>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <h4>Cargando historial...</h4>
+                    <p>Por favor espere mientras se cargan los datos.</p>
+                </div>
+            }
         </div>
     </div>
 
     <!-- Formulario para registrar nueva aprobación -->
-    <div class="form-section">
-        <div class="filtros-header">
-            <i class="fas fa-plus filtros-icon"></i>
+    <div class="registro-section">
+        <div class="registro-header">
+            <i class="fas fa-plus"></i>
             <h3>Registrar Nueva Aprobación</h3>
         </div>
         
-        <form id="formAprobacion">
-            <div class="filtros-grid">
-                <div class="filtro-group">
-                    <label for="idPrestamo">ID del Préstamo</label>
-                    <input type="number" id="idPrestamo" name="idPrestamo" required />
+        <div class="registro-form">
+            <form id="formAprobacion">
+                @Html.AntiForgeryToken()
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="idPrestamo">ID del Préstamo</label>
+                        <select id="idPrestamo" name="idPrestamo" required>
+                            <option value="">Seleccionar préstamo</option>
+                            @if (ViewBag.PrestamosDisponibles != null && ((List<EscuelaFelixArcadio.Models.Prestamo>)ViewBag.PrestamosDisponibles).Any())
+                            {
+                                foreach (var prestamo in (List<EscuelaFelixArcadio.Models.Prestamo>)ViewBag.PrestamosDisponibles)
+                                {
+                                    <option value="@prestamo.IdPrestamo">#@prestamo.IdPrestamo - @(prestamo.ApplicationUser?.UserName ?? "Usuario no disponible") - @prestamo.NumeroPrestamo</option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="" disabled>No hay préstamos disponibles</option>
+                            }
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accionFormulario">Acción</label>
+                        <select id="accionFormulario" name="accionFormulario" required>
+                            <option value="">Seleccionar acción</option>
+                            <option value="Aprobado">Aprobado</option>
+                            <option value="Rechazado">Rechazado</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="EnRevision">En Revisión</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div class="filtro-group">
-                    <label for="accion">Acción</label>
-                    <select id="accion" name="accion" required>
-                        <option value="">Seleccionar acción</option>
-                        <option value="Aprobado">Aprobado</option>
-                        <option value="Rechazado">Rechazado</option>
-                        <option value="Pendiente">Pendiente</option>
-                        <option value="EnRevision">En Revisión</option>
-                    </select>
-                </div>
-                
-                <div class="filtro-group">
+                <div class="form-group">
                     <label for="comentarios">Comentarios del Revisor</label>
                     <textarea id="comentarios" name="comentarios" rows="3"></textarea>
                 </div>
                 
-                <div class="filtro-group">
+                <div class="form-group">
                     <label for="motivo">Motivo de Rechazo (si aplica)</label>
                     <textarea id="motivo" name="motivo" rows="2"></textarea>
                 </div>
-            </div>
-            
-            <div class="form-actions">
-                <button type="submit" class="btn-primary">
-                    <i class="fas fa-save"></i>
-                    Registrar Aprobación
-                </button>
-                <button type="button" class="btn-secondary" onclick="limpiarFormulario()">
-                    <i class="fas fa-times"></i>
-                    Limpiar
-                </button>
-            </div>
-        </form>
+                
+                <div class="registro-actions">
+                    <button type="button" class="btn-registrar" onclick="registrarAprobacion()">
+                        <i class="fas fa-save"></i>
+                        Registrar Aprobación
+                    </button>
+                    <button type="button" class="btn-limpiar-form" onclick="limpiarFormulario()">
+                        <i class="fas fa-times"></i>
+                        Limpiar
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
 
 @section scripts {
     <script>
         $(document).ready(function() {
-            // Configurar formulario
+            // Funcionalidad de búsqueda
+            $('#searchInput').on('keyup', function() {
+                var value = $(this).val().toLowerCase();
+                $('.historial-card').filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+            });
+
+            // Debug: verificar cambios en los campos
+            $('#idPrestamo').on('change', function() {
+                console.log('Préstamo seleccionado:', $(this).val());
+            });
+
+            $('#accionFormulario').on('change', function() {
+                console.log('Acción seleccionada:', $(this).val());
+                console.log('Acción seleccionada (DOM):', document.getElementById('accionFormulario').value);
+                console.log('Índice seleccionado:', document.getElementById('accionFormulario').selectedIndex);
+            });
+
+            // También agregar evento directo al elemento
+            document.getElementById('accionFormulario').addEventListener('change', function() {
+                console.log('Evento directo - Acción cambiada:', this.value);
+                console.log('Evento directo - Índice:', this.selectedIndex);
+            });
+
+            // Funcionalidad del formulario
             $('#formAprobacion').on('submit', function(e) {
                 e.preventDefault();
-                registrarAprobacion();
-            });
-            
-            // Mostrar/ocultar campo motivo según la acción
-            $('#accion').on('change', function() {
-                if ($(this).val() === 'Rechazado') {
-                    $('#motivo').closest('.filtro-group').show();
-                    $('#motivo').prop('required', true);
-                } else {
-                    $('#motivo').closest('.filtro-group').hide();
-                    $('#motivo').prop('required', false);
-                }
-            });
-            
-            // Ocultar campo motivo inicialmente
-            $('#motivo').closest('.filtro-group').hide();
-        });
 
-        function registrarAprobacion() {
-            var idPrestamo = $('#idPrestamo').val();
-            var accion = $('#accion').val();
-            var comentarios = $('#comentarios').val();
-            var motivo = $('#motivo').val();
-            
-            if (!idPrestamo || !accion) {
-                alert('Por favor completa los campos obligatorios');
-                return;
-            }
-            
-            $.ajax({
-                url: '@Url.Action("RegistrarAprobacion")',
-                type: 'POST',
-                data: {
+                // Obtener valores directamente del DOM
+                var idPrestamo = document.getElementById('idPrestamo').value;
+                var accion = document.getElementById('accionFormulario').value;
+                var comentarios = document.getElementById('comentarios').value;
+                var motivo = document.getElementById('motivo').value;
+
+                var formData = {
                     idPrestamo: idPrestamo,
                     accion: accion,
                     comentarios: comentarios,
-                    motivo: motivo,
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        alert('Aprobación registrada exitosamente');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + response.message);
+                    motivo: motivo
+                };
+
+                // Debug: mostrar valores en consola
+                console.log('Valores del formulario:', formData);
+                console.log('ID Préstamo:', idPrestamo);
+                console.log('Acción:', accion);
+                console.log('Elemento accion:', document.getElementById('accion'));
+                console.log('Opciones accion:', document.getElementById('accion').options);
+
+                if (!idPrestamo || idPrestamo === '' || !accion || accion === '') {
+                    var mensaje = 'Por favor complete todos los campos requeridos:\n';
+                    if (!idPrestamo || idPrestamo === '') {
+                        mensaje += '- Seleccione un préstamo\n';
                     }
-                },
-                error: function() {
-                    alert('Error al registrar la aprobación');
+                    if (!accion || accion === '') {
+                        mensaje += '- Seleccione una acción\n';
+                    }
+                    alert(mensaje);
+                    console.log('Validación falló - ID Préstamo:', idPrestamo, 'Acción:', accion);
+                    return;
                 }
+
+                $.ajax({
+                    url: '@Url.Action("RegistrarAprobacion", "Reportes")',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            // Limpiar formulario
+                            $('#formAprobacion')[0].reset();
+
+                            // Mostrar mensaje de éxito
+                            alert('Aprobación registrada exitosamente');
+
+                            // Recargar la página para mostrar el nuevo registro
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Error al registrar la aprobación');
+                    }
+                });
             });
-        }
+        });
 
         function limpiarFiltros() {
-            $('#fechaInicio, #fechaFin').val('');
+            $('#fechaInicio').val('');
+            $('#fechaFin').val('');
             $('#accion').val('');
-            window.location.href = '@Url.Action("HistorialAprobaciones")';
+            $('#searchInput').val('');
+            $('.historial-card').show();
         }
 
         function limpiarFormulario() {
             $('#formAprobacion')[0].reset();
-            $('#motivo').closest('.filtro-group').hide();
+        }
+
+        function mostrarModalExito() {
+            // Crear modal si no existe
+            if ($('#modalExito').length === 0) {
+                $('body').append(`
+                    <div id="modalExito" class="modal-exito-overlay">
+                        <div class="modal-exito-content">
+                            <div class="modal-exito-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="modal-exito-title">¡Éxito!</div>
+                            <div class="modal-exito-message">Aprobación registrada exitosamente</div>
+                            <div class="modal-exito-actions">
+                                <button class="btn-modal-exito" onclick="cerrarModalExito()">Continuar</button>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            }
+            
+            // Mostrar modal con animación
+            $('#modalExito').fadeIn(300);
+            
+            // Auto-cerrar después de 3 segundos
+            setTimeout(function() {
+                cerrarModalExito();
+            }, 3000);
+        }
+
+        function cerrarModalExito() {
+            $('#modalExito').fadeOut(300, function() {
+                location.reload();
+            });
+        }
+
+        function registrarAprobacion() {
+    setTimeout(function() {
+        var idPrestamo = document.getElementById('idPrestamo').value;
+        var accion = document.getElementById('accionFormulario').value;
+        var comentarios = document.getElementById('comentarios').value;
+        var motivo = document.getElementById('motivo').value;
+
+        // Obtener el token antifalsificación
+        var token = $('input[name="__RequestVerificationToken"]').val();
+
+        var formData = {
+            idPrestamo: idPrestamo,
+            accionFormulario: accion,
+            comentarios: comentarios,
+            motivo: motivo,
+            __RequestVerificationToken: token
+        };
+
+        if (!idPrestamo || !accion) {
+            alert('Por favor seleccione un préstamo y una acción');
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("RegistrarAprobacion", "Reportes")',
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    $('#formAprobacion')[0].reset();
+                    mostrarModalExito();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('AJAX Error:', xhr.responseText);
+                alert('Error AJAX: ' + error);
+            }
+        });
+    }, 100);
+}
+
+        function verDetalle(id) {
+            // Aquí iría la lógica para ver detalles
+            alert('Ver detalle del historial: ' + id);
+        }
+
+        function editarAprobacion(id) {
+            // Aquí iría la lógica para editar
+            alert('Editar aprobación: ' + id);
         }
     </script>
 }
