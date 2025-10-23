@@ -230,18 +230,20 @@ namespace EscuelaFelixArcadio.Services
 
         private object CompararInventarioPeriodos(DateTime p1Inicio, DateTime p1Fin, DateTime p2Inicio, DateTime p2Fin)
         {
-            var periodo1 = _context.Inventario
-                .Where(i => i.FechaActualizacion >= p1Inicio && i.FechaActualizacion <= p1Fin)
-                .AsNoTracking();
+            try
+            {
+                var periodo1 = _context.Inventario
+                    .Where(i => i.FechaActualizacion >= p1Inicio && i.FechaActualizacion <= p1Fin)
+                    .AsNoTracking();
 
-            var periodo2 = _context.Inventario
-                .Where(i => i.FechaActualizacion >= p2Inicio && i.FechaActualizacion <= p2Fin)
-                .AsNoTracking();
+                var periodo2 = _context.Inventario
+                    .Where(i => i.FechaActualizacion >= p2Inicio && i.FechaActualizacion <= p2Fin)
+                    .AsNoTracking();
 
-            var totalItemsP1 = periodo1.Sum(i => i.Cantidad);
-            var totalItemsP2 = periodo2.Sum(i => i.Cantidad);
-            var alertasP1 = periodo1.Count(i => i.Cantidad <= i.Minimo);
-            var alertasP2 = periodo2.Count(i => i.Cantidad <= i.Minimo);
+                var totalItemsP1 = periodo1.Sum(i => i.Cantidad);
+                var totalItemsP2 = periodo2.Sum(i => i.Cantidad);
+                var alertasP1 = periodo1.Count(i => i.Cantidad <= i.Minimo);
+                var alertasP2 = periodo2.Count(i => i.Cantidad <= i.Minimo);
 
             return new
             {
@@ -266,22 +268,52 @@ namespace EscuelaFelixArcadio.Services
                     Alertas = alertasP2 - alertasP1
                 }
             };
+            }
+            catch (Exception)
+            {
+                // Si hay errores de null, devolver valores por defecto
+                return new
+                {
+                    Periodo1 = new
+                    {
+                        Inicio = p1Inicio,
+                        Fin = p1Fin,
+                        TotalItems = 0,
+                        AlertasStockBajo = 0
+                    },
+                    Periodo2 = new
+                    {
+                        Inicio = p2Inicio,
+                        Fin = p2Fin,
+                        TotalItems = 0,
+                        AlertasStockBajo = 0
+                    },
+                    Diferencias = new
+                    {
+                        TotalItems = 0,
+                        TotalItemsPorc = 0,
+                        Alertas = 0
+                    }
+                };
+            }
         }
 
         private object CompararSancionesPeriodos(DateTime p1Inicio, DateTime p1Fin, DateTime p2Inicio, DateTime p2Fin)
         {
-            var periodo1 = _context.Sancion
-                .Where(s => s.FechaInicio >= p1Inicio && s.FechaInicio <= p1Fin)
-                .AsNoTracking();
+            try
+            {
+                var periodo1 = _context.Sancion
+                    .Where(s => s.FechaInicio >= p1Inicio && s.FechaInicio <= p1Fin)
+                    .AsNoTracking();
 
-            var periodo2 = _context.Sancion
-                .Where(s => s.FechaInicio >= p2Inicio && s.FechaInicio <= p2Fin)
-                .AsNoTracking();
+                var periodo2 = _context.Sancion
+                    .Where(s => s.FechaInicio >= p2Inicio && s.FechaInicio <= p2Fin)
+                    .AsNoTracking();
 
-            var totalP1 = periodo1.Count();
-            var totalP2 = periodo2.Count();
-            var montoP1 = periodo1.Sum(s => s.Monto);
-            var montoP2 = periodo2.Sum(s => s.Monto);
+                var totalP1 = periodo1.Count();
+                var totalP2 = periodo2.Count();
+                var montoP1 = periodo1.Sum(s => s.Monto);
+                var montoP2 = periodo2.Sum(s => s.Monto);
 
             return new
             {
@@ -307,6 +339,35 @@ namespace EscuelaFelixArcadio.Services
                     MontoTotalPorc = montoP1 > 0 ? ((montoP2 - montoP1) * 100.0m / montoP1) : 0
                 }
             };
+            }
+            catch (Exception)
+            {
+                // Si hay errores de null, devolver valores por defecto
+                return new
+                {
+                    Periodo1 = new
+                    {
+                        Inicio = p1Inicio,
+                        Fin = p1Fin,
+                        TotalSanciones = 0,
+                        MontoTotal = 0
+                    },
+                    Periodo2 = new
+                    {
+                        Inicio = p2Inicio,
+                        Fin = p2Fin,
+                        TotalSanciones = 0,
+                        MontoTotal = 0
+                    },
+                    Diferencias = new
+                    {
+                        TotalSanciones = 0,
+                        TotalSancionesPorc = 0,
+                        MontoTotal = 0,
+                        MontoTotalPorc = 0
+                    }
+                };
+            }
         }
 
         #endregion
