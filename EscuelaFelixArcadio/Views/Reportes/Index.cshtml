@@ -1,23 +1,17 @@
 ﻿
 @{
-    ViewBag.Title = "Reportes y Estadísticas";
+    ViewBag.Title = "Reportes";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 @section Styles {
-    <link href="~/Content/reportes.css" rel="stylesheet" />
+    <link href="~/Content/reportes.css?v=3.5" rel="stylesheet" />
 }
 
 <div class="reportes-container">
     <!-- Header Principal -->
     <div class="reportes-header">
-        <h1>
-            <i class="fas fa-chart-line header-icon"></i>
-            @ViewBag.Title
-        </h1>
-        <div class="header-subtitle">
-            Genera reportes detallados y estadísticas del sistema deportivo
-        </div>
+        <h1 class="reportes-title">@ViewBag.Title</h1>
     </div>
 
     <!-- Alertas Recientes -->
@@ -174,46 +168,59 @@
     <!-- Reportes Guardados Recientes -->
     @if (ViewBag.ReportesGuardados != null && ((List<EscuelaFelixArcadio.Models.ReporteGuardado>)ViewBag.ReportesGuardados).Any())
     {
-        <div class="datos-section">
-            <div class="datos-header">
+        <div class="reportes-recientes-container">
+            <div class="reportes-recientes-header">
                 <h3>
                     <i class="fas fa-clock"></i>
                     Reportes Recientes
                 </h3>
             </div>
-            <div class="tabla-responsive">
-                <table class="tabla-datos">
-                    <thead>
-                        <tr>
-                            <th>Nombre del Reporte</th>
-                            <th>Tipo</th>
-                            <th>Formato</th>
-                            <th>Fecha de Generación</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var reporte in (List<EscuelaFelixArcadio.Models.ReporteGuardado>)ViewBag.ReportesGuardados)
-                        {
-                            <tr>
-                                <td>@reporte.NombreReporte</td>
-                                <td>@reporte.TipoReporte</td>
-                                <td>
-                                    <span class="badge badge-@(reporte.Formato == "PDF" ? "danger" : "success")">
-                                        @reporte.Formato
-                                    </span>
-                                </td>
-                                <td>@reporte.FechaGeneracion.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>
-                                    <a href="@Url.Action("VerReporte", new { id = reporte.IdReporteGuardado })" class="btn-exportar">
-                                        <i class="fas fa-eye"></i>
-                                        Ver
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+            <div class="reportes-recientes-grid">
+                @foreach (var reporte in (List<EscuelaFelixArcadio.Models.ReporteGuardado>)ViewBag.ReportesGuardados)
+                {
+                    <div class="reporte-reciente-card">
+                        <div class="reporte-card-header">
+                            <div class="reporte-tipo">
+                                @switch (reporte.TipoReporte.ToLower())
+                                {
+                                    case "inventario":
+                                        <i class="fas fa-boxes"></i>
+                                        break;
+                                    case "prestamos":
+                                        <i class="fas fa-hand-holding"></i>
+                                        break;
+                                    case "sanciones":
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        break;
+                                    default:
+                                        <i class="fas fa-file-alt"></i>
+                                        break;
+                                }
+                            </div>
+                            <div class="reporte-formato">
+                                <span class="badge badge-@(reporte.Formato == "PDF" ? "danger" : "success")">
+                                    @reporte.Formato
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="reporte-card-body">
+                            <h4 class="reporte-nombre">@reporte.NombreReporte</h4>
+                            <p class="reporte-tipo-texto">@reporte.TipoReporte</p>
+                            <div class="reporte-fecha">
+                                <i class="fas fa-calendar-alt"></i>
+                                @reporte.FechaGeneracion.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+                        
+                        <div class="reporte-card-footer">
+                            <a href="@Url.Action("VerReporte", new { id = reporte.IdReporteGuardado })" class="btn-ver-reporte">
+                                <i class="fas fa-eye"></i>
+                                Ver Reporte
+                            </a>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     }

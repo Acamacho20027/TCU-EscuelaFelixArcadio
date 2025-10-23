@@ -6,70 +6,56 @@
 }
 
 @section Styles {
-    <link href="~/Content/reportes.css" rel="stylesheet" />
+    <link href="~/Content/reportes.css?v=3.4" rel="stylesheet" />
 }
 
 <div class="reportes-container">
     <!-- Header -->
-    <div class="reportes-header">
-        <h1>
-            <i class="fas fa-hand-holding header-icon"></i>
-            @ViewBag.Title
-        </h1>
-        <div class="header-subtitle">
-            Análisis de préstamos, devoluciones y patrones de uso del material deportivo
-        </div>
+    <div class="reportes-header" style="display: flex; align-items: center; justify-content: space-between;">
+        <a href="@Url.Action("Index", "Reportes")" class="btn-reservas-cancel">
+            <i class="fas fa-arrow-left"></i> Volver a Reportes
+        </a>
+        <h1 class="reportes-title" style="margin: 0;">@ViewBag.Title</h1>
+        <div style="width: 200px;"></div>
     </div>
 
     <!-- Filtros -->
     <div class="filtros-section">
-        <div class="filtros-header">
-            <i class="fas fa-filter filtros-icon"></i>
-            <h3>Filtros de Búsqueda</h3>
+        <!-- Barra de búsqueda -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Buscar por usuario, motivo, estado..." />
         </div>
         
-        @using (Html.BeginForm("Prestamos", "Reportes", FormMethod.Get, new { @class = "filtros-form" }))
+        @using (Html.BeginForm("Prestamos", "Reportes", FormMethod.Get, new { @class = "filtros-form", @id = "filtrosForm" }))
         {
-            <div class="filtros-grid">
+            <!-- Primera fila de filtros -->
+            <div class="filtros-row">
                 <div class="filtro-group">
-                    <label for="fechaInicio">Fecha Inicio</label>
-                    <input type="date" id="fechaInicio" name="fechaInicio" value="@Request.QueryString["fechaInicio"]" />
-                </div>
-                
-                <div class="filtro-group">
-                    <label for="fechaFin">Fecha Fin</label>
-                    <input type="date" id="fechaFin" name="fechaFin" value="@Request.QueryString["fechaFin"]" />
-                </div>
-                
-                <div class="filtro-group">
-                    <label for="usuarios">Usuarios</label>
-                    <select id="usuarios" name="usuarios" multiple>
+                    <label for="usuarios">Usuario</label>
+                    <select id="usuarios" name="usuarios" onchange="aplicarFiltros()">
+                        <option value="">Todos los usuarios</option>
                         @if (ViewBag.Usuarios != null)
                         {
                             foreach (var usuario in (List<EscuelaFelixArcadio.Models.ApplicationUser>)ViewBag.Usuarios)
                             {
-                                <option value="@usuario.Id">@usuario.UserName</option>
+                                <option value="@usuario.Id" @(Request.QueryString["usuarios"] == usuario.Id ? "selected" : "")>@usuario.UserName</option>
                             }
                         }
                     </select>
                 </div>
                 
                 <div class="filtro-group">
-                    <label for="estados">Estados</label>
-                    <select id="estados" name="estados" multiple>
-                        @if (ViewBag.Estados != null)
-                        {
-                            foreach (var estado in (List<EscuelaFelixArcadio.Models.Estado>)ViewBag.Estados)
-                            {
-                                <option value="@estado.IdEstado">@estado.Descripcion</option>
-                            }
-                        }
+                    <label for="estados">Estado</label>
+                    <select id="estados" name="estados" onchange="aplicarFiltros()">
+                        <option value="">Todos los estados</option>
+                        <option value="Activo" @(Request.QueryString["estados"] == "Activo" ? "selected" : "")>Activo</option>
+                        <option value="Inactivo" @(Request.QueryString["estados"] == "Inactivo" ? "selected" : "")>Inactivo</option>
                     </select>
                 </div>
                 
                 <div class="filtro-group">
-                    <label for="devueltos">Estado de Devolución</label>
-                    <select id="devueltos" name="devueltos">
+                    <label for="devueltos">Devueltos</label>
+                    <select id="devueltos" name="devueltos" onchange="aplicarFiltros()">
                         <option value="">Todos</option>
                         <option value="true" @(Request.QueryString["devueltos"] == "true" ? "selected" : "")>Devueltos</option>
                         <option value="false" @(Request.QueryString["devueltos"] == "false" ? "selected" : "")>Pendientes</option>
@@ -77,15 +63,53 @@
                 </div>
             </div>
             
-            <div class="filtros-actions">
-                <button type="submit" class="btn-filtrar">
-                    <i class="fas fa-search"></i>
-                    Filtrar
-                </button>
-                <button type="button" class="btn-limpiar" onclick="limpiarFiltros()">
-                    <i class="fas fa-eraser"></i>
-                    Limpiar
-                </button>
+            <!-- Segunda fila de filtros -->
+            <div class="filtros-row">
+                <div class="filtro-group">
+                    <label for="fechaInicio">Fecha Inicio</label>
+                    <input type="date" id="fechaInicio" name="fechaInicio" value="@Request.QueryString["fechaInicio"]" onchange="aplicarFiltros()" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="fechaFin">Fecha Fin</label>
+                    <input type="date" id="fechaFin" name="fechaFin" value="@Request.QueryString["fechaFin"]" onchange="aplicarFiltros()" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="sortBy">Ordenar por:</label>
+                    <select id="sortBy" name="sortBy" onchange="aplicarFiltros()">
+                        <option value="Usuario" @(Request.QueryString["sortBy"] == "Usuario" ? "selected" : "")>Usuario</option>
+                        <option value="FechaPrestamo" @(Request.QueryString["sortBy"] == "FechaPrestamo" ? "selected" : "")>Fecha Préstamo</option>
+                        <option value="FechaDevolucion" @(Request.QueryString["sortBy"] == "FechaDevolucion" ? "selected" : "")>Fecha Devolución</option>
+                        <option value="Estado" @(Request.QueryString["sortBy"] == "Estado" ? "selected" : "")>Estado</option>
+                        <option value="NumeroPrestamo" @(Request.QueryString["sortBy"] == "NumeroPrestamo" ? "selected" : "")>Número Préstamo</option>
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="sortOrder">Orden:</label>
+                    <select id="sortOrder" name="sortOrder" onchange="aplicarFiltros()">
+                        <option value="asc" @(Request.QueryString["sortOrder"] == "asc" ? "selected" : "")>Ascendente</option>
+                        <option value="desc" @(Request.QueryString["sortOrder"] == "desc" ? "selected" : "")>Descendente</option>
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="pageSize">Mostrar:</label>
+                    <select id="pageSize" name="pageSize" onchange="aplicarFiltros()">
+                        <option value="10" @(Request.QueryString["pageSize"] == "10" ? "selected" : "")>10</option>
+                        <option value="25" @(Request.QueryString["pageSize"] == "25" ? "selected" : "")>25</option>
+                        <option value="50" @(Request.QueryString["pageSize"] == "50" ? "selected" : "")>50</option>
+                        <option value="100" @(Request.QueryString["pageSize"] == "100" ? "selected" : "")>100</option>
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <button type="button" class="btn-limpiar-filtros" onclick="limpiarFiltros()">
+                        <i class="fas fa-times"></i>
+                        Limpiar Filtros
+                    </button>
+                </div>
             </div>
         }
     </div>
@@ -109,56 +133,73 @@
             </div>
         </div>
         
-        <div class="tabla-responsive">
-            <table class="tabla-datos">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Número</th>
-                        <th>Usuario</th>
-                        <th>Nombre Completo</th>
-                        <th>Estado</th>
-                        <th>Fecha Creación</th>
-                        <th>Fecha Devolución</th>
-                        <th>Fecha Vencimiento</th>
-                        <th>Devuelto</th>
-                        <th>Motivo</th>
-                        <th>Urgente</th>
-                        <th>Días Retraso</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null)
-                    {
-                        foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>@item.IdPrestamo</td>
-                                <td>@item.NumeroPrestamo</td>
-                                <td>@item.Usuario</td>
-                                <td>@item.NombreCompleto</td>
-                                <td>@item.Estado</td>
-                                <td>@item.FechadeCreacion.ToString("dd/MM/yyyy")</td>
-                                <td>@(item.FechaDevolucion?.ToString("dd/MM/yyyy") ?? "N/A")</td>
-                                <td>@(item.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "N/A")</td>
-                                <td>
+        <!-- Cards Grid -->
+        <div class="prestamos-cards-grid">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <div class="prestamos-card">
+                        <div class="prestamos-card-header">
+                            <div class="prestamos-card-id">#@item.IdPrestamo</div>
+                            <div class="prestamos-card-status @(item.Estado.ToLower())">
+                                @item.Estado
+                            </div>
+                        </div>
+                        
+                        <div class="prestamos-card-body">
+                            <h3 class="prestamos-card-title">@item.NumeroPrestamo</h3>
+                            <p class="prestamos-card-usuario">Usuario: @item.Usuario</p>
+                            
+                            <div class="prestamos-card-details">
+                                <div class="prestamos-detail-item">
+                                    <span class="prestamos-detail-label">Nombre Completo:</span>
+                                    <span class="prestamos-detail-value">@item.NombreCompleto</span>
+                                </div>
+                                
+                                <div class="prestamos-detail-item">
+                                    <span class="prestamos-detail-label">Motivo:</span>
+                                    <span class="prestamos-detail-value">@(item.MotivoPrestamo ?? "N/A")</span>
+                                </div>
+                                
+                                <div class="prestamos-detail-item">
+                                    <span class="prestamos-detail-label">Fecha Creación:</span>
+                                    <span class="prestamos-detail-value">@item.FechadeCreacion.ToString("dd/MM/yyyy")</span>
+                                </div>
+                            </div>
+                            
+                            <div class="prestamos-card-fechas">
+                                <div class="fechas-info">
+                                    <div class="fecha-item">
+                                        <span class="fecha-label">Devolución:</span>
+                                        <span class="fecha-value fecha-devolucion">@(item.FechaDevolucion?.ToString("dd/MM/yyyy") ?? "N/A")</span>
+                                    </div>
+                                    <div class="fecha-item">
+                                        <span class="fecha-label">Vencimiento:</span>
+                                        <span class="fecha-value fecha-vencimiento">@(item.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "N/A")</span>
+                                    </div>
+                                    <div class="fecha-item">
+                                        <span class="fecha-label">Días Retraso:</span>
+                                        <span class="fecha-value fecha-retraso">@item.DiasRetraso días</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="prestamos-alert">
                                     @if (item.Devolucion)
                                     {
                                         <span class="badge badge-success">
                                             <i class="fas fa-check"></i>
-                                            Sí
+                                            Devuelto
                                         </span>
                                     }
                                     else
                                     {
                                         <span class="badge badge-warning">
                                             <i class="fas fa-clock"></i>
-                                            No
+                                            Pendiente
                                         </span>
                                     }
-                                </td>
-                                <td>@(item.MotivoPrestamo ?? "N/A")</td>
-                                <td>
+                                    
                                     @if (item.EsUrgente)
                                     {
                                         <span class="badge badge-danger">
@@ -166,34 +207,20 @@
                                             Urgente
                                         </span>
                                     }
-                                    else
-                                    {
-                                        <span class="badge badge-secondary">Normal</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (item.DiasRetraso > 0)
-                                    {
-                                        <span class="badge badge-danger">@item.DiasRetraso días</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge badge-success">Al día</span>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="12" class="text-center">
-                                <div class="loading">Cargando datos...</div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="prestamos-empty">
+                    <i class="fas fa-hand-holding"></i>
+                    <h3>No hay datos de préstamos</h3>
+                    <p>Aplica filtros diferentes o verifica la configuración</p>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -201,28 +228,95 @@
 @section scripts {
     <script>
         $(document).ready(function() {
-            // Inicializar select múltiple
-            $('#usuarios, #estados').select2({
-                placeholder: 'Seleccionar opciones',
-                allowClear: true,
-                width: '100%'
+            // Búsqueda con debounce
+            let searchTimeout;
+            $('#searchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    aplicarFiltros();
+                }, 500);
             });
-            
-            // Cargar datos si hay filtros aplicados
-            if (window.location.search) {
-                cargarDatosPrestamos();
-            }
         });
 
-        function limpiarFiltros() {
-            $('#fechaInicio, #fechaFin').val('');
-            $('#usuarios, #estados').val(null).trigger('change');
-            $('#devueltos').val('');
-            window.location.href = '@Url.Action("Prestamos")';
+        function aplicarFiltros() {
+            // Obtener valores de los filtros
+            const usuarios = $('#usuarios').val();
+            const estados = $('#estados').val();
+            const devueltos = $('#devueltos').val();
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            const sortBy = $('#sortBy').val();
+            const sortOrder = $('#sortOrder').val();
+            const pageSize = $('#pageSize').val();
+            const searchTerm = $('#searchInput').val();
+
+            // Construir URL con parámetros
+            let url = '@Url.Action("Prestamos", "Reportes")';
+            let params = [];
+
+            if (usuarios) params.push('usuarios=' + usuarios);
+            if (estados) params.push('estados=' + estados);
+            if (devueltos) params.push('devueltos=' + devueltos);
+            if (fechaInicio) params.push('fechaInicio=' + fechaInicio);
+            if (fechaFin) params.push('fechaFin=' + fechaFin);
+            if (sortBy) params.push('sortBy=' + sortBy);
+            if (sortOrder) params.push('sortOrder=' + sortOrder);
+            if (pageSize) params.push('pageSize=' + pageSize);
+            if (searchTerm) params.push('search=' + encodeURIComponent(searchTerm));
+
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+
+            // Redirigir con los filtros aplicados
+            window.location.href = url;
         }
 
-        function cargarDatosPrestamos() {
-            console.log('Cargando datos de préstamos...');
+        function limpiarFiltros() {
+            // Limpiar todos los campos
+            $('#usuarios, #estados, #devueltos, #sortBy, #sortOrder, #pageSize').val('');
+            $('#fechaInicio, #fechaFin').val('');
+            $('#searchInput').val('');
+            
+            // Redirigir sin filtros
+            window.location.href = '@Url.Action("Prestamos", "Reportes")';
+        }
+
+        function changePage(page) {
+            // Obtener valores de los filtros actuales
+            const usuarios = $('#usuarios').val();
+            const estados = $('#estados').val();
+            const devueltos = $('#devueltos').val();
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            const sortBy = $('#sortBy').val();
+            const sortOrder = $('#sortOrder').val();
+            const pageSize = $('#pageSize').val();
+            const searchTerm = $('#searchInput').val();
+
+            // Construir URL con parámetros
+            let url = '@Url.Action("Prestamos", "Reportes")';
+            let params = [];
+
+            if (usuarios) params.push('usuarios=' + usuarios);
+            if (estados) params.push('estados=' + estados);
+            if (devueltos) params.push('devueltos=' + devueltos);
+            if (fechaInicio) params.push('fechaInicio=' + fechaInicio);
+            if (fechaFin) params.push('fechaFin=' + fechaFin);
+            if (sortBy) params.push('sortBy=' + sortBy);
+            if (sortOrder) params.push('sortOrder=' + sortOrder);
+            if (pageSize) params.push('pageSize=' + pageSize);
+            if (searchTerm) params.push('search=' + encodeURIComponent(searchTerm));
+            
+            // Agregar página
+            params.push('page=' + page);
+
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+
+            // Redirigir con los filtros aplicados
+            window.location.href = url;
         }
     </script>
 }
