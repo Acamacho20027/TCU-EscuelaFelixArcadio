@@ -37,6 +37,20 @@ namespace EscuelaFelixArcadio.Services
                     padding: 30px;
                     border-radius: 10px;
                     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    position: relative;
+                }
+                .volver-btn {
+                    position: absolute;
+                    left: 30px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: #6c757d;
+                    color: white;
+                    padding: 6px 12px;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    font-weight: 500;
+                    font-size: 12px;
                 }
                 .logo {
                     width: 80px;
@@ -137,6 +151,13 @@ namespace EscuelaFelixArcadio.Services
             html.AppendLine("</head><body>");
             
             html.AppendLine("<div class='header'>");
+            
+            // Solo mostrar botón "Volver" para historial de aprobaciones
+            if (tipoReporte.ToLower() == "historialaprobaciones")
+            {
+                html.AppendLine("<a href='javascript:history.back()' class='volver-btn'>← Volver a Historial de Aprobaciones de Préstamos</a>");
+            }
+            
             html.AppendLine("<div class='logo'><img src='data:image/jpeg;base64," + ConvertirImagenABase64() + "' alt='Logo Escuela' style='width: 80px; height: 80px; border-radius: 50%; object-fit: cover;'></div>");
             html.AppendLine("<h1>Escuela Félix Arcadio Montero Monge</h1>");
             html.AppendLine("<h2>" + titulo + "</h2>");
@@ -157,6 +178,9 @@ namespace EscuelaFelixArcadio.Services
                     break;
                 case "sanciones":
                     GenerarTablaSanciones(html, datos);
+                    break;
+                case "historialaprobaciones":
+                    GenerarTablaHistorialAprobaciones(html, datos);
                     break;
                 default:
                     html.AppendLine("<p>No hay datos disponibles para este reporte.</p>");
@@ -318,6 +342,74 @@ namespace EscuelaFelixArcadio.Services
             html.AppendLine("</table>");
         }
 
+        private void GenerarTablaHistorialAprobaciones(StringBuilder html, object datos)
+        {
+            var historialData = datos as List<object>;
+            if (historialData == null || !historialData.Any())
+            {
+                html.AppendLine("<div style='text-align: center; margin: 40px 0;'>");
+                html.AppendLine("<p style='font-size: 18px; color: #64748b; margin-bottom: 20px;'>No hay datos de historial de aprobaciones disponibles.</p>");
+                html.AppendLine("<a href='javascript:history.back()' style='display: inline-block; background: linear-gradient(135deg, #0ea5e9, #3b82f6); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;'>");
+                html.AppendLine("← Volver a Historial de Aprobaciones de Préstamos");
+                html.AppendLine("</a>");
+                html.AppendLine("</div>");
+                return;
+            }
+
+            html.AppendLine("<table>");
+            html.AppendLine("<thead>");
+            html.AppendLine("<tr>");
+            html.AppendLine("<th>ID Historial</th>");
+            html.AppendLine("<th>Número Préstamo</th>");
+            html.AppendLine("<th>Solicitante</th>");
+            html.AppendLine("<th>Revisor</th>");
+            html.AppendLine("<th>Estado Previo</th>");
+            html.AppendLine("<th>Estado Nuevo</th>");
+            html.AppendLine("<th>Acción</th>");
+            html.AppendLine("<th>Motivo Rechazo</th>");
+            html.AppendLine("<th>Comentarios</th>");
+            html.AppendLine("<th>Fecha Revisión</th>");
+            html.AppendLine("<th>Duración</th>");
+            html.AppendLine("<th>Prioridad</th>");
+            html.AppendLine("</tr>");
+            html.AppendLine("</thead>");
+            html.AppendLine("<tbody>");
+
+            foreach (var item in historialData)
+            {
+                var idHistorial = item.GetType().GetProperty("IdHistorial")?.GetValue(item);
+                var numeroPrestamo = item.GetType().GetProperty("NumeroPrestamo")?.GetValue(item);
+                var solicitante = item.GetType().GetProperty("Solicitante")?.GetValue(item);
+                var revisor = item.GetType().GetProperty("Revisor")?.GetValue(item);
+                var estadoPrevio = item.GetType().GetProperty("EstadoPrevio")?.GetValue(item);
+                var estadoNuevo = item.GetType().GetProperty("EstadoNuevo")?.GetValue(item);
+                var accion = item.GetType().GetProperty("Accion")?.GetValue(item);
+                var motivoRechazo = item.GetType().GetProperty("MotivoRechazo")?.GetValue(item);
+                var comentariosRevisor = item.GetType().GetProperty("ComentariosRevisor")?.GetValue(item);
+                var fechaRevision = item.GetType().GetProperty("FechaRevision")?.GetValue(item);
+                var duracionRevision = item.GetType().GetProperty("DuracionRevision")?.GetValue(item);
+                var prioridad = item.GetType().GetProperty("Prioridad")?.GetValue(item);
+
+                html.AppendLine("<tr>");
+                html.AppendLine($"<td>{idHistorial}</td>");
+                html.AppendLine($"<td>{EscapeHtml(numeroPrestamo)}</td>");
+                html.AppendLine($"<td>{EscapeHtml(solicitante)}</td>");
+                html.AppendLine($"<td>{EscapeHtml(revisor)}</td>");
+                html.AppendLine($"<td>{EscapeHtml(estadoPrevio)}</td>");
+                html.AppendLine($"<td>{EscapeHtml(estadoNuevo)}</td>");
+                html.AppendLine($"<td>{EscapeHtml(accion)}</td>");
+                html.AppendLine($"<td>{EscapeHtml(motivoRechazo)}</td>");
+                html.AppendLine($"<td>{EscapeHtml(comentariosRevisor)}</td>");
+                html.AppendLine($"<td>{fechaRevision}</td>");
+                html.AppendLine($"<td>{duracionRevision}</td>");
+                html.AppendLine($"<td>{EscapeHtml(prioridad)}</td>");
+                html.AppendLine("</tr>");
+            }
+
+            html.AppendLine("</tbody>");
+            html.AppendLine("</table>");
+        }
+
         private string EscapeHtml(object value)
         {
             if (value == null) return "";
@@ -464,6 +556,9 @@ namespace EscuelaFelixArcadio.Services
                     break;
                 case "sanciones":
                     GenerarTablaSanciones(html, datos);
+                    break;
+                case "historialaprobaciones":
+                    GenerarTablaHistorialAprobaciones(html, datos);
                     break;
                 default:
                     html.AppendLine("<p>No hay datos disponibles para este reporte.</p>");

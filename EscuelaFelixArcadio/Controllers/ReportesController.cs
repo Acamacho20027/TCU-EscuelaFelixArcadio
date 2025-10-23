@@ -176,6 +176,10 @@ namespace EscuelaFelixArcadio.Controllers
                     datos = _reportesService.ObtenerDatosSanciones(null, null);
                     titulo = "Reporte de Sanciones";
                     break;
+                case "historialaprobaciones":
+                    datos = ObtenerDatosHistorialAprobaciones();
+                    titulo = "Historial de Aprobaciones de Préstamos";
+                    break;
             }
 
             var html = _exportacionService.GenerarPDF(tipoReporte, datos, titulo);
@@ -352,6 +356,10 @@ namespace EscuelaFelixArcadio.Controllers
                 case "sanciones":
                     datos = _reportesService.ObtenerDatosSanciones(null, null);
                     nombreArchivo = "Reporte_Sanciones";
+                    break;
+                case "historialaprobaciones":
+                    datos = ObtenerDatosHistorialAprobaciones();
+                    nombreArchivo = "Historial_Aprobaciones";
                     break;
             }
 
@@ -753,10 +761,59 @@ namespace EscuelaFelixArcadio.Controllers
         {
             ViewBag.Title = "Historial de Aprobaciones de Préstamos";
             
-            var historial = _reportesService.ObtenerHistorialAprobaciones(fechaInicio, fechaFin, accion);
+            // Obtener historial directamente desde la base de datos
+            var historial = new List<object>();
+            try
+            {
+                var query = db.HistorialAprobacionPrestamo
+                    .Include(h => h.Prestamo)
+                    .Include(h => h.UsuarioSolicitante)
+                    .Include(h => h.UsuarioRevisor)
+                    .AsQueryable();
+
+                if (fechaInicio.HasValue)
+                    query = query.Where(h => h.FechaRevision >= fechaInicio.Value);
+
+                if (fechaFin.HasValue)
+                    query = query.Where(h => h.FechaRevision <= fechaFin.Value);
+
+                if (!string.IsNullOrEmpty(accion))
+                    query = query.Where(h => h.Accion == accion);
+
+                historial = query.Select(h => new
+                {
+                    IdHistorial = h.IdHistorial,
+                    NumeroPrestamo = h.Prestamo.NumeroPrestamo,
+                    Solicitante = h.UsuarioSolicitante.UserName,
+                    Revisor = h.UsuarioRevisor.UserName,
+                    EstadoPrevio = h.EstadoPrevio,
+                    EstadoNuevo = h.EstadoNuevo,
+                    Accion = h.Accion,
+                    MotivoRechazo = h.MotivoRechazo,
+                    ComentariosRevisor = h.ComentariosRevisor,
+                    FechaRevision = h.FechaRevision,
+                    DuracionRevision = h.DuracionRevision,
+                    Prioridad = h.Prioridad
+                }).ToList().Cast<object>().ToList();
+            }
+            catch
+            {
+                historial = new List<object>();
+            }
+
             var estadisticas = _reportesService.ObtenerEstadisticasAprobaciones(fechaInicio, fechaFin);
 
+            // Cargar préstamos disponibles para el dropdown
+            var prestamosDisponibles = db.Prestamo
+                .Include(p => p.ApplicationUser)
+                .Include(p => p.Estado)
+                .Where(p => p.FechaDevolucion == null) // Solo préstamos activos (sin devolver)
+                .OrderByDescending(p => p.FechadeCreacion)
+                .Take(50) // Limitar a 50 para mejor rendimiento
+                .ToList();
+
             ViewBag.Estadisticas = estadisticas;
+            ViewBag.PrestamosDisponibles = prestamosDisponibles;
 
             return View(historial);
         }
@@ -764,34 +821,58 @@ namespace EscuelaFelixArcadio.Controllers
         // POST: Reportes/RegistrarAprobacion
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult RegistrarAprobacion(long idPrestamo, string accion, string comentarios, string motivo)
+        public ActionResult RegistrarAprobacion(long idPrestamo, string accionFormulario, string comentarios, string motivo)
         {
-            var prestamo = db.Prestamo.Find(idPrestamo);
-            
-            if (prestamo == null)
-                return Json(new { success = false, message = "Préstamo no encontrado" });
-
-            var historial = new HistorialAprobacionPrestamo
+            try
             {
-                IdPrestamo = idPrestamo,
-                IdUsuarioSolicitante = prestamo.Id,
-                IdUsuarioRevisor = User.Identity.GetUserId(),
-                EstadoPrevio = db.Estado.Find(prestamo.IdEstado).Descripcion,
-                Accion = accion,
-                ComentariosRevisor = comentarios,
-                MotivoRechazo = motivo,
-                FechaRevision = DateTime.Now,
-                NotificadoSolicitante = false
-            };
+                // Validaciones básicas
+                if (idPrestamo <= 0)
+                    return Json(new { success = false, message = "ID de préstamo inválido" });
+                
+                if (string.IsNullOrEmpty(accionFormulario))
+                    return Json(new { success = false, message = "Debe seleccionar una acción" });
 
-            // Calcular duración de revisión si es aplicable
-            var duracionMinutos = (int)(DateTime.Now - prestamo.FechadeCreacion).TotalMinutes;
-            historial.DuracionRevision = duracionMinutos;
+                // Obtener el préstamo
+                var prestamo = db.Prestamo
+                    .Include(p => p.Estado)
+                    .Include(p => p.ApplicationUser)
+                    .FirstOrDefault(p => p.IdPrestamo == idPrestamo);
+                
+                if (prestamo == null)
+                    return Json(new { success = false, message = "Préstamo no encontrado" });
 
-            db.HistorialAprobacionPrestamo.Add(historial);
-            db.SaveChanges();
+                // Obtener el ID del usuario actual
+                var userId = User.Identity.GetUserId();
+                if (string.IsNullOrEmpty(userId))
+                    return Json(new { success = false, message = "Usuario no autenticado" });
 
-            return Json(new { success = true, message = "Aprobación registrada exitosamente" });
+                // Crear el historial con todos los campos requeridos
+                var historial = new HistorialAprobacionPrestamo
+                {
+                    IdPrestamo = idPrestamo,
+                    IdUsuarioSolicitante = prestamo.Id,
+                    IdUsuarioRevisor = userId,
+                    EstadoPrevio = prestamo.Estado?.Descripcion ?? "Desconocido",
+                    EstadoNuevo = accionFormulario,
+                    Accion = accionFormulario,
+                    ComentariosRevisor = comentarios ?? "",
+                    MotivoRechazo = motivo ?? "",
+                    FechaRevision = DateTime.Now,
+                    DuracionRevision = (int)(DateTime.Now - prestamo.FechadeCreacion).TotalMinutes,
+                    Prioridad = 0,
+                    NotificadoSolicitante = false
+                };
+
+                // Guardar en la base de datos
+                db.HistorialAprobacionPrestamo.Add(historial);
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Aprobación registrada exitosamente" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
         }
 
         #endregion
@@ -871,18 +952,99 @@ namespace EscuelaFelixArcadio.Controllers
         /// </summary>
         private void GuardarReporteGenerado(string tipoReporte, string nombreReporte, string filtros, string formato)
         {
-            var reporte = new ReporteGuardado
+            try
             {
-                TipoReporte = tipoReporte,
-                NombreReporte = nombreReporte,
-                FechaGeneracion = DateTime.Now,
-                GeneradoPor = User.Identity.GetUserId(),
-                FiltrosUtilizados = filtros,
-                Formato = formato
-            };
+                var userId = User.Identity.GetUserId();
+                if (string.IsNullOrEmpty(userId))
+                {
+                    // Si no hay usuario autenticado, no guardar el reporte
+                    return;
+                }
 
-            db.ReporteGuardado.Add(reporte);
-            db.SaveChanges();
+                var reporte = new ReporteGuardado
+                {
+                    TipoReporte = tipoReporte ?? "Desconocido",
+                    NombreReporte = nombreReporte ?? "Reporte Sin Nombre",
+                    FechaGeneracion = DateTime.Now,
+                    GeneradoPor = userId,
+                    FiltrosUtilizados = filtros ?? "",
+                    Formato = formato ?? "PDF"
+                };
+
+                db.ReporteGuardado.Add(reporte);
+                db.SaveChanges();
+            }
+            catch (Exception)
+            {
+                // Si hay error al guardar el reporte, continuar sin fallar
+                // Esto evita que la exportación falle por problemas de base de datos
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los datos del historial de aprobaciones para exportación
+        /// </summary>
+        private object ObtenerDatosHistorialAprobaciones()
+        {
+            try
+            {
+                // Primero intentar con Entity Framework
+                var query = db.HistorialAprobacionPrestamo
+                    .Include(h => h.Prestamo)
+                    .Include(h => h.UsuarioSolicitante)
+                    .Include(h => h.UsuarioRevisor)
+                    .AsQueryable();
+
+                var historialEF = query.Select(h => new
+                {
+                    IdHistorial = h.IdHistorial,
+                    NumeroPrestamo = h.Prestamo.NumeroPrestamo,
+                    Solicitante = h.UsuarioSolicitante.UserName,
+                    Revisor = h.UsuarioRevisor.UserName,
+                    EstadoPrevio = h.EstadoPrevio,
+                    EstadoNuevo = h.EstadoNuevo,
+                    Accion = h.Accion,
+                    MotivoRechazo = h.MotivoRechazo,
+                    ComentariosRevisor = h.ComentariosRevisor,
+                    FechaRevision = h.FechaRevision,
+                    DuracionRevision = h.DuracionRevision,
+                    Prioridad = h.Prioridad
+                }).ToList();
+
+                if (historialEF.Any())
+                {
+                    return historialEF.Cast<object>().ToList();
+                }
+
+                // Si no hay datos con EF, intentar con SQL directo
+                var sql = @"
+                    SELECT 
+                        h.IdHistorial,
+                        p.NumeroPrestamo,
+                        u1.UserName as Solicitante,
+                        u2.UserName as Revisor,
+                        h.EstadoPrevio,
+                        h.EstadoNuevo,
+                        h.Accion,
+                        h.MotivoRechazo,
+                        h.ComentariosRevisor,
+                        h.FechaRevision,
+                        h.DuracionRevision,
+                        h.Prioridad
+                    FROM HistorialAprobacionPrestamo h
+                    LEFT JOIN Prestamo p ON h.IdPrestamo = p.IdPrestamo
+                    LEFT JOIN AspNetUsers u1 ON h.IdUsuarioSolicitante = u1.Id
+                    LEFT JOIN AspNetUsers u2 ON h.IdUsuarioRevisor = u2.Id
+                    ORDER BY h.FechaRevision DESC";
+
+                var historialSQL = db.Database.SqlQuery<object>(sql).ToList();
+                return historialSQL;
+            }
+            catch
+            {
+                // Si todo falla, devolver lista vacía
+                return new List<object>();
+            }
         }
 
         #endregion

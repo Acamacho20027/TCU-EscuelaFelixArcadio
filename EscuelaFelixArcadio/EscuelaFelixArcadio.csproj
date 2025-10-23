@@ -281,6 +281,7 @@
     <Content Include="Content\documento.css" />
     <Content Include="Content\espacios.css" />
     <Content Include="Content\graficos-interactivos.css" />
+    <Content Include="Content\historial-aprobaciones.css" />
     <Content Include="Content\images\escudo_escuela_felix_arcadio.jpg" />
     <Content Include="Content\images\escuela_parque.jpg" />
     <Content Include="Content\images\herramientas-deportivas.jpg" />
