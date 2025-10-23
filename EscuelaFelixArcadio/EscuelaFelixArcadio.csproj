@@ -247,6 +247,17 @@
     <Content Include="Base de Datos\InsertsBaseDatos.sql" />
     <Content Include="Base de Datos\NumeroSerieProductoActualizado.sql" />
     <Content Include="Base de Datos\ResetearIntentosBloqueo.sql" />
+    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll" />
+    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.dll" />
+    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll" />
+    <Content Include="bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll" />
+    <Content Include="bin\roslyn\System.Collections.Immutable.dll" />
+    <Content Include="bin\roslyn\System.IO.FileSystem.dll" />
+    <Content Include="bin\roslyn\System.IO.FileSystem.Primitives.dll" />
+    <Content Include="bin\roslyn\System.Reflection.Metadata.dll" />
+    <Content Include="bin\roslyn\System.Security.Cryptography.Primitives.dll" />
+    <Content Include="bin\roslyn\System.ValueTuple.dll" />
+    <Content Include="bin\roslyn\VBCSCompiler.exe" />
     <Content Include="Content\admin-layout.css" />
     <Content Include="Content\auth-pages.css" />
     <Content Include="Content\bootstrap-grid.css" />
@@ -266,12 +277,15 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\categoria.css" />
+    <Content Include="Content\comparar-periodos.css" />
     <Content Include="Content\documento.css" />
     <Content Include="Content\espacios.css" />
+    <Content Include="Content\graficos-interactivos.css" />
     <Content Include="Content\images\escudo_escuela_felix_arcadio.jpg" />
     <Content Include="Content\images\escuela_parque.jpg" />
     <Content Include="Content\images\herramientas-deportivas.jpg" />
     <Content Include="Content\inventario.css" />
+    <Content Include="Content\plantillas.css" />
     <Content Include="Content\prestamos.css" />
     <Content Include="Content\productos.css" />
     <Content Include="Content\reportes.css" />
@@ -389,10 +403,7 @@
     <Content Include="Views\Reportes\Inventario.cshtml" />
     <Content Include="Views\Reportes\Prestamos.cshtml" />
     <Content Include="Views\Reportes\Sanciones.cshtml" />
-    <Content Include="Views\Reportes\ConfiguracionPersonalizada.cshtml" />
-    <Content Include="Views\Reportes\Plantillas.cshtml" />
     <Content Include="Views\Reportes\GenerarPorPlantilla.cshtml" />
-    <Content Include="Views\Reportes\CrearPlantilla.cshtml" />
     <Content Include="Views\Reportes\CompararPeriodos.cshtml" />
     <Content Include="Views\Reportes\GraficosInteractivos.cshtml" />
     <Content Include="Views\Reportes\Alertas.cshtml" />
@@ -401,9 +412,11 @@
     <Content Include="Views\Reportes\VerReporte.cshtml" />
     <Content Include="Views\Reportes\HistorialAprobaciones.cshtml" />
     <Content Include="Views\Reportes\VistaPlantilla.cshtml" />
+    <Content Include="Views\Reportes\AlertasActivas.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="bin\es\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
