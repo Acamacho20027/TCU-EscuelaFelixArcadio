@@ -6,77 +6,115 @@
 }
 
 @section Styles {
-    <link href="~/Content/reportes.css" rel="stylesheet" />
+    <link href="~/Content/reportes.css?v=3.4" rel="stylesheet" />
 }
 
 <div class="reportes-container">
     <!-- Header -->
-    <div class="reportes-header">
-        <h1>
-            <i class="fas fa-boxes header-icon"></i>
-            @ViewBag.Title
-        </h1>
-        <div class="header-subtitle">
-            Análisis detallado del inventario y stock de productos deportivos
-        </div>
+    <div class="reportes-header" style="display: flex; align-items: center; justify-content: space-between;">
+        <a href="@Url.Action("Index", "Reportes")" class="btn-reservas-cancel">
+            <i class="fas fa-arrow-left"></i> Volver a Reportes
+        </a>
+        <h1 class="reportes-title" style="margin: 0;">@ViewBag.Title</h1>
+        <div style="width: 200px;"></div>
     </div>
 
     <!-- Filtros -->
     <div class="filtros-section">
-        <div class="filtros-header">
-            <i class="fas fa-filter filtros-icon"></i>
-            <h3>Filtros de Búsqueda</h3>
+        <!-- Barra de búsqueda -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Buscar por producto, código, categoría..." />
         </div>
         
-        @using (Html.BeginForm("Inventario", "Reportes", FormMethod.Get, new { @class = "filtros-form" }))
+        @using (Html.BeginForm("Inventario", "Reportes", FormMethod.Get, new { @class = "filtros-form", @id = "filtrosForm" }))
         {
-            <div class="filtros-grid">
+            <!-- Primera fila de filtros -->
+            <div class="filtros-row">
                 <div class="filtro-group">
-                    <label for="fechaInicio">Fecha Inicio</label>
-                    <input type="date" id="fechaInicio" name="fechaInicio" value="@Request.QueryString["fechaInicio"]" />
-                </div>
-                
-                <div class="filtro-group">
-                    <label for="fechaFin">Fecha Fin</label>
-                    <input type="date" id="fechaFin" name="fechaFin" value="@Request.QueryString["fechaFin"]" />
-                </div>
-                
-                <div class="filtro-group">
-                    <label for="categorias">Categorías</label>
-                    <select id="categorias" name="categorias" multiple>
+                    <label for="categorias">Categoría</label>
+                    <select id="categorias" name="categorias" onchange="aplicarFiltros()">
+                        <option value="">Todas las categorías</option>
                         @if (ViewBag.Categorias != null)
                         {
                             foreach (var categoria in (List<EscuelaFelixArcadio.Models.Categoria>)ViewBag.Categorias)
                             {
-                                <option value="@categoria.IdCategoria">@categoria.Nombre</option>
+                                <option value="@categoria.IdCategoria" @(Request.QueryString["categorias"] == categoria.IdCategoria.ToString() ? "selected" : "")>@categoria.Nombre</option>
                             }
                         }
                     </select>
                 </div>
                 
                 <div class="filtro-group">
-                    <label for="estados">Estados</label>
-                    <select id="estados" name="estados" multiple>
+                    <label for="estados">Estado</label>
+                    <select id="estados" name="estados" onchange="aplicarFiltros()">
+                        <option value="">Todos los estados</option>
                         @if (ViewBag.Estados != null)
                         {
                             foreach (var estado in (List<EscuelaFelixArcadio.Models.Estado>)ViewBag.Estados)
                             {
-                                <option value="@estado.IdEstado">@estado.Descripcion</option>
+                                <option value="@estado.IdEstado" @(Request.QueryString["estados"] == estado.IdEstado.ToString() ? "selected" : "")>@estado.Descripcion</option>
                             }
                         }
                     </select>
                 </div>
+                
+                <div class="filtro-group">
+                    <label for="alertaStock">Alerta Stock</label>
+                    <select id="alertaStock" name="alertaStock" onchange="aplicarFiltros()">
+                        <option value="">Todas las alertas</option>
+                        <option value="true" @(Request.QueryString["alertaStock"] == "true" ? "selected" : "")>Stock Bajo</option>
+                        <option value="false" @(Request.QueryString["alertaStock"] == "false" ? "selected" : "")>Stock Normal</option>
+                    </select>
+                </div>
             </div>
             
-            <div class="filtros-actions">
-                <button type="submit" class="btn-filtrar">
-                    <i class="fas fa-search"></i>
-                    Filtrar
-                </button>
-                <button type="button" class="btn-limpiar" onclick="limpiarFiltros()">
-                    <i class="fas fa-eraser"></i>
-                    Limpiar
-                </button>
+            <!-- Segunda fila de filtros -->
+            <div class="filtros-row">
+                <div class="filtro-group">
+                    <label for="fechaInicio">Fecha Inicio</label>
+                    <input type="date" id="fechaInicio" name="fechaInicio" value="@Request.QueryString["fechaInicio"]" onchange="aplicarFiltros()" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="fechaFin">Fecha Fin</label>
+                    <input type="date" id="fechaFin" name="fechaFin" value="@Request.QueryString["fechaFin"]" onchange="aplicarFiltros()" />
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="sortBy">Ordenar por:</label>
+                    <select id="sortBy" name="sortBy" onchange="aplicarFiltros()">
+                        <option value="Producto" @(Request.QueryString["sortBy"] == "Producto" ? "selected" : "")>Nombre</option>
+                        <option value="Codigo" @(Request.QueryString["sortBy"] == "Codigo" ? "selected" : "")>Código</option>
+                        <option value="Categoria" @(Request.QueryString["sortBy"] == "Categoria" ? "selected" : "")>Categoría</option>
+                        <option value="Cantidad" @(Request.QueryString["sortBy"] == "Cantidad" ? "selected" : "")>Cantidad</option>
+                        <option value="FechaActualizacion" @(Request.QueryString["sortBy"] == "FechaActualizacion" ? "selected" : "")>Fecha Actualización</option>
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="sortOrder">Orden:</label>
+                    <select id="sortOrder" name="sortOrder" onchange="aplicarFiltros()">
+                        <option value="asc" @(Request.QueryString["sortOrder"] == "asc" ? "selected" : "")>Ascendente</option>
+                        <option value="desc" @(Request.QueryString["sortOrder"] == "desc" ? "selected" : "")>Descendente</option>
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <label for="pageSize">Mostrar:</label>
+                    <select id="pageSize" name="pageSize" onchange="aplicarFiltros()">
+                        <option value="10" @(Request.QueryString["pageSize"] == "10" ? "selected" : "")>10</option>
+                        <option value="25" @(Request.QueryString["pageSize"] == "25" ? "selected" : "")>25</option>
+                        <option value="50" @(Request.QueryString["pageSize"] == "50" ? "selected" : "")>50</option>
+                        <option value="100" @(Request.QueryString["pageSize"] == "100" ? "selected" : "")>100</option>
+                    </select>
+                </div>
+                
+                <div class="filtro-group">
+                    <button type="button" class="btn-limpiar-filtros" onclick="limpiarFiltros()">
+                        <i class="fas fa-times"></i>
+                        Limpiar Filtros
+                    </button>
+                </div>
             </div>
         }
     </div>
@@ -100,40 +138,58 @@
             </div>
         </div>
         
-        <div class="tabla-responsive">
-            <table class="tabla-datos">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Producto</th>
-                        <th>Código</th>
-                        <th>Categoría</th>
-                        <th>Estado</th>
-                        <th>Cantidad</th>
-                        <th>Mínimo</th>
-                        <th>Máximo</th>
-                        <th>Variante</th>
-                        <th>Última Actualización</th>
-                        <th>Alerta</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null)
-                    {
-                        foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>@item.IdInventario</td>
-                                <td>@item.Producto</td>
-                                <td>@item.Codigo</td>
-                                <td>@item.Categoria</td>
-                                <td>@item.Estado</td>
-                                <td>@item.Cantidad</td>
-                                <td>@item.Minimo</td>
-                                <td>@item.Maximo</td>
-                                <td>@item.Variante</td>
-                                <td>@item.FechaActualizacion.ToString("dd/MM/yyyy")</td>
-                                <td>
+        <!-- Cards Grid -->
+        <div class="inventario-cards-grid">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <div class="inventario-card">
+                        <div class="inventario-card-header">
+                            <div class="inventario-card-id">#@item.IdInventario</div>
+                            <div class="inventario-card-status @(item.Estado.ToLower())">
+                                @item.Estado
+                            </div>
+                        </div>
+                        
+                        <div class="inventario-card-body">
+                            <h3 class="inventario-card-title">@item.Producto</h3>
+                            <p class="inventario-card-code">Código: @item.Codigo</p>
+                            
+                            <div class="inventario-card-details">
+                                <div class="inventario-detail-item">
+                                    <span class="inventario-detail-label">Categoría:</span>
+                                    <span class="inventario-detail-value">@item.Categoria</span>
+                                </div>
+                                
+                                <div class="inventario-detail-item">
+                                    <span class="inventario-detail-label">Variante:</span>
+                                    <span class="inventario-detail-value">@item.Variante</span>
+                                </div>
+                                
+                                <div class="inventario-detail-item">
+                                    <span class="inventario-detail-label">Última Actualización:</span>
+                                    <span class="inventario-detail-value">@item.FechaActualizacion.ToString("dd/MM/yyyy")</span>
+                                </div>
+                            </div>
+                            
+                            <div class="inventario-card-stock">
+                                <div class="stock-info">
+                                    <div class="stock-item">
+                                        <span class="stock-label">Cantidad:</span>
+                                        <span class="stock-value stock-current">@item.Cantidad</span>
+                                    </div>
+                                    <div class="stock-item">
+                                        <span class="stock-label">Mín:</span>
+                                        <span class="stock-value stock-min">@item.Minimo</span>
+                                    </div>
+                                    <div class="stock-item">
+                                        <span class="stock-label">Máx:</span>
+                                        <span class="stock-value stock-max">@item.Maximo</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="stock-alert">
                                     @if (item.AlertaStockBajo)
                                     {
                                         <span class="badge badge-danger">
@@ -148,49 +204,171 @@
                                             Normal
                                         </span>
                                     }
-                                </td>
-                            </tr>
-                        }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="inventario-empty">
+                    <i class="fas fa-box-open"></i>
+                    <h3>No hay datos de inventario</h3>
+                    <p>Aplica filtros diferentes o verifica la configuración</p>
+                </div>
+            }
+        </div>
+        
+        <!-- Paginación -->
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="reportes-pagination">
+                @if (ViewBag.CurrentPage > 1)
+                {
+                    <a href="#" class="reportes-pagination-btn" onclick="changePage(1)">Primera</a>
+                    <a href="#" class="reportes-pagination-btn" onclick="changePage(@(ViewBag.CurrentPage - 1))">Anterior</a>
+                }
+                else
+                {
+                    <span class="reportes-pagination-btn" disabled>Primera</span>
+                    <span class="reportes-pagination-btn" disabled>Anterior</span>
+                }
+
+                @{
+                    int startPage = Math.Max(1, ViewBag.CurrentPage - 2);
+                    int endPage = Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2);
+                }
+
+                @if (startPage > 1)
+                {
+                    <span class="reportes-pagination-dots">...</span>
+                }
+
+                @for (int i = startPage; i <= endPage; i++)
+                {
+                    if (i == ViewBag.CurrentPage)
+                    {
+                        <span class="reportes-pagination-btn active">@i</span>
                     }
                     else
                     {
-                        <tr>
-                            <td colspan="11" class="text-center">
-                                <div class="loading">Cargando datos...</div>
-                            </td>
-                        </tr>
+                        <a href="#" class="reportes-pagination-btn" onclick="changePage(@i)">@i</a>
                     }
-                </tbody>
-            </table>
-        </div>
+                }
+
+                @if (endPage < ViewBag.TotalPages)
+                {
+                    <span class="reportes-pagination-dots">...</span>
+                }
+
+                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                {
+                    <a href="#" class="reportes-pagination-btn" onclick="changePage(@(ViewBag.CurrentPage + 1))">Siguiente</a>
+                    <a href="#" class="reportes-pagination-btn" onclick="changePage(@ViewBag.TotalPages)">Ultima</a>
+                }
+                else
+                {
+                    <span class="reportes-pagination-btn" disabled>Siguiente</span>
+                    <span class="reportes-pagination-btn" disabled>Ultima</span>
+                }
+            </div>
+        }
     </div>
 </div>
 
 @section scripts {
     <script>
         $(document).ready(function() {
-            // Inicializar select múltiple
-            $('#categorias, #estados').select2({
-                placeholder: 'Seleccionar opciones',
-                allowClear: true,
-                width: '100%'
+            // Búsqueda con debounce
+            let searchTimeout;
+            $('#searchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    aplicarFiltros();
+                }, 500);
             });
-            
-            // Cargar datos si hay filtros aplicados
-            if (window.location.search) {
-                cargarDatosInventario();
-            }
         });
 
-        function limpiarFiltros() {
-            $('#fechaInicio, #fechaFin').val('');
-            $('#categorias, #estados').val(null).trigger('change');
-            window.location.href = '@Url.Action("Inventario")';
+        function aplicarFiltros() {
+            // Obtener valores de los filtros
+            const categorias = $('#categorias').val();
+            const estados = $('#estados').val();
+            const alertaStock = $('#alertaStock').val();
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            const sortBy = $('#sortBy').val();
+            const sortOrder = $('#sortOrder').val();
+            const pageSize = $('#pageSize').val();
+            const searchTerm = $('#searchInput').val();
+
+            // Construir URL con parámetros
+            let url = '@Url.Action("Inventario", "Reportes")';
+            let params = [];
+
+            if (categorias) params.push('categorias=' + categorias);
+            if (estados) params.push('estados=' + estados);
+            if (alertaStock) params.push('alertaStock=' + alertaStock);
+            if (fechaInicio) params.push('fechaInicio=' + fechaInicio);
+            if (fechaFin) params.push('fechaFin=' + fechaFin);
+            if (sortBy) params.push('sortBy=' + sortBy);
+            if (sortOrder) params.push('sortOrder=' + sortOrder);
+            if (pageSize) params.push('pageSize=' + pageSize);
+            if (searchTerm) params.push('search=' + encodeURIComponent(searchTerm));
+
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+
+            // Redirigir con los filtros aplicados
+            window.location.href = url;
         }
 
-        function cargarDatosInventario() {
-            // Esta función se puede usar para cargar datos dinámicamente
-            console.log('Cargando datos de inventario...');
+        function limpiarFiltros() {
+            // Limpiar todos los campos
+            $('#categorias, #estados, #alertaStock, #sortBy, #sortOrder, #pageSize').val('');
+            $('#fechaInicio, #fechaFin').val('');
+            $('#searchInput').val('');
+            
+            // Redirigir sin filtros
+            window.location.href = '@Url.Action("Inventario", "Reportes")';
+        }
+
+        function changePage(page) {
+            // Obtener valores de los filtros actuales
+            const categorias = $('#categorias').val();
+            const estados = $('#estados').val();
+            const alertaStock = $('#alertaStock').val();
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            const sortBy = $('#sortBy').val();
+            const sortOrder = $('#sortOrder').val();
+            const pageSize = $('#pageSize').val();
+            const searchTerm = $('#searchInput').val();
+
+            // Construir URL con parámetros
+            let url = '@Url.Action("Inventario", "Reportes")';
+            let params = [];
+
+            if (categorias) params.push('categorias=' + categorias);
+            if (estados) params.push('estados=' + estados);
+            if (alertaStock) params.push('alertaStock=' + alertaStock);
+            if (fechaInicio) params.push('fechaInicio=' + fechaInicio);
+            if (fechaFin) params.push('fechaFin=' + fechaFin);
+            if (sortBy) params.push('sortBy=' + sortBy);
+            if (sortOrder) params.push('sortOrder=' + sortOrder);
+            if (pageSize) params.push('pageSize=' + pageSize);
+            if (searchTerm) params.push('search=' + encodeURIComponent(searchTerm));
+            
+            // Agregar página
+            params.push('page=' + page);
+
+            if (params.length > 0) {
+                url += '?' + params.join('&');
+            }
+
+            // Redirigir con los filtros aplicados
+            window.location.href = url;
         }
     </script>
 }

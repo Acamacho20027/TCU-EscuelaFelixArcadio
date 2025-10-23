@@ -61,7 +61,7 @@ namespace EscuelaFelixArcadio.Services
 
         #region Datos de Préstamos
 
-        public List<ReportePrestamosViewModel> ObtenerDatosPrestamos(DateTime? fechaInicio, DateTime? fechaFin, List<string> usuarios = null, List<int> estados = null, bool? devueltos = null)
+        public List<ReportePrestamosViewModel> ObtenerDatosPrestamos(DateTime? fechaInicio, DateTime? fechaFin, List<string> usuarios = null, List<string> estados = null, bool? devueltos = null)
         {
             var query = _context.Prestamo
                 .Include(p => p.ApplicationUser)
@@ -77,8 +77,9 @@ namespace EscuelaFelixArcadio.Services
             if (usuarios != null && usuarios.Any())
                 query = query.Where(p => usuarios.Contains(p.Id));
 
+            // Cambiar filtro de estados para manejar strings en lugar de ints
             if (estados != null && estados.Any())
-                query = query.Where(p => estados.Contains(p.IdEstado));
+                query = query.Where(p => estados.Contains(p.Estado.Descripcion));
 
             if (devueltos.HasValue)
                 query = query.Where(p => p.Devolucion == devueltos.Value);
@@ -123,7 +124,7 @@ namespace EscuelaFelixArcadio.Services
 
         #region Datos de Sanciones
 
-        public List<ReporteSancionesViewModel> ObtenerDatosSanciones(DateTime? fechaInicio, DateTime? fechaFin, List<string> usuarios = null, List<int> estados = null, List<string> tipos = null)
+        public List<ReporteSancionesViewModel> ObtenerDatosSanciones(DateTime? fechaInicio, DateTime? fechaFin, List<string> usuarios = null, List<string> estados = null, List<string> tipos = null)
         {
             var query = _context.Sancion
                 .Include(s => s.ApplicationUser)
@@ -140,8 +141,9 @@ namespace EscuelaFelixArcadio.Services
             if (usuarios != null && usuarios.Any())
                 query = query.Where(s => usuarios.Contains(s.Id));
 
+            // Cambiar filtro de estados para manejar strings en lugar de ints
             if (estados != null && estados.Any())
-                query = query.Where(s => estados.Contains(s.IdEstado));
+                query = query.Where(s => estados.Contains(s.Estado.Descripcion));
 
             if (tipos != null && tipos.Any())
                 query = query.Where(s => tipos.Contains(s.Tipo));

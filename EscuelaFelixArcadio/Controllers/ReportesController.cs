@@ -30,7 +30,7 @@ namespace EscuelaFelixArcadio.Controllers
         // GET: Reportes
         public ActionResult Index()
         {
-            ViewBag.Title = "Reportes y Estadísticas";
+            ViewBag.Title = "Reportes";
             
             // Generar alertas automáticas
             _reportesService.GenerarAlertasAutomaticas();
@@ -77,7 +77,7 @@ namespace EscuelaFelixArcadio.Controllers
         }
 
         // GET: Reportes/Prestamos
-        public ActionResult Prestamos(DateTime? fechaInicio, DateTime? fechaFin, string usuarios, string estados, bool? devueltos)
+        public ActionResult Prestamos(DateTime? fechaInicio, DateTime? fechaFin, string usuarios, string estados, bool? devueltos, string search)
         {
             ViewBag.Title = "Reportes de Préstamos";
             
@@ -85,11 +85,23 @@ namespace EscuelaFelixArcadio.Controllers
                 ? usuarios.Split(',').ToList() 
                 : null;
             
-            List<int> listaEstados = !string.IsNullOrEmpty(estados) 
-                ? estados.Split(',').Select(int.Parse).ToList() 
+            // Cambiar estados de int a string para manejar los valores como "Pendiente", "Aprobado", etc.
+            List<string> listaEstados = !string.IsNullOrEmpty(estados) 
+                ? estados.Split(',').ToList() 
                 : null;
 
             var datos = _reportesService.ObtenerDatosPrestamos(fechaInicio, fechaFin, listaUsuarios, listaEstados, devueltos);
+            
+            // Aplicar filtro de búsqueda si existe
+            if (!string.IsNullOrEmpty(search))
+            {
+                datos = datos.Where(p => 
+                    p.Usuario.ToLower().Contains(search.ToLower()) ||
+                    p.NombreCompleto.ToLower().Contains(search.ToLower()) ||
+                    p.NumeroPrestamo.ToLower().Contains(search.ToLower()) ||
+                    (p.MotivoPrestamo != null && p.MotivoPrestamo.ToLower().Contains(search.ToLower()))
+                ).ToList();
+            }
             
             ViewBag.Usuarios = db.Users.ToList();
             ViewBag.Estados = db.Estado.ToList();
@@ -98,7 +110,7 @@ namespace EscuelaFelixArcadio.Controllers
         }
 
         // GET: Reportes/Sanciones
-        public ActionResult Sanciones(DateTime? fechaInicio, DateTime? fechaFin, string usuarios, string estados, string tipos)
+        public ActionResult Sanciones(DateTime? fechaInicio, DateTime? fechaFin, string usuarios, string estados, string tipos, string search)
         {
             ViewBag.Title = "Reportes de Sanciones";
             
@@ -106,8 +118,9 @@ namespace EscuelaFelixArcadio.Controllers
                 ? usuarios.Split(',').ToList() 
                 : null;
             
-            List<int> listaEstados = !string.IsNullOrEmpty(estados) 
-                ? estados.Split(',').Select(int.Parse).ToList() 
+            // Cambiar estados de int a string para manejar los valores como "Activa", "Pagada", etc.
+            List<string> listaEstados = !string.IsNullOrEmpty(estados) 
+                ? estados.Split(',').ToList() 
                 : null;
             
             List<string> listaTipos = !string.IsNullOrEmpty(tipos) 
@@ -115,6 +128,17 @@ namespace EscuelaFelixArcadio.Controllers
                 : null;
 
             var datos = _reportesService.ObtenerDatosSanciones(fechaInicio, fechaFin, listaUsuarios, listaEstados, listaTipos);
+            
+            // Aplicar filtro de búsqueda si existe
+            if (!string.IsNullOrEmpty(search))
+            {
+                datos = datos.Where(s => 
+                    s.Usuario.ToLower().Contains(search.ToLower()) ||
+                    s.NombreCompleto.ToLower().Contains(search.ToLower()) ||
+                    s.Motivo.ToLower().Contains(search.ToLower()) ||
+                    s.Tipo.ToLower().Contains(search.ToLower())
+                ).ToList();
+            }
             
             ViewBag.Usuarios = db.Users.ToList();
             ViewBag.Estados = db.Estado.ToList();
@@ -159,7 +183,152 @@ namespace EscuelaFelixArcadio.Controllers
             // Guardar reporte generado
             GuardarReporteGenerado(tipoReporte, titulo, filtros, "PDF");
 
-            return Content(html, "text/html");
+            // Retornar HTML con botón de descarga antes de la tabla
+            string botonVolver = "";
+            switch (tipoReporte.ToLower())
+            {
+                case "inventario":
+                    botonVolver = "<a href='/Reportes/Inventario' style='background: #f1f5f9; color: #475569; padding: 12px 24px; border-radius: 8px; border: 1px solid #e2e8f0; text-decoration: none; font-weight: 500; font-size: 14px; margin-right: 0px; display: inline-flex; align-items: center; gap: 8px;'><i>←</i> Volver a Inventario</a>";
+                    break;
+                case "prestamos":
+                    botonVolver = "<a href='/Reportes/Prestamos' style='background: #f1f5f9; color: #475569; padding: 12px 24px; border-radius: 8px; border: 1px solid #e2e8f0; text-decoration: none; font-weight: 500; font-size: 14px; margin-right: 0px; display: inline-flex; align-items: center; gap: 8px;'><i>←</i> Volver a Préstamos</a>";
+                    break;
+                case "sanciones":
+                    botonVolver = "<a href='/Reportes/Sanciones' style='background: #f1f5f9; color: #475569; padding: 12px 24px; border-radius: 8px; border: 1px solid #e2e8f0; text-decoration: none; font-weight: 500; font-size: 14px; margin-right: 0px; display: inline-flex; align-items: center; gap: 8px;'><i>←</i> Volver a Sanciones</a>";
+                    break;
+            }
+
+            var htmlConDescarga = html.Replace("<div class='report-info'>", $@"
+                <div style='display: flex; justify-content: space-between; align-items: center; margin: 20px; padding: 20px; background: #f8f9fa; border-radius: 10px;'>
+                    <div style='flex: 1;'>
+                        {botonVolver}
+                    </div>
+                    <div style='flex: 1; text-align: center;'>
+                        <h3 style='color: #0ea5e9; margin-bottom: 15px;'>Reporte Generado Exitosamente</h3>
+                        <p style='color: #64748b; margin: 0;'>Haz clic en el botón para descargar el archivo PDF</p>
+                    </div>
+                    <div style='flex: 1; text-align: right;'>
+                        <button onclick='descargarPDF()' style='background: linear-gradient(135deg, #0ea5e9, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600;'>
+                            📄 Descargar PDF
+                        </button>
+                    </div>
+                </div>
+                <div class='report-info'>");
+            
+            htmlConDescarga = htmlConDescarga.Replace("</body>", @"
+                <style>
+                    .modal-overlay {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.5);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 10000;
+                    }
+                    .modal-success {
+                        background: linear-gradient(135deg, #10b981, #059669);
+                        color: white;
+                        padding: 30px;
+                        border-radius: 15px;
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                        text-align: center;
+                        max-width: 400px;
+                        animation: modalSlideIn 0.3s ease-out;
+                    }
+                    @keyframes modalSlideIn {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                    .modal-icon {
+                        font-size: 48px;
+                        margin-bottom: 15px;
+                    }
+                    .modal-title {
+                        font-size: 20px;
+                        font-weight: 700;
+                        margin-bottom: 10px;
+                    }
+                    .modal-message {
+                        font-size: 16px;
+                        margin-bottom: 25px;
+                        opacity: 0.9;
+                    }
+                    .modal-btn {
+                        background: rgba(255, 255, 255, 0.2);
+                        color: white;
+                        border: 2px solid rgba(255, 255, 255, 0.3);
+                        padding: 12px 30px;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    }
+                    .modal-btn:hover {
+                        background: rgba(255, 255, 255, 0.3);
+                        border-color: rgba(255, 255, 255, 0.5);
+                    }
+                </style>
+                <script>
+                    function descargarPDF() {
+                        // Crear un blob con el HTML
+                        var blob = new Blob([document.documentElement.outerHTML], {type: 'text/html'});
+                        var url = window.URL.createObjectURL(blob);
+                        
+                        // Crear enlace de descarga
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = '" + titulo.Replace(" ", "_") + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + @".html';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                        
+                        // Mostrar modal de éxito bonito
+                        mostrarModalExito();
+                    }
+                    
+                    function mostrarModalExito() {
+                        var modal = document.createElement('div');
+                        modal.className = 'modal-overlay';
+                        modal.innerHTML = `
+                            <div class='modal-success'>
+                                <div class='modal-icon'>✅</div>
+                                <div class='modal-title'>¡Descarga Exitosa!</div>
+                                <div class='modal-message'>El archivo PDF se ha descargado correctamente</div>
+                                <button class='modal-btn' onclick='cerrarModal()'>Aceptar</button>
+                            </div>
+                        `;
+                        document.body.appendChild(modal);
+                        
+                        // Cerrar modal al hacer clic fuera
+                        modal.addEventListener('click', function(e) {
+                            if (e.target === modal) {
+                                cerrarModal();
+                            }
+                        });
+                    }
+                    
+                    function cerrarModal() {
+                        var modal = document.querySelector('.modal-overlay');
+                        if (modal) {
+                            modal.remove();
+                        }
+                    }
+                </script>
+            </body>");
+            
+            return Content(htmlConDescarga, "text/html");
         }
 
         // GET: Reportes/ExportarExcel
@@ -167,34 +336,32 @@ namespace EscuelaFelixArcadio.Controllers
         {
             RegistrarAcceso(tipoReporte, "ExportarExcel");
             
-            byte[] archivoBytes = null;
+            object datos = null;
             string nombreArchivo = "";
 
             switch (tipoReporte.ToLower())
             {
                 case "inventario":
-                    var datosInventario = _reportesService.ObtenerDatosInventario(null, null);
-                    archivoBytes = _exportacionService.GenerarCSVInventario(datosInventario as IEnumerable<dynamic>);
-                    nombreArchivo = $"Reporte_Inventario_{DateTime.Now:yyyyMMdd}.csv";
+                    datos = _reportesService.ObtenerDatosInventario(null, null);
+                    nombreArchivo = "Reporte_Inventario";
                     break;
-                    
                 case "prestamos":
-                    var datosPrestamos = _reportesService.ObtenerDatosPrestamos(null, null);
-                    archivoBytes = _exportacionService.GenerarCSVPrestamos(datosPrestamos as IEnumerable<dynamic>);
-                    nombreArchivo = $"Reporte_Prestamos_{DateTime.Now:yyyyMMdd}.csv";
+                    datos = _reportesService.ObtenerDatosPrestamos(null, null);
+                    nombreArchivo = "Reporte_Prestamos";
                     break;
-                    
                 case "sanciones":
-                    var datosSanciones = _reportesService.ObtenerDatosSanciones(null, null);
-                    archivoBytes = _exportacionService.GenerarCSVSanciones(datosSanciones as IEnumerable<dynamic>);
-                    nombreArchivo = $"Reporte_Sanciones_{DateTime.Now:yyyyMMdd}.csv";
+                    datos = _reportesService.ObtenerDatosSanciones(null, null);
+                    nombreArchivo = "Reporte_Sanciones";
                     break;
             }
 
+            var excelBytes = _exportacionService.GenerarExcelBonito(tipoReporte, datos);
+            
             // Guardar reporte generado
             GuardarReporteGenerado(tipoReporte, nombreArchivo, filtros, "Excel");
 
-            return File(archivoBytes, "text/csv", nombreArchivo);
+            // Retornar archivo Excel bonito para descarga (HTML que Excel puede abrir)
+            return File(excelBytes, "application/vnd.ms-excel", $"{nombreArchivo}_{DateTime.Now:yyyyMMdd_HHmmss}.xls");
         }
 
         #endregion

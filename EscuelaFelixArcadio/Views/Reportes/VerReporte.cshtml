@@ -100,15 +100,15 @@
         <div id="listaComentarios">
             @if (ViewBag.Comentarios != null && ((List<EscuelaFelixArcadio.Models.ComentarioReporte>)ViewBag.Comentarios).Any())
             {
-                @foreach (var comentario in (List<EscuelaFelixArcadio.Models.ComentarioReporte>)ViewBag.Comentarios)
+                foreach (var comentario in (List<EscuelaFelixArcadio.Models.ComentarioReporte>)ViewBag.Comentarios)
                 {
                     <div class="comentario-item">
                         <div class="comentario-avatar">
-                            @comentario.Usuario.Substring(0, 1).ToUpper()
+                            @(comentario.IdUsuario?.Substring(0, 1).ToUpper() ?? "U")
                         </div>
                         <div class="comentario-content">
                             <div class="comentario-header">
-                                <div class="comentario-usuario">@comentario.Usuario</div>
+                                <div class="comentario-usuario">@(comentario.IdUsuario ?? "Usuario")</div>
                                 <div class="comentario-fecha">@comentario.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</div>
                             </div>
                             <div class="comentario-texto">@comentario.Comentario</div>
