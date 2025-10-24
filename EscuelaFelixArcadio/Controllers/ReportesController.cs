@@ -200,6 +200,9 @@ namespace EscuelaFelixArcadio.Controllers
                 case "sanciones":
                     botonVolver = "<a href='/Reportes/Sanciones' style='background: #f1f5f9; color: #475569; padding: 12px 24px; border-radius: 8px; border: 1px solid #e2e8f0; text-decoration: none; font-weight: 500; font-size: 14px; margin-right: 0px; display: inline-flex; align-items: center; gap: 8px;'><i>←</i> Volver a Sanciones</a>";
                     break;
+                case "historialaprobaciones":
+                    botonVolver = "<a href='/Reportes/HistorialAprobaciones' style='background: #f1f5f9; color: #475569; padding: 12px 24px; border-radius: 8px; border: 1px solid #e2e8f0; text-decoration: none; font-weight: 500; font-size: 14px; margin-right: 0px; display: inline-flex; align-items: center; gap: 8px;'><i>←</i> Volver a Historial de Aprobaciones de Préstamos</a>";
+                    break;
             }
 
             var htmlConDescarga = html.Replace("<div class='report-info'>", $@"

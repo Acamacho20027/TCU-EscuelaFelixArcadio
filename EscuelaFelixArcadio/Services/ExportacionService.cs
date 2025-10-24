@@ -155,7 +155,7 @@ namespace EscuelaFelixArcadio.Services
             // Solo mostrar botón "Volver" para historial de aprobaciones
             if (tipoReporte.ToLower() == "historialaprobaciones")
             {
-                html.AppendLine("<a href='javascript:history.back()' class='volver-btn'>← Volver a Historial de Aprobaciones de Préstamos</a>");
+                // Botón eliminado según solicitud del usuario
             }
             
             html.AppendLine("<div class='logo'><img src='data:image/jpeg;base64," + ConvertirImagenABase64() + "' alt='Logo Escuela' style='width: 80px; height: 80px; border-radius: 50%; object-fit: cover;'></div>");
@@ -349,9 +349,6 @@ namespace EscuelaFelixArcadio.Services
             {
                 html.AppendLine("<div style='text-align: center; margin: 40px 0;'>");
                 html.AppendLine("<p style='font-size: 18px; color: #64748b; margin-bottom: 20px;'>No hay datos de historial de aprobaciones disponibles.</p>");
-                html.AppendLine("<a href='javascript:history.back()' style='display: inline-block; background: linear-gradient(135deg, #0ea5e9, #3b82f6); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600;'>");
-                html.AppendLine("← Volver a Historial de Aprobaciones de Préstamos");
-                html.AppendLine("</a>");
                 html.AppendLine("</div>");
                 return;
             }
