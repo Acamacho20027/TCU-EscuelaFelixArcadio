@@ -1,0 +1,310 @@
+﻿@{
+    ViewBag.Title = "Estadísticas de Usuarios";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+}
+
+<div class="estadisticas-container">
+    <!-- Header Principal -->
+    <div class="estadisticas-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index")" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Dashboard
+            </a>
+        </div>
+        <h1 class="estadisticas-title">@ViewBag.Title</h1>
+        <div class="header-actions"></div>
+    </div>
+
+    <!-- Filtros de Fecha -->
+    <div class="filtros-fecha">
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Inicio</label>
+            <input type="date" id="fechaInicio" class="filtro-input" />
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Fin</label>
+            <input type="date" id="fechaFin" class="filtro-input" />
+        </div>
+        <button class="btn-filtrar" onclick="aplicarFiltros()">
+            <i class="fas fa-filter"></i>
+            Filtrar
+        </button>
+    </div>
+
+    <!-- Gráfico de Usuarios -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Análisis de Actividad de Usuarios</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarDatos('usuarios')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoUsuarios">
+            <div class="loading">Cargando análisis de usuarios...</div>
+        </div>
+    </div>
+
+    <!-- Tabla de Usuarios Más Activos -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Usuarios Más Activos</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarDatos('activos')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaUsuariosActivos">
+            <div class="loading">Cargando usuarios más activos...</div>
+        </div>
+    </div>
+
+    <!-- Análisis de Comportamiento -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Análisis de Comportamiento</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarDatos('comportamiento')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaComportamiento">
+            <div class="loading">Cargando análisis de comportamiento...</div>
+        </div>
+    </div>
+
+    <!-- Estadísticas de Usuarios -->
+    <div class="estadisticas-grid" id="estadisticasUsuarios">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalUsuarios">-</div>
+            <div class="estadistica-label">Total Usuarios</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="usuariosActivos">-</div>
+            <div class="estadistica-label">Usuarios Activos</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="promedioPrestamos">-</div>
+            <div class="estadistica-label">Promedio Préstamos</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="promedioReservas">-</div>
+            <div class="estadistica-label">Promedio Reservas</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="usuariosSancionados">-</div>
+            <div class="estadistica-label">Usuarios Sancionados</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chartUsuarios = null;
+
+        $(document).ready(function() {
+            // Establecer fechas por defecto (últimos 30 días)
+            const fechaFin = new Date();
+            const fechaInicio = new Date();
+            fechaInicio.setDate(fechaInicio.getDate() - 30);
+            
+            $('#fechaInicio').val(fechaInicio.toISOString().split('T')[0]);
+            $('#fechaFin').val(fechaFin.toISOString().split('T')[0]);
+            
+            // Cargar datos iniciales
+            aplicarFiltros();
+        });
+
+        function aplicarFiltros() {
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            
+            cargarDatosUsuarios(fechaInicio, fechaFin);
+            cargarGraficoUsuarios(fechaInicio, fechaFin);
+        }
+
+        function cargarDatosUsuarios(fechaInicio, fechaFin) {
+            $('#tablaUsuariosActivos').html('<div class="loading">Cargando usuarios más activos...</div>');
+            $('#tablaComportamiento').html('<div class="loading">Cargando análisis de comportamiento...</div>');
+            
+            $.get('@Url.Action("DatosGraficoUsuarios")', {
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin
+            }, function(response) {
+                if (response.success) {
+                    mostrarUsuariosActivos(response.data);
+                    mostrarComportamiento(response.data);
+                    actualizarEstadisticasUsuarios(response.data);
+                } else {
+                    $('#tablaUsuariosActivos').html('<div class="error-message">Error al cargar datos de usuarios</div>');
+                }
+            }).fail(function() {
+                $('#tablaUsuariosActivos').html('<div class="error-message">Error al cargar datos de usuarios</div>');
+            });
+        }
+
+        function mostrarUsuariosActivos(usuarios) {
+            let html = '<table class="tabla-datos"><thead><tr><th>Usuario</th><th>Préstamos</th><th>Reservas</th><th>Sanciones</th><th>Score Actividad</th></tr></thead><tbody>';
+            
+            usuarios.forEach(u => {
+                const scoreClass = u.ScoreActividad > 10 ? 'positiva' : u.ScoreActividad < 0 ? 'negativa' : '';
+                html += `<tr>
+                    <td>${u.Usuario}</td>
+                    <td>${u.Prestamos}</td>
+                    <td>${u.Reservas}</td>
+                    <td>${u.Sanciones}</td>
+                    <td class="${scoreClass}">${u.ScoreActividad}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            $('#tablaUsuariosActivos').html(html);
+        }
+
+        function mostrarComportamiento(usuarios) {
+            // Calcular estadísticas de comportamiento
+            const totalUsuarios = usuarios.length;
+            const usuariosConPrestamos = usuarios.filter(u => u.Prestamos > 0).length;
+            const usuariosConReservas = usuarios.filter(u => u.Reservas > 0).length;
+            const usuariosConSanciones = usuarios.filter(u => u.Sanciones > 0).length;
+            const promedioPrestamos = usuarios.reduce((sum, u) => sum + u.Prestamos, 0) / totalUsuarios;
+            const promedioReservas = usuarios.reduce((sum, u) => sum + u.Reservas, 0) / totalUsuarios;
+            
+            let html = '<table class="tabla-datos"><thead><tr><th>Métrica</th><th>Valor</th><th>Porcentaje</th></tr></thead><tbody>';
+            
+            html += `<tr>
+                <td>Usuarios con Préstamos</td>
+                <td>${usuariosConPrestamos}</td>
+                <td>${(usuariosConPrestamos * 100 / totalUsuarios).toFixed(1)}%</td>
+            </tr>`;
+            
+            html += `<tr>
+                <td>Usuarios con Reservas</td>
+                <td>${usuariosConReservas}</td>
+                <td>${(usuariosConReservas * 100 / totalUsuarios).toFixed(1)}%</td>
+            </tr>`;
+            
+            html += `<tr>
+                <td>Usuarios con Sanciones</td>
+                <td>${usuariosConSanciones}</td>
+                <td>${(usuariosConSanciones * 100 / totalUsuarios).toFixed(1)}%</td>
+            </tr>`;
+            
+            html += `<tr>
+                <td>Promedio de Préstamos por Usuario</td>
+                <td>${promedioPrestamos.toFixed(1)}</td>
+                <td>-</td>
+            </tr>`;
+            
+            html += `<tr>
+                <td>Promedio de Reservas por Usuario</td>
+                <td>${promedioReservas.toFixed(1)}</td>
+                <td>-</td>
+            </tr>`;
+            
+            html += '</tbody></table>';
+            $('#tablaComportamiento').html(html);
+        }
+
+        function cargarGraficoUsuarios(fechaInicio, fechaFin) {
+            $('#graficoUsuarios').html('<div class="loading">Cargando gráfico de usuarios...</div>');
+            
+            $.get('@Url.Action("DatosGraficoUsuarios")', {
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin
+            }, function(response) {
+                if (response.success) {
+                    crearGraficoUsuarios(response.data);
+                } else {
+                    $('#graficoUsuarios').html('<div class="error-message">Error al cargar gráfico</div>');
+                }
+            }).fail(function() {
+                $('#graficoUsuarios').html('<div class="error-message">Error al cargar gráfico</div>');
+            });
+        }
+
+        function crearGraficoUsuarios(usuarios) {
+            const ctx = document.createElement('canvas');
+            $('#graficoUsuarios').html(ctx);
+            
+            if (chartUsuarios) {
+                chartUsuarios.destroy();
+            }
+            
+            // Tomar solo los primeros 10 usuarios para el gráfico
+            const usuariosTop = usuarios.slice(0, 10);
+            
+            chartUsuarios = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: usuariosTop.map(u => u.Usuario),
+                    datasets: [{
+                        label: 'Préstamos',
+                        data: usuariosTop.map(u => u.Prestamos),
+                        backgroundColor: '#10b981'
+                    }, {
+                        label: 'Reservas',
+                        data: usuariosTop.map(u => u.Reservas),
+                        backgroundColor: '#3b82f6'
+                    }, {
+                        label: 'Sanciones',
+                        data: usuariosTop.map(u => u.Sanciones),
+                        backgroundColor: '#ef4444'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Actividad de Usuarios (Top 10)'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function actualizarEstadisticasUsuarios(usuarios) {
+            const totalUsuarios = usuarios.length;
+            const usuariosActivos = usuarios.filter(u => u.Prestamos > 0 || u.Reservas > 0).length;
+            const promedioPrestamos = usuarios.reduce((sum, u) => sum + u.Prestamos, 0) / totalUsuarios;
+            const promedioReservas = usuarios.reduce((sum, u) => sum + u.Reservas, 0) / totalUsuarios;
+            const usuariosSancionados = usuarios.filter(u => u.Sanciones > 0).length;
+            
+            $('#totalUsuarios').text(totalUsuarios);
+            $('#usuariosActivos').text(usuariosActivos);
+            $('#promedioPrestamos').text(promedioPrestamos.toFixed(1));
+            $('#promedioReservas').text(promedioReservas.toFixed(1));
+            $('#usuariosSancionados').text(usuariosSancionados);
+        }
+
+        function exportarDatos(tipo) {
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            
+            window.open('@Url.Action("ExportarDatos")' + 
+                '?tipoDatos=' + tipo + 
+                '&fechaInicio=' + fechaInicio + 
+                '&fechaFin=' + fechaFin + 
+                '&formato=excel', '_blank');
+        }
+    </script>
+}

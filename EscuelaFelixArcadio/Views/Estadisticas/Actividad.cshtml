@@ -1,0 +1,385 @@
+﻿@{
+    ViewBag.Title = "Estadísticas de Actividad";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+}
+
+<div class="estadisticas-container">
+    <!-- Header Principal -->
+    <div class="estadisticas-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index")" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Dashboard
+            </a>
+        </div>
+        <h1 class="estadisticas-title">@ViewBag.Title</h1>
+        <div class="header-actions"></div>
+    </div>
+
+    <!-- Filtros de Fecha -->
+    <div class="filtros-fecha">
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Inicio</label>
+            <input type="date" id="fechaInicio" class="filtro-input" />
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Fin</label>
+            <input type="date" id="fechaFin" class="filtro-input" />
+        </div>
+        <button class="btn-filtrar" onclick="aplicarFiltros()">
+            <i class="fas fa-filter"></i>
+            Filtrar
+        </button>
+    </div>
+
+    <!-- Gráfico de Actividad General -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Actividad General del Sistema</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarDatos('actividad')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoActividad">
+            <div class="loading">Cargando gráfico de actividad...</div>
+        </div>
+    </div>
+
+    <!-- Heatmap de Actividad -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Heatmap de Actividad</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarDatos('heatmap')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoHeatmap">
+            <div class="loading">Cargando heatmap de actividad...</div>
+        </div>
+    </div>
+
+    <!-- Análisis de Patrones de Actividad -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Patrones de Actividad</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarDatos('patrones')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaPatrones">
+            <div class="loading">Cargando patrones de actividad...</div>
+        </div>
+    </div>
+
+    <!-- Métricas de Rendimiento -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Métricas de Rendimiento</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarDatos('rendimiento')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaRendimiento">
+            <div class="loading">Cargando métricas de rendimiento...</div>
+        </div>
+    </div>
+
+    <!-- Estadísticas de Actividad -->
+    <div class="estadisticas-grid" id="estadisticasActividad">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalActividades">-</div>
+            <div class="estadistica-label">Total Actividades</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="actividadesDiarias">-</div>
+            <div class="estadistica-label">Actividades Diarias</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="picoActividad">-</div>
+            <div class="estadistica-label">Pico de Actividad</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="tiempoPromedioSesion">-</div>
+            <div class="estadistica-label">Tiempo Promedio Sesión</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="eficienciaSistema">-</div>
+            <div class="estadistica-label">Eficiencia Sistema</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chartActividad = null;
+        let chartHeatmap = null;
+
+        $(document).ready(function() {
+            // Establecer fechas por defecto (últimos 30 días)
+            const fechaFin = new Date();
+            const fechaInicio = new Date();
+            fechaInicio.setDate(fechaInicio.getDate() - 30);
+            
+            $('#fechaInicio').val(fechaInicio.toISOString().split('T')[0]);
+            $('#fechaFin').val(fechaFin.toISOString().split('T')[0]);
+            
+            // Cargar datos iniciales
+            aplicarFiltros();
+        });
+
+        function aplicarFiltros() {
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            
+            cargarGraficoActividad(fechaInicio, fechaFin);
+            cargarHeatmapActividad(fechaInicio, fechaFin);
+            cargarPatronesActividad(fechaInicio, fechaFin);
+            cargarMetricasRendimiento(fechaInicio, fechaFin);
+        }
+
+        function cargarGraficoActividad(fechaInicio, fechaFin) {
+            $('#graficoActividad').html('<div class="loading">Cargando gráfico de actividad...</div>');
+            
+            // Placeholder para gráfico de actividad
+            const ctx = document.createElement('canvas');
+            $('#graficoActividad').html(ctx);
+            
+            if (chartActividad) {
+                chartActividad.destroy();
+            }
+            
+            // Datos de ejemplo para el gráfico
+            const dias = [];
+            const prestamos = [];
+            const reservas = [];
+            const usuarios = [];
+            
+            for (let i = 0; i < 30; i++) {
+                const fecha = new Date();
+                fecha.setDate(fecha.getDate() - (29 - i));
+                dias.push(fecha.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }));
+                prestamos.push(Math.floor(Math.random() * 20) + 5);
+                reservas.push(Math.floor(Math.random() * 15) + 3);
+                usuarios.push(Math.floor(Math.random() * 25) + 10);
+            }
+            
+            chartActividad = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dias,
+                    datasets: [{
+                        label: 'Préstamos',
+                        data: prestamos,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Reservas',
+                        data: reservas,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Usuarios Activos',
+                        data: usuarios,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Actividad General del Sistema'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarHeatmapActividad(fechaInicio, fechaFin) {
+            $('#graficoHeatmap').html('<div class="loading">Cargando heatmap de actividad...</div>');
+            
+            // Placeholder para heatmap
+            const ctx = document.createElement('canvas');
+            $('#graficoHeatmap').html(ctx);
+            
+            if (chartHeatmap) {
+                chartHeatmap.destroy();
+            }
+            
+            // Datos de ejemplo para el heatmap
+            const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            const horas = Array.from({length: 24}, (_, i) => i);
+            
+            const datosHeatmap = [];
+            diasSemana.forEach((dia, diaIndex) => {
+                horas.forEach((hora, horaIndex) => {
+                    const actividad = Math.floor(Math.random() * 10);
+                    datosHeatmap.push({
+                        x: horaIndex,
+                        y: diaIndex,
+                        v: actividad
+                    });
+                });
+            });
+            
+            chartHeatmap = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Actividad',
+                        data: datosHeatmap,
+                        backgroundColor: function(context) {
+                            const valor = context.parsed.v;
+                            const intensidad = Math.min(valor / 10, 1);
+                            return `rgba(16, 185, 129, ${intensidad})`;
+                        },
+                        pointRadius: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Heatmap de Actividad por Día y Hora'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'Hora del Día'
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Día de la Semana'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return diasSemana[value];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarPatronesActividad(fechaInicio, fechaFin) {
+            $('#tablaPatrones').html('<div class="loading">Cargando patrones de actividad...</div>');
+            
+            // Datos de ejemplo para patrones
+            const patrones = [
+                { Patron: 'Día de la Semana', Valor: 'Viernes', Frecuencia: '35%', Tendencia: 'Creciente' },
+                { Patron: 'Hora del Día', Valor: '14:00-16:00', Frecuencia: '28%', Tendencia: 'Estable' },
+                { Patron: 'Tipo de Actividad', Valor: 'Préstamos', Frecuencia: '45%', Tendencia: 'Creciente' },
+                { Patron: 'Usuario Activo', Valor: 'Usuario Principal', Frecuencia: '22%', Tendencia: 'Estable' },
+                { Patron: 'Espacio Popular', Valor: 'Cancha de Fútbol', Frecuencia: '18%', Tendencia: 'Creciente' }
+            ];
+            
+            let html = '<table class="tabla-datos"><thead><tr><th>Patrón</th><th>Valor</th><th>Frecuencia</th><th>Tendencia</th></tr></thead><tbody>';
+            
+            patrones.forEach(p => {
+                const tendenciaClass = p.Tendencia === 'Creciente' ? 'positiva' : p.Tendencia === 'Decreciente' ? 'negativa' : '';
+                html += `<tr>
+                    <td>${p.Patron}</td>
+                    <td>${p.Valor}</td>
+                    <td>${p.Frecuencia}</td>
+                    <td class="${tendenciaClass}">${p.Tendencia}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            $('#tablaPatrones').html(html);
+        }
+
+        function cargarMetricasRendimiento(fechaInicio, fechaFin) {
+            $('#tablaRendimiento').html('<div class="loading">Cargando métricas de rendimiento...</div>');
+            
+            // Datos de ejemplo para métricas
+            const metricas = [
+                { Metrica: 'Tiempo de Respuesta Promedio', Valor: '245ms', Estado: 'Excelente', Tendencia: 'Mejorando' },
+                { Metrica: 'Disponibilidad del Sistema', Valor: '99.8%', Estado: 'Excelente', Tendencia: 'Estable' },
+                { Metrica: 'Carga de Servidor', Valor: '45%', Estado: 'Bueno', Tendencia: 'Estable' },
+                { Metrica: 'Memoria Utilizada', Valor: '2.1GB', Estado: 'Bueno', Tendencia: 'Estable' },
+                { Metrica: 'Consultas por Minuto', Valor: '156', Estado: 'Excelente', Tendencia: 'Creciente' },
+                { Metrica: 'Errores por Hora', Valor: '0.2', Estado: 'Excelente', Tendencia: 'Mejorando' }
+            ];
+            
+            let html = '<table class="tabla-datos"><thead><tr><th>Métrica</th><th>Valor</th><th>Estado</th><th>Tendencia</th></tr></thead><tbody>';
+            
+            metricas.forEach(m => {
+                const estadoClass = m.Estado === 'Excelente' ? 'positiva' : m.Estado === 'Bueno' ? '' : 'negativa';
+                const tendenciaClass = m.Tendencia === 'Mejorando' ? 'positiva' : m.Tendencia === 'Empeorando' ? 'negativa' : '';
+                
+                html += `<tr>
+                    <td>${m.Metrica}</td>
+                    <td>${m.Valor}</td>
+                    <td class="${estadoClass}">${m.Estado}</td>
+                    <td class="${tendenciaClass}">${m.Tendencia}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            $('#tablaRendimiento').html(html);
+        }
+
+        function actualizarEstadisticasActividad() {
+            // Datos de ejemplo para estadísticas
+            $('#totalActividades').text('1,247');
+            $('#actividadesDiarias').text('42');
+            $('#picoActividad').text('Viernes 14:00');
+            $('#tiempoPromedioSesion').text('23 min');
+            $('#eficienciaSistema').text('94.5%');
+        }
+
+        function exportarDatos(tipo) {
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            
+            window.open('@Url.Action("ExportarDatos")' + 
+                '?tipoDatos=' + tipo + 
+                '&fechaInicio=' + fechaInicio + 
+                '&fechaFin=' + fechaFin + 
+                '&formato=excel', '_blank');
+        }
+
+        // Actualizar estadísticas después de cargar los datos
+        setTimeout(actualizarEstadisticasActividad, 2000);
+    </script>
+}

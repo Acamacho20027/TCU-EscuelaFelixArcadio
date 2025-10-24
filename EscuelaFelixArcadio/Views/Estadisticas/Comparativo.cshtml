@@ -1,0 +1,417 @@
+﻿@{
+    ViewBag.Title = "Análisis Comparativo";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+}
+
+<div class="estadisticas-container">
+    <!-- Header Principal -->
+    <div class="estadisticas-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index")" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Dashboard
+            </a>
+        </div>
+        <h1 class="estadisticas-title">@ViewBag.Title</h1>
+        <div class="header-actions"></div>
+    </div>
+
+    <!-- Configuración de Períodos -->
+    <div class="comparativo-container">
+        <div class="filtros-header">
+            <i class="fas fa-balance-scale filtros-icon"></i>
+            <h3>Configuración de Períodos de Comparación</h3>
+        </div>
+        
+        <div class="filtros-fecha">
+            <div class="filtro-grupo">
+                <label class="filtro-label">Tipo de Análisis</label>
+                <select id="tipoAnalisis" class="filtro-input">
+                    <option value="prestamos">Préstamos</option>
+                    <option value="espacios">Espacios</option>
+                    <option value="usuarios">Usuarios</option>
+                    <option value="inventario">Inventario</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Período 1 - Inicio</label>
+                <input type="date" id="periodo1Inicio" class="filtro-input" />
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Período 1 - Fin</label>
+                <input type="date" id="periodo1Fin" class="filtro-input" />
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Período 2 - Inicio</label>
+                <input type="date" id="periodo2Inicio" class="filtro-input" />
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Período 2 - Fin</label>
+                <input type="date" id="periodo2Fin" class="filtro-input" />
+            </div>
+            <button class="btn-filtrar" onclick="compararPeriodos()">
+                <i class="fas fa-exchange-alt"></i>
+                Comparar
+            </button>
+        </div>
+    </div>
+
+    <!-- Resultados de Comparación -->
+    <div class="comparativo-container" id="resultadosComparacion">
+        <div class="periodo-comparacion">
+            <div class="periodo-card" id="periodo1Card">
+                <div class="periodo-titulo">Período 1</div>
+                <div class="periodo-fecha" id="periodo1Fecha">-</div>
+                <div class="periodo-valor" id="periodo1Valor">-</div>
+                <div class="periodo-label" id="periodo1Label">Total</div>
+            </div>
+            
+            <div class="comparacion-separador">VS</div>
+            
+            <div class="periodo-card" id="periodo2Card">
+                <div class="periodo-titulo">Período 2</div>
+                <div class="periodo-fecha" id="periodo2Fecha">-</div>
+                <div class="periodo-valor" id="periodo2Valor">-</div>
+                <div class="periodo-label" id="periodo2Label">Total</div>
+            </div>
+        </div>
+
+        <div class="diferencias-card" id="diferenciasCard">
+            <div class="diferencias-titulo">Análisis de Diferencias</div>
+            <div id="diferenciasContenido">
+                <div class="loading">Selecciona períodos para comparar</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico Comparativo -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Visualización Comparativa</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarDatos('comparativo')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoComparativo">
+            <div class="loading">Selecciona períodos para comparar</div>
+        </div>
+    </div>
+
+    <!-- Análisis de Variaciones Temporales -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Variaciones Temporales</h3>
+            <div class="tabla-actions">
+                <select id="periodoVariacion" class="filtro-input">
+                    <option value="mensual">Mensual</option>
+                    <option value="semanal">Semanal</option>
+                </select>
+                <button class="btn-filtrar" onclick="cargarVariaciones()">
+                    <i class="fas fa-chart-line"></i>
+                    Analizar
+                </button>
+            </div>
+        </div>
+        <div id="tablaVariaciones">
+            <div class="loading">Selecciona tipo de análisis para ver variaciones</div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Comparativas -->
+    <div class="estadisticas-grid" id="estadisticasComparativas">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="diferenciaTotal">-</div>
+            <div class="estadistica-label">Diferencia Total</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="porcentajeCambio">-</div>
+            <div class="estadistica-label">% Cambio</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="tendencia">-</div>
+            <div class="estadistica-label">Tendencia</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="significancia">-</div>
+            <div class="estadistica-label">Significancia</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="confianza">-</div>
+            <div class="estadistica-label">Nivel Confianza</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chartComparativo = null;
+
+        $(document).ready(function() {
+            // Establecer fechas por defecto
+            const fechaFin = new Date();
+            const fechaInicio = new Date();
+            fechaInicio.setDate(fechaInicio.getDate() - 30);
+            
+            const fechaFin2 = new Date();
+            fechaFin2.setDate(fechaFin2.getDate() - 30);
+            const fechaInicio2 = new Date();
+            fechaInicio2.setDate(fechaInicio2.getDate() - 60);
+            
+            $('#periodo1Inicio').val(fechaInicio2.toISOString().split('T')[0]);
+            $('#periodo1Fin').val(fechaFin2.toISOString().split('T')[0]);
+            $('#periodo2Inicio').val(fechaInicio.toISOString().split('T')[0]);
+            $('#periodo2Fin').val(fechaFin.toISOString().split('T')[0]);
+            
+            // Comparar períodos por defecto
+            compararPeriodos();
+        });
+
+        function compararPeriodos() {
+            const tipoAnalisis = $('#tipoAnalisis').val();
+            const periodo1Inicio = $('#periodo1Inicio').val();
+            const periodo1Fin = $('#periodo1Fin').val();
+            const periodo2Inicio = $('#periodo2Inicio').val();
+            const periodo2Fin = $('#periodo2Fin').val();
+            
+            if (!periodo1Inicio || !periodo1Fin || !periodo2Inicio || !periodo2Fin) {
+                alert('Por favor selecciona todas las fechas');
+                return;
+            }
+            
+            $('#diferenciasContenido').html('<div class="loading">Comparando períodos...</div>');
+            $('#graficoComparativo').html('<div class="loading">Generando gráfico comparativo...</div>');
+            
+            $.get('@Url.Action("CompararPeriodos")', {
+                tipoAnalisis: tipoAnalisis,
+                periodo1Inicio: periodo1Inicio,
+                periodo1Fin: periodo1Fin,
+                periodo2Inicio: periodo2Inicio,
+                periodo2Fin: periodo2Fin
+            }, function(response) {
+                if (response.success) {
+                    mostrarComparacion(response.data);
+                    crearGraficoComparativo(response.data);
+                    actualizarEstadisticasComparativas(response.data);
+                } else {
+                    $('#diferenciasContenido').html('<div class="error-message">Error al comparar períodos</div>');
+                }
+            }).fail(function() {
+                $('#diferenciasContenido').html('<div class="error-message">Error al comparar períodos</div>');
+            });
+        }
+
+        function mostrarComparacion(datos) {
+            // Actualizar fechas
+            $('#periodo1Fecha').text(datos.Periodo1.Inicio + ' - ' + datos.Periodo1.Fin);
+            $('#periodo2Fecha').text(datos.Periodo2.Inicio + ' - ' + datos.Periodo2.Fin);
+            
+            // Actualizar valores según el tipo de análisis
+            const tipoAnalisis = $('#tipoAnalisis').val();
+            let valor1, valor2, label1, label2;
+            
+            switch (tipoAnalisis) {
+                case 'prestamos':
+                    valor1 = datos.Periodo1.TotalPrestamos;
+                    valor2 = datos.Periodo2.TotalPrestamos;
+                    label1 = 'Total Préstamos';
+                    label2 = 'Total Préstamos';
+                    break;
+                case 'espacios':
+                    valor1 = datos.Periodo1.TotalReservas;
+                    valor2 = datos.Periodo2.TotalReservas;
+                    label1 = 'Total Reservas';
+                    label2 = 'Total Reservas';
+                    break;
+                case 'usuarios':
+                    valor1 = datos.Periodo1.UsuariosUnicos;
+                    valor2 = datos.Periodo2.UsuariosUnicos;
+                    label1 = 'Usuarios Únicos';
+                    label2 = 'Usuarios Únicos';
+                    break;
+                case 'inventario':
+                    valor1 = datos.Periodo1.TotalItems;
+                    valor2 = datos.Periodo2.TotalItems;
+                    label1 = 'Total Items';
+                    label2 = 'Total Items';
+                    break;
+            }
+            
+            $('#periodo1Valor').text(valor1);
+            $('#periodo2Valor').text(valor2);
+            $('#periodo1Label').text(label1);
+            $('#periodo2Label').text(label2);
+            
+            // Mostrar diferencias
+            let html = '';
+            for (const [key, value] of Object.entries(datos.Diferencias)) {
+                if (typeof value === 'number') {
+                    const esPorcentaje = key.includes('Porc');
+                    const valorFormateado = esPorcentaje ? value.toFixed(1) + '%' : value;
+                    const clase = value > 0 ? 'positiva' : value < 0 ? 'negativa' : '';
+                    
+                    html += `<div class="diferencia-item">
+                        <div class="diferencia-label">${key.replace(/([A-Z])/g, ' $1').trim()}</div>
+                        <div class="diferencia-valor ${clase}">${valorFormateado}</div>
+                    </div>`;
+                }
+            }
+            
+            $('#diferenciasContenido').html(html);
+        }
+
+        function crearGraficoComparativo(datos) {
+            const ctx = document.createElement('canvas');
+            $('#graficoComparativo').html(ctx);
+            
+            if (chartComparativo) {
+                chartComparativo.destroy();
+            }
+            
+            const tipoAnalisis = $('#tipoAnalisis').val();
+            let label1, label2, valor1, valor2;
+            
+            switch (tipoAnalisis) {
+                case 'prestamos':
+                    label1 = 'Préstamos P1';
+                    label2 = 'Préstamos P2';
+                    valor1 = datos.Periodo1.TotalPrestamos;
+                    valor2 = datos.Periodo2.TotalPrestamos;
+                    break;
+                case 'espacios':
+                    label1 = 'Reservas P1';
+                    label2 = 'Reservas P2';
+                    valor1 = datos.Periodo1.TotalReservas;
+                    valor2 = datos.Periodo2.TotalReservas;
+                    break;
+                case 'usuarios':
+                    label1 = 'Usuarios P1';
+                    label2 = 'Usuarios P2';
+                    valor1 = datos.Periodo1.UsuariosUnicos;
+                    valor2 = datos.Periodo2.UsuariosUnicos;
+                    break;
+                case 'inventario':
+                    label1 = 'Items P1';
+                    label2 = 'Items P2';
+                    valor1 = datos.Periodo1.TotalItems;
+                    valor2 = datos.Periodo2.TotalItems;
+                    break;
+            }
+            
+            chartComparativo = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Período 1', 'Período 2'],
+                    datasets: [{
+                        label: 'Comparación',
+                        data: [valor1, valor2],
+                        backgroundColor: ['#10b981', '#3b82f6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Comparación de ${tipoAnalisis.charAt(0).toUpperCase() + tipoAnalisis.slice(1)}`
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarVariaciones() {
+            const tipoAnalisis = $('#tipoAnalisis').val();
+            const periodo = $('#periodoVariacion').val();
+            
+            $('#tablaVariaciones').html('<div class="loading">Cargando variaciones temporales...</div>');
+            
+            $.get('@Url.Action("VariacionesTemporales")', {
+                tipoAnalisis: tipoAnalisis,
+                periodo: periodo
+            }, function(response) {
+                if (response.success) {
+                    mostrarVariaciones(response.data);
+                } else {
+                    $('#tablaVariaciones').html('<div class="error-message">Error al cargar variaciones</div>');
+                }
+            }).fail(function() {
+                $('#tablaVariaciones').html('<div class="error-message">Error al cargar variaciones</div>');
+            });
+        }
+
+        function mostrarVariaciones(datos) {
+            let html = '<table class="tabla-datos"><thead><tr><th>Período</th><th>Valor</th><th>Variación</th><th>Tendencia</th></tr></thead><tbody>';
+            
+            datos.forEach(d => {
+                const claseVariacion = d.Variacion > 0 ? 'positiva' : d.Variacion < 0 ? 'negativa' : '';
+                html += `<tr>
+                    <td>${d.Periodo}</td>
+                    <td>${d.Valor}</td>
+                    <td class="${claseVariacion}">${d.Variacion.toFixed(1)}%</td>
+                    <td>${d.Tendencia}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            $('#tablaVariaciones').html(html);
+        }
+
+        function actualizarEstadisticasComparativas(datos) {
+            const tipoAnalisis = $('#tipoAnalisis').val();
+            let diferenciaTotal, porcentajeCambio;
+            
+            switch (tipoAnalisis) {
+                case 'prestamos':
+                    diferenciaTotal = datos.Diferencias.TotalPrestamos;
+                    porcentajeCambio = datos.Diferencias.TotalPrestamosPorc;
+                    break;
+                case 'espacios':
+                    diferenciaTotal = datos.Diferencias.TotalReservas;
+                    porcentajeCambio = datos.Diferencias.TotalReservasPorc;
+                    break;
+                case 'usuarios':
+                    diferenciaTotal = datos.Diferencias.UsuariosUnicos;
+                    porcentajeCambio = datos.Diferencias.UsuariosUnicosPorc;
+                    break;
+                case 'inventario':
+                    diferenciaTotal = datos.Diferencias.TotalItems;
+                    porcentajeCambio = datos.Diferencias.TotalItemsPorc;
+                    break;
+            }
+            
+            $('#diferenciaTotal').text(diferenciaTotal);
+            $('#porcentajeCambio').text(porcentajeCambio.toFixed(1) + '%');
+            $('#tendencia').text(porcentajeCambio > 0 ? 'Creciente' : porcentajeCambio < 0 ? 'Decreciente' : 'Estable');
+            $('#significancia').text(Math.abs(porcentajeCambio) > 10 ? 'Alta' : Math.abs(porcentajeCambio) > 5 ? 'Media' : 'Baja');
+            $('#confianza').text('85%'); // Placeholder
+        }
+
+        function exportarDatos(tipo) {
+            const tipoAnalisis = $('#tipoAnalisis').val();
+            const periodo1Inicio = $('#periodo1Inicio').val();
+            const periodo1Fin = $('#periodo1Fin').val();
+            const periodo2Inicio = $('#periodo2Inicio').val();
+            const periodo2Fin = $('#periodo2Fin').val();
+            
+            window.open('@Url.Action("ExportarDatos")' + 
+                '?tipoDatos=' + tipo + 
+                '&fechaInicio=' + periodo1Inicio + 
+                '&fechaFin=' + periodo2Fin + 
+                '&formato=excel', '_blank');
+        }
+    </script>
+}

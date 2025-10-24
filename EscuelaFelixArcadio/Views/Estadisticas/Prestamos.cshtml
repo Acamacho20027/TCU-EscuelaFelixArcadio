@@ -1,0 +1,342 @@
+﻿@{
+    ViewBag.Title = "Análisis de Préstamos Deportivos";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+}
+
+<div class="estadisticas-container">
+    <!-- Header Principal -->
+    <div class="estadisticas-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index")" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Dashboard
+            </a>
+        </div>
+        <h1 class="estadisticas-title">@ViewBag.Title</h1>
+        <div class="header-actions"></div>
+    </div>
+
+    <!-- Filtros de Fecha -->
+    <div class="filtros-fecha">
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Inicio</label>
+            <input type="date" id="fechaInicio" class="filtro-input" />
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Fin</label>
+            <input type="date" id="fechaFin" class="filtro-input" />
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Tipo de Análisis</label>
+            <select id="tipoAnalisis" class="filtro-input">
+                <option value="diario">Diario</option>
+                <option value="semanal">Semanal</option>
+                <option value="mensual">Mensual</option>
+            </select>
+        </div>
+        <button class="btn-filtrar" onclick="aplicarFiltros()">
+            <i class="fas fa-filter"></i>
+            Filtrar
+        </button>
+    </div>
+
+    <!-- Gráfico de Tendencias -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Tendencias de Préstamos</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarDatos('prestamos')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoTendencias">
+            <div class="loading">Cargando gráfico de tendencias...</div>
+        </div>
+    </div>
+
+    <!-- Análisis de Patrones -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Patrones de Uso</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarDatos('patrones')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaPatrones">
+            <div class="loading">Cargando patrones de uso...</div>
+        </div>
+    </div>
+
+    <!-- Predicciones -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Predicciones de Préstamos</h3>
+            <div class="grafico-controls">
+                <select id="diasPrediccion" class="filtro-input">
+                    <option value="7">7 días</option>
+                    <option value="15">15 días</option>
+                    <option value="30" selected>30 días</option>
+                    <option value="60">60 días</option>
+                </select>
+                <button class="btn-filtrar" onclick="generarPredicciones()">
+                    <i class="fas fa-crystal-ball"></i>
+                    Generar Predicciones
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoPredicciones">
+            <div class="loading">Generando predicciones...</div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Detalladas -->
+    <div class="estadisticas-grid" id="estadisticasPrestamos">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalPrestamosPeriodo">-</div>
+            <div class="estadistica-label">Total Préstamos</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="prestamosDevueltos">-</div>
+            <div class="estadistica-label">Devueltos</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="prestamosPendientes">-</div>
+            <div class="estadistica-label">Pendientes</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="tiempoPromedio">-</div>
+            <div class="estadistica-label">Tiempo Promedio (días)</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="tasaDevolucionPeriodo">-</div>
+            <div class="estadistica-label">Tasa Devolución</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chartTendencias = null;
+        let chartPredicciones = null;
+
+        $(document).ready(function() {
+            // Establecer fechas por defecto (últimos 30 días)
+            const fechaFin = new Date();
+            const fechaInicio = new Date();
+            fechaInicio.setDate(fechaInicio.getDate() - 30);
+            
+            $('#fechaInicio').val(fechaInicio.toISOString().split('T')[0]);
+            $('#fechaFin').val(fechaFin.toISOString().split('T')[0]);
+            
+            // Cargar datos iniciales
+            aplicarFiltros();
+            cargarPatrones();
+            generarPredicciones();
+        });
+
+        function aplicarFiltros() {
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            const tipoAnalisis = $('#tipoAnalisis').val();
+            
+            cargarTendencias(fechaInicio, fechaFin, tipoAnalisis);
+            cargarEstadisticasPeriodo(fechaInicio, fechaFin);
+        }
+
+        function cargarTendencias(fechaInicio, fechaFin, tipoAnalisis) {
+            $('#graficoTendencias').html('<div class="loading">Cargando tendencias...</div>');
+            
+            $.get('@Url.Action("TendenciasPrestamos")', {
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                tipoAnalisis: tipoAnalisis
+            }, function(response) {
+                if (response.success) {
+                    crearGraficoTendencias(response.data);
+                } else {
+                    $('#graficoTendencias').html('<div class="error-message">Error al cargar tendencias</div>');
+                }
+            }).fail(function() {
+                $('#graficoTendencias').html('<div class="error-message">Error al cargar tendencias</div>');
+            });
+        }
+
+        function crearGraficoTendencias(datos) {
+            const ctx = document.createElement('canvas');
+            $('#graficoTendencias').html(ctx);
+            
+            if (chartTendencias) {
+                chartTendencias.destroy();
+            }
+            
+            chartTendencias = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: datos.map(d => d.Fecha),
+                    datasets: [{
+                        label: 'Total Préstamos',
+                        data: datos.map(d => d.Cantidad),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Devueltos',
+                        data: datos.map(d => d.Devueltos),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Tendencias de Préstamos por Período'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarPatrones() {
+            $.get('@Url.Action("PatronesPrestamos")', function(response) {
+                if (response.success) {
+                    mostrarPatrones(response.data);
+                } else {
+                    $('#tablaPatrones').html('<div class="error-message">Error al cargar patrones</div>');
+                }
+            }).fail(function() {
+                $('#tablaPatrones').html('<div class="error-message">Error al cargar patrones</div>');
+            });
+        }
+
+        function mostrarPatrones(patrones) {
+            let html = '<div class="tabla-datos-container">';
+            
+            // Patrón por día de la semana
+            html += '<h4>Patrón por Día de la Semana</h4>';
+            html += '<table class="tabla-datos"><thead><tr><th>Día</th><th>Cantidad</th><th>Porcentaje</th></tr></thead><tbody>';
+            patrones.PatronDiaSemana.forEach(p => {
+                html += `<tr><td>${p.DiaSemana}</td><td>${p.Cantidad}</td><td>${p.Porcentaje}%</td></tr>`;
+            });
+            html += '</tbody></table>';
+            
+            // Patrón por motivo
+            html += '<h4>Patrón por Motivo de Préstamo</h4>';
+            html += '<table class="tabla-datos"><thead><tr><th>Motivo</th><th>Cantidad</th><th>Porcentaje</th></tr></thead><tbody>';
+            patrones.PatronMotivo.forEach(p => {
+                html += `<tr><td>${p.Motivo}</td><td>${p.Cantidad}</td><td>${p.Porcentaje}%</td></tr>`;
+            });
+            html += '</tbody></table>';
+            
+            html += '</div>';
+            $('#tablaPatrones').html(html);
+        }
+
+        function generarPredicciones() {
+            const diasPrediccion = $('#diasPrediccion').val();
+            $('#graficoPredicciones').html('<div class="loading">Generando predicciones...</div>');
+            
+            $.get('@Url.Action("PrediccionesPrestamos")', {
+                diasPrediccion: diasPrediccion
+            }, function(response) {
+                if (response.success) {
+                    crearGraficoPredicciones(response.data);
+                } else {
+                    $('#graficoPredicciones').html('<div class="error-message">Error al generar predicciones</div>');
+                }
+            }).fail(function() {
+                $('#graficoPredicciones').html('<div class="error-message">Error al generar predicciones</div>');
+            });
+        }
+
+        function crearGraficoPredicciones(datos) {
+            const ctx = document.createElement('canvas');
+            $('#graficoPredicciones').html(ctx);
+            
+            if (chartPredicciones) {
+                chartPredicciones.destroy();
+            }
+            
+            chartPredicciones = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: datos.Predicciones.map(p => p.Fecha),
+                    datasets: [{
+                        label: 'Predicción',
+                        data: datos.Predicciones.map(p => p.Prediccion),
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4,
+                        borderDash: [5, 5]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Predicciones para los próximos ${$('#diasPrediccion').val()} días`
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarEstadisticasPeriodo(fechaInicio, fechaFin) {
+            $.get('@Url.Action("TendenciasPrestamos")', {
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                tipoAnalisis: 'diario'
+            }, function(response) {
+                if (response.success) {
+                    const datos = response.data;
+                    const total = datos.reduce((sum, d) => sum + d.Cantidad, 0);
+                    const devueltos = datos.reduce((sum, d) => sum + d.Devueltos, 0);
+                    const pendientes = total - devueltos;
+                    const tasaDevolucion = total > 0 ? (devueltos * 100 / total).toFixed(1) : 0;
+                    
+                    $('#totalPrestamosPeriodo').text(total);
+                    $('#prestamosDevueltos').text(devueltos);
+                    $('#prestamosPendientes').text(pendientes);
+                    $('#tasaDevolucionPeriodo').text(tasaDevolucion + '%');
+                    $('#tiempoPromedio').text('-'); // Placeholder
+                }
+            });
+        }
+
+        function exportarDatos(tipo) {
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            
+            window.open('@Url.Action("ExportarDatos")' + 
+                '?tipoDatos=' + tipo + 
+                '&fechaInicio=' + fechaInicio + 
+                '&fechaFin=' + fechaFin + 
+                '&formato=excel', '_blank');
+        }
+    </script>
+}

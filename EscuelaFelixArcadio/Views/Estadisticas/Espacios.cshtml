@@ -1,0 +1,423 @@
+﻿@{
+    ViewBag.Title = "Análisis de Reservaciones de Espacios";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+}
+
+<div class="estadisticas-container">
+    <!-- Header Principal -->
+    <div class="estadisticas-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index")" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Dashboard
+            </a>
+        </div>
+        <h1 class="estadisticas-title">@ViewBag.Title</h1>
+        <div class="header-actions"></div>
+    </div>
+
+    <!-- Filtros de Fecha -->
+    <div class="filtros-fecha">
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Inicio</label>
+            <input type="date" id="fechaInicio" class="filtro-input" />
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Fecha Fin</label>
+            <input type="date" id="fechaFin" class="filtro-input" />
+        </div>
+        <div class="filtro-grupo">
+            <label class="filtro-label">Espacio</label>
+            <select id="idEspacio" class="filtro-input">
+                <option value="">Todos los espacios</option>
+            </select>
+        </div>
+        <button class="btn-filtrar" onclick="aplicarFiltros()">
+            <i class="fas fa-filter"></i>
+            Filtrar
+        </button>
+    </div>
+
+    <!-- Gráfico de Tendencias -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Tendencias de Reservaciones</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarDatos('espacios')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoTendencias">
+            <div class="loading">Cargando gráfico de tendencias...</div>
+        </div>
+    </div>
+
+    <!-- Heatmap de Ocupación -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Heatmap de Ocupación</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarDatos('heatmap')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoHeatmap">
+            <div class="loading">Cargando heatmap...</div>
+        </div>
+    </div>
+
+    <!-- Análisis de Ocupación -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Análisis de Ocupación por Espacio</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarDatos('ocupacion')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaOcupacion">
+            <div class="loading">Cargando análisis de ocupación...</div>
+        </div>
+    </div>
+
+    <!-- Análisis de Eficiencia -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Eficiencia de Espacios</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarDatos('eficiencia')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaEficiencia">
+            <div class="loading">Cargando análisis de eficiencia...</div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Detalladas -->
+    <div class="estadisticas-grid" id="estadisticasEspacios">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalReservas">-</div>
+            <div class="estadistica-label">Total Reservas</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="reservasExitosas">-</div>
+            <div class="estadistica-label">Reservas Exitosas</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="tasaOcupacion">-</div>
+            <div class="estadistica-label">Tasa Ocupación</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="espaciosUtilizados">-</div>
+            <div class="estadistica-label">Espacios Utilizados</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="horasTotales">-</div>
+            <div class="estadistica-label">Horas Totales</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chartTendencias = null;
+        let chartHeatmap = null;
+
+        $(document).ready(function() {
+            // Establecer fechas por defecto (últimos 30 días)
+            const fechaFin = new Date();
+            const fechaInicio = new Date();
+            fechaInicio.setDate(fechaInicio.getDate() - 30);
+            
+            $('#fechaInicio').val(fechaInicio.toISOString().split('T')[0]);
+            $('#fechaFin').val(fechaFin.toISOString().split('T')[0]);
+            
+            // Cargar espacios
+            cargarEspacios();
+            
+            // Cargar datos iniciales
+            aplicarFiltros();
+            cargarOcupacion();
+            cargarEficiencia();
+        });
+
+        function cargarEspacios() {
+            // Placeholder para cargar espacios desde el servidor
+            $('#idEspacio').append('<option value="1">Cancha de Fútbol</option>');
+            $('#idEspacio').append('<option value="2">Cancha de Baloncesto</option>');
+            $('#idEspacio').append('<option value="3">Gimnasio</option>');
+            $('#idEspacio').append('<option value="4">Piscina</option>');
+        }
+
+        function aplicarFiltros() {
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            const idEspacio = $('#idEspacio').val();
+            
+            cargarTendencias(fechaInicio, fechaFin, idEspacio);
+            cargarHeatmap(fechaInicio, fechaFin);
+            cargarEstadisticasPeriodo(fechaInicio, fechaFin);
+        }
+
+        function cargarTendencias(fechaInicio, fechaFin, idEspacio) {
+            $('#graficoTendencias').html('<div class="loading">Cargando tendencias...</div>');
+            
+            $.get('@Url.Action("TendenciasEspacios")', {
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                idEspacio: idEspacio || null
+            }, function(response) {
+                if (response.success) {
+                    crearGraficoTendencias(response.data);
+                } else {
+                    $('#graficoTendencias').html('<div class="error-message">Error al cargar tendencias</div>');
+                }
+            }).fail(function() {
+                $('#graficoTendencias').html('<div class="error-message">Error al cargar tendencias</div>');
+            });
+        }
+
+        function crearGraficoTendencias(datos) {
+            const ctx = document.createElement('canvas');
+            $('#graficoTendencias').html(ctx);
+            
+            if (chartTendencias) {
+                chartTendencias.destroy();
+            }
+            
+            chartTendencias = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: datos.map(d => d.Fecha),
+                    datasets: [{
+                        label: 'Reservas',
+                        data: datos.map(d => d.CantidadReservas),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Espacios Utilizados',
+                        data: datos.map(d => d.EspaciosUtilizados),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Tendencias de Reservaciones de Espacios'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarHeatmap(fechaInicio, fechaFin) {
+            $('#graficoHeatmap').html('<div class="loading">Cargando heatmap...</div>');
+            
+            $.get('@Url.Action("HeatmapEspacios")', {
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin
+            }, function(response) {
+                if (response.success) {
+                    crearGraficoHeatmap(response.data);
+                } else {
+                    $('#graficoHeatmap').html('<div class="error-message">Error al cargar heatmap</div>');
+                }
+            }).fail(function() {
+                $('#graficoHeatmap').html('<div class="error-message">Error al cargar heatmap</div>');
+            });
+        }
+
+        function crearGraficoHeatmap(datos) {
+            const ctx = document.createElement('canvas');
+            $('#graficoHeatmap').html(ctx);
+            
+            if (chartHeatmap) {
+                chartHeatmap.destroy();
+            }
+            
+            // Crear matriz de datos para el heatmap
+            const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            const horas = Array.from({length: 24}, (_, i) => i);
+            
+            const matrizDatos = [];
+            diasSemana.forEach((dia, diaIndex) => {
+                horas.forEach((hora, horaIndex) => {
+                    const dato = datos.find(d => d.DiaSemana === dia && d.Hora === hora);
+                    matrizDatos.push({
+                        x: horaIndex,
+                        y: diaIndex,
+                        v: dato ? dato.Cantidad : 0
+                    });
+                });
+            });
+            
+            chartHeatmap = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Ocupación',
+                        data: matrizDatos,
+                        backgroundColor: function(context) {
+                            const valor = context.parsed.v;
+                            const intensidad = Math.min(valor / 10, 1); // Normalizar a 0-1
+                            return `rgba(16, 185, 129, ${intensidad})`;
+                        },
+                        pointRadius: 20
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Heatmap de Ocupación por Día y Hora'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'Hora del Día'
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Día de la Semana'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return diasSemana[value];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarOcupacion() {
+            $.get('@Url.Action("OcupacionEspacios")', function(response) {
+                if (response.success) {
+                    mostrarOcupacion(response.data);
+                } else {
+                    $('#tablaOcupacion').html('<div class="error-message">Error al cargar ocupación</div>');
+                }
+            }).fail(function() {
+                $('#tablaOcupacion').html('<div class="error-message">Error al cargar ocupación</div>');
+            });
+        }
+
+        function mostrarOcupacion(datos) {
+            let html = '<table class="tabla-datos"><thead><tr><th>Espacio</th><th>Capacidad</th><th>Reservas</th><th>Horas Reservadas</th><th>% Ocupación</th><th>Estado</th></tr></thead><tbody>';
+            
+            datos.forEach(d => {
+                html += `<tr>
+                    <td>${d.NombreEspacio}</td>
+                    <td>${d.Capacidad}</td>
+                    <td>${d.TotalReservas}</td>
+                    <td>${d.HorasReservadas}</td>
+                    <td>${d.PorcentajeOcupacion}%</td>
+                    <td>${d.Estado}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            $('#tablaOcupacion').html(html);
+        }
+
+        function cargarEficiencia() {
+            $.get('@Url.Action("EficienciaEspacios")', function(response) {
+                if (response.success) {
+                    mostrarEficiencia(response.data);
+                } else {
+                    $('#tablaEficiencia').html('<div class="error-message">Error al cargar eficiencia</div>');
+                }
+            }).fail(function() {
+                $('#tablaEficiencia').html('<div class="error-message">Error al cargar eficiencia</div>');
+            });
+        }
+
+        function mostrarEficiencia(datos) {
+            let html = '<table class="tabla-datos"><thead><tr><th>Espacio</th><th>Capacidad</th><th>Reservas</th><th>Exitosas</th><th>Tasa Éxito</th><th>Horas Totales</th><th>Usuarios Únicos</th><th>Eficiencia</th></tr></thead><tbody>';
+            
+            datos.forEach(d => {
+                html += `<tr>
+                    <td>${d.NombreEspacio}</td>
+                    <td>${d.Capacidad}</td>
+                    <td>${d.TotalReservas}</td>
+                    <td>${d.ReservasExitosas}</td>
+                    <td>${d.TasaExito}%</td>
+                    <td>${d.HorasTotales}</td>
+                    <td>${d.UsuariosUnicos}</td>
+                    <td>${(d.Eficiencia * 100).toFixed(1)}%</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            $('#tablaEficiencia').html(html);
+        }
+
+        function cargarEstadisticasPeriodo(fechaInicio, fechaFin) {
+            $.get('@Url.Action("TendenciasEspacios")', {
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin
+            }, function(response) {
+                if (response.success) {
+                    const datos = response.data;
+                    const totalReservas = datos.reduce((sum, d) => sum + d.CantidadReservas, 0);
+                    const espaciosUtilizados = Math.max(...datos.map(d => d.EspaciosUtilizados));
+                    const horasTotales = datos.reduce((sum, d) => sum + d.DuracionPromedio, 0);
+                    
+                    $('#totalReservas').text(totalReservas);
+                    $('#reservasExitosas').text('-'); // Placeholder
+                    $('#tasaOcupacion').text('-'); // Placeholder
+                    $('#espaciosUtilizados').text(espaciosUtilizados);
+                    $('#horasTotales').text(horasTotales.toFixed(1));
+                }
+            });
+        }
+
+        function exportarDatos(tipo) {
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            
+            window.open('@Url.Action("ExportarDatos")' + 
+                '?tipoDatos=' + tipo + 
+                '&fechaInicio=' + fechaInicio + 
+                '&fechaFin=' + fechaFin + 
+                '&formato=excel', '_blank');
+        }
+    </script>
+}

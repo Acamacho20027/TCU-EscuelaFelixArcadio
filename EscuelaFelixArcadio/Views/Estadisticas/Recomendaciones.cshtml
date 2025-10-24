@@ -1,0 +1,372 @@
+﻿@{
+    ViewBag.Title = "Recomendaciones Inteligentes";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+}
+
+<div class="estadisticas-container">
+    <!-- Header Principal -->
+    <div class="estadisticas-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index")" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Dashboard
+            </a>
+        </div>
+        <h1 class="estadisticas-title">@ViewBag.Title</h1>
+        <div class="header-actions"></div>
+    </div>
+
+    <!-- Recomendaciones de Horarios -->
+    <div class="recomendaciones-container">
+        <div class="filtros-header">
+            <i class="fas fa-clock filtros-icon"></i>
+            <h3>Recomendaciones de Horarios</h3>
+        </div>
+        <div class="filtros-fecha">
+            <div class="filtro-grupo">
+                <label class="filtro-label">Espacio</label>
+                <select id="espacioHorarios" class="filtro-input">
+                    <option value="">Todos los espacios</option>
+                </select>
+            </div>
+            <button class="btn-filtrar" onclick="cargarRecomendacionesHorarios()">
+                <i class="fas fa-search"></i>
+                Generar Recomendaciones
+            </button>
+        </div>
+        <div id="recomendacionesHorarios">
+            <div class="loading">Generando recomendaciones de horarios...</div>
+        </div>
+    </div>
+
+    <!-- Recomendaciones de Equipamiento -->
+    <div class="recomendaciones-container">
+        <div class="filtros-header">
+            <i class="fas fa-dumbbell filtros-icon"></i>
+            <h3>Recomendaciones de Equipamiento</h3>
+        </div>
+        <div class="filtros-fecha">
+            <button class="btn-filtrar" onclick="cargarRecomendacionesEquipamiento()">
+                <i class="fas fa-search"></i>
+                Generar Recomendaciones
+            </button>
+        </div>
+        <div id="recomendacionesEquipamiento">
+            <div class="loading">Generando recomendaciones de equipamiento...</div>
+        </div>
+    </div>
+
+    <!-- Recomendaciones de Mantenimiento -->
+    <div class="recomendaciones-container">
+        <div class="filtros-header">
+            <i class="fas fa-tools filtros-icon"></i>
+            <h3>Recomendaciones de Mantenimiento</h3>
+        </div>
+        <div class="filtros-fecha">
+            <button class="btn-filtrar" onclick="cargarRecomendacionesMantenimiento()">
+                <i class="fas fa-search"></i>
+                Generar Recomendaciones
+            </button>
+        </div>
+        <div id="recomendacionesMantenimiento">
+            <div class="loading">Generando recomendaciones de mantenimiento...</div>
+        </div>
+    </div>
+
+    <!-- Gráfico de Análisis de Patrones -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Análisis de Patrones de Uso</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarDatos('patrones')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoPatrones">
+            <div class="loading">Cargando análisis de patrones...</div>
+        </div>
+    </div>
+
+    <!-- Resumen de Recomendaciones -->
+    <div class="estadisticas-grid" id="resumenRecomendaciones">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalRecomendaciones">-</div>
+            <div class="estadistica-label">Total Recomendaciones</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="recomendacionesAlta">-</div>
+            <div class="estadistica-label">Prioridad Alta</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="recomendacionesMedia">-</div>
+            <div class="estadistica-label">Prioridad Media</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="recomendacionesBaja">-</div>
+            <div class="estadistica-label">Prioridad Baja</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="ahorroEstimado">-</div>
+            <div class="estadistica-label">Ahorro Estimado</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chartPatrones = null;
+
+        $(document).ready(function() {
+            // Cargar espacios
+            cargarEspacios();
+            
+            // Cargar recomendaciones iniciales
+            cargarRecomendacionesHorarios();
+            cargarRecomendacionesEquipamiento();
+            cargarRecomendacionesMantenimiento();
+            cargarGraficoPatrones();
+        });
+
+        function cargarEspacios() {
+            // Placeholder para cargar espacios desde el servidor
+            $('#espacioHorarios').append('<option value="1">Cancha de Fútbol</option>');
+            $('#espacioHorarios').append('<option value="2">Cancha de Baloncesto</option>');
+            $('#espacioHorarios').append('<option value="3">Gimnasio</option>');
+            $('#espacioHorarios').append('<option value="4">Piscina</option>');
+        }
+
+        function cargarRecomendacionesHorarios() {
+            const idEspacio = $('#espacioHorarios').val();
+            $('#recomendacionesHorarios').html('<div class="loading">Generando recomendaciones de horarios...</div>');
+            
+            $.get('@Url.Action("RecomendacionesHorarios")', {
+                idEspacio: idEspacio || null
+            }, function(response) {
+                if (response.success) {
+                    mostrarRecomendacionesHorarios(response.data);
+                } else {
+                    $('#recomendacionesHorarios').html('<div class="error-message">Error al generar recomendaciones</div>');
+                }
+            }).fail(function() {
+                $('#recomendacionesHorarios').html('<div class="error-message">Error al generar recomendaciones</div>');
+            });
+        }
+
+        function mostrarRecomendacionesHorarios(datos) {
+            let html = '';
+            
+            // Horarios más demandados
+            html += '<h4>Horarios Más Demandados</h4>';
+            html += '<table class="tabla-datos"><thead><tr><th>Día</th><th>Hora</th><th>Cantidad</th><th>Tasa Éxito</th></tr></thead><tbody>';
+            datos.HorariosDemandados.forEach(h => {
+                html += `<tr>
+                    <td>${h.DiaSemana}</td>
+                    <td>${h.HoraInicio}:00</td>
+                    <td>${h.Cantidad}</td>
+                    <td>${h.TasaExito.toFixed(1)}%</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            
+            // Horarios menos demandados
+            html += '<h4>Horarios Menos Demandados</h4>';
+            html += '<table class="tabla-datos"><thead><tr><th>Día</th><th>Hora</th><th>Cantidad</th><th>Tasa Éxito</th></tr></thead><tbody>';
+            datos.HorariosMenosDemandados.forEach(h => {
+                html += `<tr>
+                    <td>${h.DiaSemana}</td>
+                    <td>${h.HoraInicio}:00</td>
+                    <td>${h.Cantidad}</td>
+                    <td>${h.TasaExito.toFixed(1)}%</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            
+            // Recomendaciones específicas
+            if (datos.Recomendaciones && datos.Recomendaciones.length > 0) {
+                html += '<h4>Recomendaciones Específicas</h4>';
+                datos.Recomendaciones.forEach(r => {
+                    html += `<div class="recomendacion-item">
+                        <div class="recomendacion-header">
+                            <div class="recomendacion-tipo">${r.Tipo}</div>
+                            <div class="recomendacion-prioridad ${r.Prioridad.toLowerCase()}">${r.Prioridad}</div>
+                        </div>
+                        <div class="recomendacion-descripcion">${r.Descripcion}</div>
+                        <div class="recomendacion-beneficio">Beneficio: ${r.Beneficio}</div>
+                    </div>`;
+                });
+            }
+            
+            $('#recomendacionesHorarios').html(html);
+        }
+
+        function cargarRecomendacionesEquipamiento() {
+            $('#recomendacionesEquipamiento').html('<div class="loading">Generando recomendaciones de equipamiento...</div>');
+            
+            $.get('@Url.Action("RecomendacionesEquipamiento")', function(response) {
+                if (response.success) {
+                    mostrarRecomendacionesEquipamiento(response.data);
+                } else {
+                    $('#recomendacionesEquipamiento').html('<div class="error-message">Error al generar recomendaciones</div>');
+                }
+            }).fail(function() {
+                $('#recomendacionesEquipamiento').html('<div class="error-message">Error al generar recomendaciones</div>');
+            });
+        }
+
+        function mostrarRecomendacionesEquipamiento(datos) {
+            let html = '';
+            
+            // Motivos más frecuentes
+            html += '<h4>Motivos Más Frecuentes</h4>';
+            html += '<table class="tabla-datos"><thead><tr><th>Motivo</th><th>Cantidad</th><th>Tasa Devolución</th></tr></thead><tbody>';
+            datos.MotivosFrecuentes.forEach(m => {
+                html += `<tr>
+                    <td>${m.Motivo}</td>
+                    <td>${m.Cantidad}</td>
+                    <td>${m.TasaDevolucion.toFixed(1)}%</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            
+            // Tiempos por motivo
+            html += '<h4>Tiempos de Préstamo por Motivo</h4>';
+            html += '<table class="tabla-datos"><thead><tr><th>Motivo</th><th>Tiempo Promedio (días)</th><th>Cantidad</th></tr></thead><tbody>';
+            datos.TiemposPorMotivo.forEach(t => {
+                html += `<tr>
+                    <td>${t.Motivo}</td>
+                    <td>${t.TiempoPromedio.toFixed(1)}</td>
+                    <td>${t.Cantidad}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            
+            // Recomendaciones específicas
+            if (datos.Recomendaciones && datos.Recomendaciones.length > 0) {
+                html += '<h4>Recomendaciones Específicas</h4>';
+                datos.Recomendaciones.forEach(r => {
+                    html += `<div class="recomendacion-item">
+                        <div class="recomendacion-header">
+                            <div class="recomendacion-tipo">${r.Tipo}</div>
+                            <div class="recomendacion-prioridad ${r.Prioridad.toLowerCase()}">${r.Prioridad}</div>
+                        </div>
+                        <div class="recomendacion-descripcion">${r.Descripcion}</div>
+                        <div class="recomendacion-beneficio">Beneficio: ${r.Beneficio}</div>
+                    </div>`;
+                });
+            }
+            
+            $('#recomendacionesEquipamiento').html(html);
+        }
+
+        function cargarRecomendacionesMantenimiento() {
+            $('#recomendacionesMantenimiento').html('<div class="loading">Generando recomendaciones de mantenimiento...</div>');
+            
+            $.get('@Url.Action("RecomendacionesMantenimiento")', function(response) {
+                if (response.success) {
+                    mostrarRecomendacionesMantenimiento(response.data);
+                } else {
+                    $('#recomendacionesMantenimiento').html('<div class="error-message">Error al generar recomendaciones</div>');
+                }
+            }).fail(function() {
+                $('#recomendacionesMantenimiento').html('<div class="error-message">Error al generar recomendaciones</div>');
+            });
+        }
+
+        function mostrarRecomendacionesMantenimiento(datos) {
+            let html = '';
+            
+            // Equipamiento utilizado
+            html += '<h4>Equipamiento Más Utilizado</h4>';
+            html += '<table class="tabla-datos"><thead><tr><th>Equipamiento</th><th>Usos</th><th>Tiempo Total</th><th>Tasa Desgaste</th></tr></thead><tbody>';
+            datos.EquipamientoUtilizado.forEach(e => {
+                html += `<tr>
+                    <td>${e.Equipamiento}</td>
+                    <td>${e.CantidadUsos}</td>
+                    <td>${e.TiempoTotalUso.toFixed(1)} días</td>
+                    <td>${(e.TasaDesgaste * 100).toFixed(1)}%</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            
+            // Recomendaciones específicas
+            if (datos.Recomendaciones && datos.Recomendaciones.length > 0) {
+                html += '<h4>Recomendaciones de Mantenimiento</h4>';
+                datos.Recomendaciones.forEach(r => {
+                    html += `<div class="recomendacion-item">
+                        <div class="recomendacion-header">
+                            <div class="recomendacion-tipo">${r.Tipo}</div>
+                            <div class="recomendacion-prioridad ${r.Prioridad.toLowerCase()}">${r.Prioridad}</div>
+                        </div>
+                        <div class="recomendacion-descripcion"><strong>${r.Equipamiento}:</strong> ${r.Descripcion}</div>
+                        <div class="recomendacion-beneficio">Acción: ${r.AccionRecomendada}</div>
+                    </div>`;
+                });
+            }
+            
+            $('#recomendacionesMantenimiento').html(html);
+        }
+
+        function cargarGraficoPatrones() {
+            $('#graficoPatrones').html('<div class="loading">Cargando análisis de patrones...</div>');
+            
+            // Placeholder para gráfico de patrones
+            const ctx = document.createElement('canvas');
+            $('#graficoPatrones').html(ctx);
+            
+            if (chartPatrones) {
+                chartPatrones.destroy();
+            }
+            
+            chartPatrones = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Horarios Recomendados', 'Equipamiento Adicional', 'Mantenimiento Urgente', 'Mantenimiento Programado'],
+                    datasets: [{
+                        data: [25, 30, 15, 30],
+                        backgroundColor: [
+                            '#10b981',
+                            '#3b82f6',
+                            '#ef4444',
+                            '#f59e0b'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribución de Recomendaciones'
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportarDatos(tipo) {
+            window.open('@Url.Action("ExportarDatos")' + 
+                '?tipoDatos=' + tipo + 
+                '&formato=excel', '_blank');
+        }
+
+        // Actualizar resumen de recomendaciones
+        function actualizarResumen() {
+            $('#totalRecomendaciones').text('12');
+            $('#recomendacionesAlta').text('3');
+            $('#recomendacionesMedia').text('5');
+            $('#recomendacionesBaja').text('4');
+            $('#ahorroEstimado').text('$2,500');
+        }
+
+        // Llamar a actualizar resumen después de cargar todas las recomendaciones
+        setTimeout(actualizarResumen, 2000);
+    </script>
+}

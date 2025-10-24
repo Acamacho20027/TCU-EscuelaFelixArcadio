@@ -1,0 +1,252 @@
+﻿@{
+    ViewBag.Title = "Estadísticas de Inventario";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+}
+
+<div class="estadisticas-container">
+    <!-- Header Principal -->
+    <div class="estadisticas-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index")" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Dashboard
+            </a>
+        </div>
+        <h1 class="estadisticas-title">@ViewBag.Title</h1>
+        <div class="header-actions"></div>
+    </div>
+
+    <!-- Gráfico de Inventario -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Análisis de Inventario</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarDatos('inventario')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoInventario">
+            <div class="loading">Cargando análisis de inventario...</div>
+        </div>
+    </div>
+
+    <!-- Análisis por Categoría -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Análisis por Categoría</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarDatos('categorias')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaCategorias">
+            <div class="loading">Cargando análisis por categoría...</div>
+        </div>
+    </div>
+
+    <!-- Análisis por Estado -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Análisis por Estado</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarDatos('estados')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaEstados">
+            <div class="loading">Cargando análisis por estado...</div>
+        </div>
+    </div>
+
+    <!-- Productos con Stock Bajo -->
+    <div class="alertas-container">
+        <div class="filtros-header">
+            <i class="fas fa-exclamation-triangle filtros-icon"></i>
+            <h3>Productos con Stock Bajo</h3>
+        </div>
+        <div id="productosStockBajo">
+            <div class="loading">Cargando productos con stock bajo...</div>
+        </div>
+    </div>
+
+    <!-- Estadísticas de Inventario -->
+    <div class="estadisticas-grid" id="estadisticasInventario">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalProductos">-</div>
+            <div class="estadistica-label">Total Productos</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalCantidad">-</div>
+            <div class="estadistica-label">Total Cantidad</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="productosStockBajo">-</div>
+            <div class="estadistica-label">Stock Bajo</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="categoriasActivas">-</div>
+            <div class="estadistica-label">Categorías Activas</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="valorTotalInventario">-</div>
+            <div class="estadistica-label">Valor Total</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chartInventario = null;
+
+        $(document).ready(function() {
+            cargarDatosInventario();
+            cargarGraficoInventario();
+        });
+
+        function cargarDatosInventario() {
+            $.get('@Url.Action("DatosGraficoInventario")', function(response) {
+                if (response.success) {
+                    mostrarCategorias(response.data.PorCategoria);
+                    mostrarEstados(response.data.PorEstado);
+                    mostrarStockBajo(response.data.StockBajo);
+                    actualizarEstadisticasInventario(response.data);
+                } else {
+                    console.log('Error al cargar datos de inventario');
+                }
+            }).fail(function() {
+                console.log('Error al cargar datos de inventario');
+            });
+        }
+
+        function mostrarCategorias(categorias) {
+            let html = '<table class="tabla-datos"><thead><tr><th>Categoría</th><th>Cantidad</th><th>Productos</th></tr></thead><tbody>';
+            
+            categorias.forEach(c => {
+                html += `<tr>
+                    <td>${c.Categoria}</td>
+                    <td>${c.Cantidad}</td>
+                    <td>${c.Productos}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            $('#tablaCategorias').html(html);
+        }
+
+        function mostrarEstados(estados) {
+            let html = '<table class="tabla-datos"><thead><tr><th>Estado</th><th>Cantidad</th></tr></thead><tbody>';
+            
+            estados.forEach(e => {
+                html += `<tr>
+                    <td>${e.Estado}</td>
+                    <td>${e.Cantidad}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            $('#tablaEstados').html(html);
+        }
+
+        function mostrarStockBajo(stockBajo) {
+            if (stockBajo.length === 0) {
+                $('#productosStockBajo').html('<div class="success-message">No hay productos con stock bajo</div>');
+                return;
+            }
+            
+            let html = '';
+            stockBajo.forEach(p => {
+                html += `<div class="alerta-item alta">
+                    <i class="fas fa-exclamation-circle alerta-icon"></i>
+                    <div class="alerta-content">
+                        <div class="alerta-titulo">${p.Producto}</div>
+                        <div class="alerta-descripcion">Cantidad actual: ${p.Cantidad}, Mínimo requerido: ${p.Minimo}</div>
+                        <div class="alerta-fecha">Diferencia: ${p.Diferencia}</div>
+                    </div>
+                </div>`;
+            });
+            
+            $('#productosStockBajo').html(html);
+        }
+
+        function cargarGraficoInventario() {
+            $('#graficoInventario').html('<div class="loading">Cargando gráfico de inventario...</div>');
+            
+            $.get('@Url.Action("DatosGraficoInventario")', function(response) {
+                if (response.success) {
+                    crearGraficoInventario(response.data);
+                } else {
+                    $('#graficoInventario').html('<div class="error-message">Error al cargar gráfico</div>');
+                }
+            }).fail(function() {
+                $('#graficoInventario').html('<div class="error-message">Error al cargar gráfico</div>');
+            });
+        }
+
+        function crearGraficoInventario(datos) {
+            const ctx = document.createElement('canvas');
+            $('#graficoInventario').html(ctx);
+            
+            if (chartInventario) {
+                chartInventario.destroy();
+            }
+            
+            chartInventario = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: datos.PorCategoria.map(c => c.Categoria),
+                    datasets: [{
+                        data: datos.PorCategoria.map(c => c.Cantidad),
+                        backgroundColor: [
+                            '#10b981',
+                            '#3b82f6',
+                            '#f59e0b',
+                            '#ef4444',
+                            '#8b5cf6',
+                            '#06b6d4'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribución de Inventario por Categoría'
+                        }
+                    }
+                }
+            });
+        }
+
+        function actualizarEstadisticasInventario(datos) {
+            const totalProductos = datos.PorCategoria.reduce((sum, c) => sum + c.Productos, 0);
+            const totalCantidad = datos.PorCategoria.reduce((sum, c) => sum + c.Cantidad, 0);
+            const productosStockBajo = datos.StockBajo.length;
+            const categoriasActivas = datos.PorCategoria.length;
+            
+            $('#totalProductos').text(totalProductos);
+            $('#totalCantidad').text(totalCantidad);
+            $('#productosStockBajo').text(productosStockBajo);
+            $('#categoriasActivas').text(categoriasActivas);
+            $('#valorTotalInventario').text('$0'); // Placeholder
+        }
+
+        function exportarDatos(tipo) {
+            window.open('@Url.Action("ExportarDatos")' + 
+                '?tipoDatos=' + tipo + 
+                '&formato=excel', '_blank');
+        }
+    </script>
+}
