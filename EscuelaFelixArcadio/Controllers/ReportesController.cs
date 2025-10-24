@@ -6,6 +6,7 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using EscuelaFelixArcadio.Models;
+using EscuelaFelixArcadio.Models.ViewModels;
 using EscuelaFelixArcadio.Services;
 using Microsoft.AspNet.Identity;
 using Newtonsoft.Json;
@@ -1115,25 +1116,25 @@ namespace EscuelaFelixArcadio.Controllers
                 // Extraer tipo de reporte y datos reales del HTML
                 if (html.Contains("Reporte de Inventario"))
                 {
-                    tipoReporte = "Inventario";
+                    tipoReporte = "inventario";
                     tituloReporte = "Reporte de Inventario";
                     datosReales = ExtraerDatosInventario(html);
                 }
                 else if (html.Contains("Reporte de Préstamos"))
                 {
-                    tipoReporte = "Préstamos";
+                    tipoReporte = "prestamos";
                     tituloReporte = "Reporte de Préstamos";
                     datosReales = ExtraerDatosPrestamos(html);
                 }
                 else if (html.Contains("Reporte de Sanciones"))
                 {
-                    tipoReporte = "Sanciones";
+                    tipoReporte = "sanciones";
                     tituloReporte = "Reporte de Sanciones";
                     datosReales = ExtraerDatosSanciones(html);
                 }
                 else if (html.Contains("Historial de Aprobaciones"))
                 {
-                    tipoReporte = "Aprobaciones";
+                    tipoReporte = "historialaprobaciones";
                     tituloReporte = "Historial de Aprobaciones de Préstamos";
                     datosReales = ExtraerDatosAprobaciones(html);
                 }
@@ -1383,17 +1384,54 @@ startxref
             // Fondo limpio para el contenido
             contenido += "q\n0.99 0.99 1.0 rg\n30 80 552 440 re\nf\nQ\n";
             
-            // Título simple y limpio
+            // Título según el tipo de reporte
+            string tituloSeccion = "";
+            switch (tipoReporte.ToLower())
+            {
+                case "inventario":
+                    tituloSeccion = "INVENTARIO DE PRODUCTOS";
+                    break;
+                case "prestamos":
+                    tituloSeccion = "REPORTE DE PRESTAMOS";
+                    break;
+                case "sanciones":
+                    tituloSeccion = "REPORTE DE SANCIONES";
+                    break;
+                case "historialaprobaciones":
+                    tituloSeccion = "HISTORIAL DE APROBACIONES";
+                    break;
+                default:
+                    tituloSeccion = "DATOS DEL REPORTE";
+                    break;
+            }
+            
             contenido += $"BT\n/F2 16 Tf\n0.1 0.3 0.6 rg\n50 {yPosicion} Td\n";
-            contenido += $"(INVENTARIO DE PRODUCTOS) Tj\nET\n";
+            contenido += $"({tituloSeccion}) Tj\nET\n";
             yPosicion -= 30;
             
             // Línea separadora
             contenido += "q\n0.8 0.8 0.8 rg\n50 490 512 1 re\nf\nQ\n";
             yPosicion -= 20;
             
-            // Obtener datos reales del inventario
-            contenido += ObtenerDatosRealesInventario(yPosicion);
+            // Obtener datos según el tipo de reporte
+            switch (tipoReporte.ToLower())
+            {
+                case "inventario":
+                    contenido += ObtenerDatosRealesInventario(yPosicion);
+                    break;
+                case "prestamos":
+                    contenido += ObtenerDatosRealesPrestamos(yPosicion);
+                    break;
+                case "sanciones":
+                    contenido += ObtenerDatosRealesSanciones(yPosicion);
+                    break;
+                case "historialaprobaciones":
+                    contenido += ObtenerDatosRealesAprobaciones(yPosicion);
+                    break;
+                default:
+                    contenido += ObtenerDatosRealesInventario(yPosicion);
+                    break;
+            }
             
             return contenido;
         }
@@ -1566,6 +1604,382 @@ startxref
             {
                 var colorTexto = i == 4 && estado.ToLower().Contains("activo") ? "0.0 0.6 0.0" : 
                                 i == 4 && estado.ToLower().Contains("inactivo") ? "0.8 0.2 0.2" : "0.1 0.1 0.1";
+                contenido += $"BT\n/F1 8 Tf\n{colorTexto} rg\n{posicionesX[i]} {yPosicion + 4} Td\n";
+                contenido += $"({EscaparTextoPDF(datos[i])}) Tj\nET\n";
+            }
+            
+            return contenido;
+        }
+
+        private string ObtenerDatosRealesPrestamos(int yPosicion)
+        {
+            var contenido = "";
+            var yActual = yPosicion;
+            
+            try
+            {
+                // Obtener datos reales de préstamos
+                var prestamos = _reportesService.ObtenerDatosPrestamos(null, null, null, null, null);
+                
+                if (prestamos != null && prestamos.Any())
+                {
+                    // Encabezados de la tabla para préstamos
+                    contenido += "q\n0.1 0.3 0.6 rg\n40 520 532 25 re\nf\nQ\n";
+                    contenido += "q\n0.2 0.2 0.2 rg\n40 545 532 1 re\nf\nQ\n";
+                    
+                    // Encabezados específicos para préstamos
+                    var encabezados = new[] { "ID", "Numero Prestamo", "Usuario", "Fecha Prestamo", "Fecha Devolucion", "Estado", "Observaciones", "Cantidad", "Responsable", "Actualizacion", "Alerta" };
+                    var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+                    
+                    for (int i = 0; i < encabezados.Length; i++)
+                    {
+                        contenido += $"BT\n/F2 9 Tf\n1 1 1 rg\n{posicionesX[i]} {yActual + 6} Td\n";
+                        contenido += $"({encabezados[i]}) Tj\nET\n";
+                    }
+                    
+                    yActual -= 30;
+                    
+                    // Procesar cada préstamo usando las propiedades reales
+                    var contador = 0;
+                    foreach (var prestamo in prestamos)
+                    {
+                        if (yActual < 100) break;
+                        
+                        var numeroPrestamo = prestamo.NumeroPrestamo ?? "N/A";
+                        var usuario = prestamo.NombreCompleto ?? "N/A";
+                        var fechaPrestamo = prestamo.FechadeCreacion.ToString("dd/MM/yyyy");
+                        var fechaDevolucion = prestamo.FechaDevolucion?.ToString("dd/MM/yyyy") ?? "N/A";
+                        var estado = prestamo.Estado ?? "Activo";
+                        var observaciones = prestamo.MotivoPrestamo ?? "N/A";
+                        var cantidad = "1"; // No hay cantidad en el modelo
+                        var responsable = prestamo.Usuario ?? "N/A";
+                        
+                        if (!string.IsNullOrEmpty(numeroPrestamo) && numeroPrestamo != "N/A")
+                        {
+                            contenido += CrearFilaTablaPrestamos(contador + 1, numeroPrestamo, usuario, fechaPrestamo, fechaDevolucion, estado, observaciones, cantidad, responsable, yActual);
+                            yActual -= 20;
+                            contador++;
+                        }
+                    }
+                    
+                    contenido += $"BT\n/F1 10 Tf\n0.5 0.5 0.5 rg\n50 {yActual} Td\n";
+                    contenido += $"(Fin del reporte) Tj\nET\n";
+                }
+                else
+                {
+                    contenido += $"BT\n/F1 12 Tf\n0.5 0.5 0.5 rg\n50 {yActual} Td\n";
+                    contenido += $"(No hay prestamos disponibles) Tj\nET\n";
+                }
+            }
+            catch (Exception ex)
+            {
+                contenido += $"BT\n/F1 12 Tf\n0.6 0.1 0.1 rg\n50 {yActual} Td\n";
+                contenido += $"(Error al cargar prestamos: {EscaparTextoPDF(ex.Message)}) Tj\nET\n";
+            }
+            
+            return contenido;
+        }
+
+        private string ObtenerDatosRealesSanciones(int yPosicion)
+        {
+            var contenido = "";
+            var yActual = yPosicion;
+            
+            try
+            {
+                // Obtener datos reales de sanciones
+                var datos = _reportesService.ObtenerDatosSanciones(null, null, null, null, null);
+                
+                if (datos != null)
+                {
+                    var datosLista = datos as IEnumerable<dynamic>;
+                    if (datosLista != null && datosLista.Any())
+                    {
+                        // Encabezados de la tabla para sanciones
+                        contenido += "q\n0.1 0.3 0.6 rg\n40 520 532 25 re\nf\nQ\n";
+                        contenido += "q\n0.2 0.2 0.2 rg\n40 545 532 1 re\nf\nQ\n";
+                        
+                        // Encabezados específicos para sanciones
+                        var encabezados = new[] { "ID", "Usuario", "Motivo", "Fecha Sancion", "Fecha Fin", "Estado", "Tipo", "Observaciones", "Responsable", "Actualizacion", "Alerta" };
+                        var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+                        
+                        for (int i = 0; i < encabezados.Length; i++)
+                        {
+                            contenido += $"BT\n/F2 9 Tf\n1 1 1 rg\n{posicionesX[i]} {yActual + 6} Td\n";
+                            contenido += $"({encabezados[i]}) Tj\nET\n";
+                        }
+                        
+                        yActual -= 30;
+                        
+                        // Procesar cada sanción
+                        var contador = 0;
+                        foreach (var item in datosLista)
+                        {
+                            if (yActual < 100) break;
+                            
+                            var propiedades = item.GetType().GetProperties();
+                            var usuario = "N/A";
+                            var motivo = "N/A";
+                            var fechaSancion = "N/A";
+                            var fechaFin = "N/A";
+                            var estado = "Activo";
+                            var tipo = "N/A";
+                            var observaciones = "N/A";
+                            var responsable = "N/A";
+                            
+                            // Extraer propiedades del objeto
+                            foreach (var prop in propiedades)
+                            {
+                                var valor = prop.GetValue(item)?.ToString() ?? "";
+                                
+                                if (prop.Name.Contains("Usuario") || prop.Name.Contains("Estudiante"))
+                                    usuario = valor;
+                                else if (prop.Name.Contains("Motivo") || prop.Name.Contains("Razon"))
+                                    motivo = valor;
+                                else if (prop.Name.Contains("FechaSancion") || prop.Name.Contains("FechaInicio"))
+                                    fechaSancion = valor;
+                                else if (prop.Name.Contains("FechaFin") || prop.Name.Contains("FechaTermino"))
+                                    fechaFin = valor;
+                                else if (prop.Name.Contains("Estado"))
+                                    estado = valor;
+                                else if (prop.Name.Contains("Tipo"))
+                                    tipo = valor;
+                                else if (prop.Name.Contains("Observaciones") || prop.Name.Contains("Comentarios"))
+                                    observaciones = valor;
+                                else if (prop.Name.Contains("Responsable") || prop.Name.Contains("Profesor"))
+                                    responsable = valor;
+                            }
+                            
+                            if (!string.IsNullOrEmpty(usuario) && usuario != "N/A")
+                            {
+                                contenido += CrearFilaTablaSanciones(contador + 1, usuario, motivo, fechaSancion, fechaFin, estado, tipo, observaciones, responsable, yActual);
+                                yActual -= 20;
+                                contador++;
+                            }
+                        }
+                        
+                        contenido += $"BT\n/F1 10 Tf\n0.5 0.5 0.5 rg\n50 {yActual} Td\n";
+                        contenido += $"(Fin del reporte) Tj\nET\n";
+                    }
+                    else
+                    {
+                        contenido += $"BT\n/F1 12 Tf\n0.5 0.5 0.5 rg\n50 {yActual} Td\n";
+                        contenido += $"(No hay sanciones disponibles) Tj\nET\n";
+                    }
+                }
+                else
+                {
+                    contenido += $"BT\n/F1 12 Tf\n0.5 0.5 0.5 rg\n50 {yActual} Td\n";
+                    contenido += $"(No se pudieron cargar los datos de sanciones) Tj\nET\n";
+                }
+            }
+            catch (Exception ex)
+            {
+                contenido += $"BT\n/F1 12 Tf\n0.6 0.1 0.1 rg\n50 {yActual} Td\n";
+                contenido += $"(Error al cargar sanciones: {EscaparTextoPDF(ex.Message)}) Tj\nET\n";
+            }
+            
+            return contenido;
+        }
+
+        private string ObtenerDatosRealesAprobaciones(int yPosicion)
+        {
+            var contenido = "";
+            var yActual = yPosicion;
+            
+            try
+            {
+                // Obtener datos reales de aprobaciones
+                var aprobaciones = _reportesService.ObtenerHistorialAprobaciones(null, null, null);
+                
+                if (aprobaciones != null)
+                {
+                    // Encabezados de la tabla para aprobaciones
+                    contenido += "q\n0.1 0.3 0.6 rg\n40 520 532 25 re\nf\nQ\n";
+                    contenido += "q\n0.2 0.2 0.2 rg\n40 545 532 1 re\nf\nQ\n";
+                    
+                    // Encabezados específicos para aprobaciones
+                    var encabezados = new[] { "ID", "Solicitante", "Numero Prestamo", "Fecha Revision", "Accion", "Estado Nuevo", "Revisor", "Comentarios", "Motivo Rechazo", "Actualizacion", "Alerta" };
+                    var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+                    
+                    for (int i = 0; i < encabezados.Length; i++)
+                    {
+                        contenido += $"BT\n/F2 9 Tf\n1 1 1 rg\n{posicionesX[i]} {yActual + 6} Td\n";
+                        contenido += $"({encabezados[i]}) Tj\nET\n";
+                    }
+                    
+                    yActual -= 30;
+                    
+                    // Procesar cada aprobación usando reflexión directa
+                    var contador = 0;
+                    var aprobacionesLista = aprobaciones as IEnumerable<dynamic>;
+                    if (aprobacionesLista != null)
+                    {
+                        foreach (var aprobacion in aprobacionesLista)
+                        {
+                            if (yActual < 100) break;
+                            
+                            var propiedades = aprobacion.GetType().GetProperties();
+                            var solicitante = "N/A";
+                            var numeroPrestamo = "N/A";
+                            var fechaRevision = "N/A";
+                            var accion = "N/A";
+                            var estadoNuevo = "N/A";
+                            var revisor = "N/A";
+                            var comentarios = "N/A";
+                            var motivoRechazo = "N/A";
+                            
+                            // Extraer propiedades usando reflexión
+                            foreach (var prop in propiedades)
+                            {
+                                var valor = prop.GetValue(aprobacion)?.ToString() ?? "";
+                                
+                                if (prop.Name == "Solicitante")
+                                    solicitante = valor;
+                                else if (prop.Name == "NumeroPrestamo")
+                                    numeroPrestamo = valor;
+                                else if (prop.Name == "FechaRevision")
+                                    fechaRevision = valor;
+                                else if (prop.Name == "Accion")
+                                    accion = valor;
+                                else if (prop.Name == "EstadoNuevo")
+                                    estadoNuevo = valor;
+                                else if (prop.Name == "Revisor")
+                                    revisor = valor;
+                                else if (prop.Name == "ComentariosRevisor")
+                                    comentarios = valor;
+                                else if (prop.Name == "MotivoRechazo")
+                                    motivoRechazo = valor;
+                            }
+                            
+                            if (!string.IsNullOrEmpty(solicitante) && solicitante != "N/A")
+                            {
+                                contenido += CrearFilaTablaAprobaciones(contador + 1, solicitante, numeroPrestamo, fechaRevision, accion, estadoNuevo, revisor, comentarios, motivoRechazo, yActual);
+                                yActual -= 20;
+                                contador++;
+                            }
+                        }
+                    }
+                    
+                    contenido += $"BT\n/F1 10 Tf\n0.5 0.5 0.5 rg\n50 {yActual} Td\n";
+                    contenido += $"(Fin del reporte) Tj\nET\n";
+                }
+                else
+                {
+                    contenido += $"BT\n/F1 12 Tf\n0.5 0.5 0.5 rg\n50 {yActual} Td\n";
+                    contenido += $"(No hay aprobaciones disponibles) Tj\nET\n";
+                }
+            }
+            catch (Exception ex)
+            {
+                contenido += $"BT\n/F1 12 Tf\n0.6 0.1 0.1 rg\n50 {yActual} Td\n";
+                contenido += $"(Error al cargar aprobaciones: {EscaparTextoPDF(ex.Message)}) Tj\nET\n";
+            }
+            
+            return contenido;
+        }
+
+        private string CrearFilaTablaPrestamos(int id, string producto, string usuario, string fechaPrestamo, string fechaDevolucion, string estado, string observaciones, string cantidad, string responsable, int yPosicion)
+        {
+            var contenido = "";
+            
+            // Fondo alternado para filas
+            var colorFondo = id % 2 == 0 ? "0.99 0.99 1.0" : "0.96 0.96 0.98";
+            contenido += $"q\n{colorFondo} rg\n40 520 532 18 re\nf\nQ\n";
+            contenido += $"q\n0.9 0.9 0.9 rg\n40 {yPosicion - 1} 532 0.5 re\nf\nQ\n";
+            
+            var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+            var datos = new[] 
+            { 
+                id.ToString(), 
+                LimpiarTextoParaPDF(producto).Length > 15 ? LimpiarTextoParaPDF(producto).Substring(0, 15) + "..." : LimpiarTextoParaPDF(producto),
+                LimpiarTextoParaPDF(usuario),
+                LimpiarTextoParaPDF(fechaPrestamo),
+                LimpiarTextoParaPDF(fechaDevolucion),
+                LimpiarTextoParaPDF(estado),
+                LimpiarTextoParaPDF(observaciones),
+                LimpiarTextoParaPDF(cantidad),
+                LimpiarTextoParaPDF(responsable),
+                DateTime.Now.ToString("dd/MM/yyyy"),
+                "Normal"
+            };
+            
+            for (int i = 0; i < datos.Length; i++)
+            {
+                var colorTexto = i == 5 && estado.ToLower().Contains("activo") ? "0.0 0.6 0.0" : 
+                                i == 5 && estado.ToLower().Contains("inactivo") ? "0.8 0.2 0.2" : "0.1 0.1 0.1";
+                contenido += $"BT\n/F1 8 Tf\n{colorTexto} rg\n{posicionesX[i]} {yPosicion + 4} Td\n";
+                contenido += $"({EscaparTextoPDF(datos[i])}) Tj\nET\n";
+            }
+            
+            return contenido;
+        }
+
+        private string CrearFilaTablaSanciones(int id, string usuario, string motivo, string fechaSancion, string fechaFin, string estado, string tipo, string observaciones, string responsable, int yPosicion)
+        {
+            var contenido = "";
+            
+            // Fondo alternado para filas
+            var colorFondo = id % 2 == 0 ? "0.99 0.99 1.0" : "0.96 0.96 0.98";
+            contenido += $"q\n{colorFondo} rg\n40 520 532 18 re\nf\nQ\n";
+            contenido += $"q\n0.9 0.9 0.9 rg\n40 {yPosicion - 1} 532 0.5 re\nf\nQ\n";
+            
+            var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+            var datos = new[] 
+            { 
+                id.ToString(), 
+                LimpiarTextoParaPDF(usuario),
+                LimpiarTextoParaPDF(motivo),
+                LimpiarTextoParaPDF(fechaSancion),
+                LimpiarTextoParaPDF(fechaFin),
+                LimpiarTextoParaPDF(estado),
+                LimpiarTextoParaPDF(tipo),
+                LimpiarTextoParaPDF(observaciones),
+                LimpiarTextoParaPDF(responsable),
+                DateTime.Now.ToString("dd/MM/yyyy"),
+                "Normal"
+            };
+            
+            for (int i = 0; i < datos.Length; i++)
+            {
+                var colorTexto = i == 5 && estado.ToLower().Contains("activo") ? "0.0 0.6 0.0" : 
+                                i == 5 && estado.ToLower().Contains("inactivo") ? "0.8 0.2 0.2" : "0.1 0.1 0.1";
+                contenido += $"BT\n/F1 8 Tf\n{colorTexto} rg\n{posicionesX[i]} {yPosicion + 4} Td\n";
+                contenido += $"({EscaparTextoPDF(datos[i])}) Tj\nET\n";
+            }
+            
+            return contenido;
+        }
+
+        private string CrearFilaTablaAprobaciones(int id, string solicitante, string numeroPrestamo, string fechaRevision, string accion, string estadoNuevo, string revisor, string comentarios, string motivoRechazo, int yPosicion)
+        {
+            var contenido = "";
+            
+            // Fondo alternado para filas
+            var colorFondo = id % 2 == 0 ? "0.99 0.99 1.0" : "0.96 0.96 0.98";
+            contenido += $"q\n{colorFondo} rg\n40 520 532 18 re\nf\nQ\n";
+            contenido += $"q\n0.9 0.9 0.9 rg\n40 {yPosicion - 1} 532 0.5 re\nf\nQ\n";
+            
+            var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+            var datos = new[] 
+            { 
+                id.ToString(), 
+                LimpiarTextoParaPDF(solicitante),
+                LimpiarTextoParaPDF(numeroPrestamo),
+                LimpiarTextoParaPDF(fechaRevision),
+                LimpiarTextoParaPDF(accion),
+                LimpiarTextoParaPDF(estadoNuevo),
+                LimpiarTextoParaPDF(revisor),
+                LimpiarTextoParaPDF(comentarios),
+                LimpiarTextoParaPDF(motivoRechazo),
+                DateTime.Now.ToString("dd/MM/yyyy"),
+                "Normal"
+            };
+            
+            for (int i = 0; i < datos.Length; i++)
+            {
+                var colorTexto = i == 4 && accion.ToLower().Contains("aprobar") ? "0.0 0.6 0.0" : 
+                                i == 4 && accion.ToLower().Contains("rechazar") ? "0.8 0.2 0.2" : "0.1 0.1 0.1";
                 contenido += $"BT\n/F1 8 Tf\n{colorTexto} rg\n{posicionesX[i]} {yPosicion + 4} Td\n";
                 contenido += $"({EscaparTextoPDF(datos[i])}) Tj\nET\n";
             }
