@@ -1,0 +1,400 @@
+﻿@{
+    ViewBag.Title = "Alertas Estadísticas";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+}
+
+<div class="estadisticas-container">
+    <!-- Header Principal -->
+    <div class="estadisticas-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index")" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Dashboard
+            </a>
+        </div>
+        <h1 class="estadisticas-title">@ViewBag.Title</h1>
+        <div class="header-actions"></div>
+    </div>
+
+    <!-- Alertas Activas -->
+    <div class="alertas-container">
+        <div class="filtros-header">
+            <i class="fas fa-exclamation-triangle filtros-icon"></i>
+            <h3>Alertas Estadísticas Activas</h3>
+        </div>
+        <div class="filtros-fecha">
+            <button class="btn-filtrar" onclick="cargarAlertas()">
+                <i class="fas fa-sync"></i>
+                Actualizar Alertas
+            </button>
+        </div>
+        <div id="alertasActivas">
+            <div class="loading">Cargando alertas estadísticas...</div>
+        </div>
+    </div>
+
+    <!-- Detección de Anomalías -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Detección de Anomalías</h3>
+            <div class="tabla-actions">
+                <select id="tipoAnalisisAnomalias" class="filtro-input">
+                    <option value="prestamos">Préstamos</option>
+                    <option value="espacios">Espacios</option>
+                </select>
+                <button class="btn-filtrar" onclick="detectarAnomalias()">
+                    <i class="fas fa-search"></i>
+                    Detectar
+                </button>
+            </div>
+        </div>
+        <div id="anomaliasDetectadas">
+            <div class="loading">Selecciona tipo de análisis para detectar anomalías</div>
+        </div>
+    </div>
+
+    <!-- Patrones Inusuales -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Patrones Inusuales</h3>
+            <div class="tabla-actions">
+                <div class="filtro-grupo">
+                    <label class="filtro-label">Fecha Inicio</label>
+                    <input type="date" id="fechaInicioPatrones" class="filtro-input" />
+                </div>
+                <div class="filtro-grupo">
+                    <label class="filtro-label">Fecha Fin</label>
+                    <input type="date" id="fechaFinPatrones" class="filtro-input" />
+                </div>
+                <button class="btn-filtrar" onclick="detectarPatronesInusuales()">
+                    <i class="fas fa-search"></i>
+                    Detectar
+                </button>
+            </div>
+        </div>
+        <div id="patronesInusuales">
+            <div class="loading">Selecciona fechas para detectar patrones inusuales</div>
+        </div>
+    </div>
+
+    <!-- Configuración de Alertas -->
+    <div class="recomendaciones-container">
+        <div class="filtros-header">
+            <i class="fas fa-cog filtros-icon"></i>
+            <h3>Configuración de Alertas</h3>
+        </div>
+        <div class="filtros-fecha">
+            <div class="filtro-grupo">
+                <label class="filtro-label">Tipo de Alerta</label>
+                <select id="tipoAlerta" class="filtro-input">
+                    <option value="PrestamosVencidos">Préstamos Vencidos</option>
+                    <option value="StockBajo">Stock Bajo</option>
+                    <option value="EspaciosSobreutilizados">Espacios Sobreutilizados</option>
+                    <option value="Anomalias">Anomalías</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Umbral</label>
+                <input type="number" id="umbralAlerta" class="filtro-input" placeholder="0" />
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Activo</label>
+                <select id="activoAlerta" class="filtro-input">
+                    <option value="true">Sí</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+            <button class="btn-filtrar" onclick="configurarAlerta()">
+                <i class="fas fa-save"></i>
+                Configurar
+            </button>
+        </div>
+        <div id="configuracionResultado">
+            <div class="success-message">Configura las alertas según tus necesidades</div>
+        </div>
+    </div>
+
+    <!-- Gráfico de Alertas -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Historial de Alertas</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarDatos('alertas')">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoAlertas">
+            <div class="loading">Cargando historial de alertas...</div>
+        </div>
+    </div>
+
+    <!-- Estadísticas de Alertas -->
+    <div class="estadisticas-grid" id="estadisticasAlertas">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalAlertas">-</div>
+            <div class="estadistica-label">Total Alertas</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="alertasCriticas">-</div>
+            <div class="estadistica-label">Críticas</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="alertasAltas">-</div>
+            <div class="estadistica-label">Alta Prioridad</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="alertasMedia">-</div>
+            <div class="estadistica-label">Media Prioridad</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="anomaliasDetectadas">-</div>
+            <div class="estadistica-label">Anomalías</div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chartAlertas = null;
+
+        $(document).ready(function() {
+            // Establecer fechas por defecto
+            const fechaFin = new Date();
+            const fechaInicio = new Date();
+            fechaInicio.setDate(fechaInicio.getDate() - 30);
+            
+            $('#fechaInicioPatrones').val(fechaInicio.toISOString().split('T')[0]);
+            $('#fechaFinPatrones').val(fechaFin.toISOString().split('T')[0]);
+            
+            // Cargar datos iniciales
+            cargarAlertas();
+            cargarGraficoAlertas();
+        });
+
+        function cargarAlertas() {
+            $('#alertasActivas').html('<div class="loading">Cargando alertas estadísticas...</div>');
+            
+            $.get('@Url.Action("AlertasEstadisticas")', function(response) {
+                if (response.success) {
+                    mostrarAlertas(response.data);
+                    actualizarEstadisticasAlertas(response.data);
+                } else {
+                    $('#alertasActivas').html('<div class="error-message">Error al cargar alertas</div>');
+                }
+            }).fail(function() {
+                $('#alertasActivas').html('<div class="error-message">Error al cargar alertas</div>');
+            });
+        }
+
+        function mostrarAlertas(alertas) {
+            if (alertas.length === 0) {
+                $('#alertasActivas').html('<div class="success-message">No hay alertas activas en este momento</div>');
+                return;
+            }
+            
+            let html = '';
+            alertas.forEach(alerta => {
+                html += `<div class="alerta-item ${alerta.Severidad.toLowerCase()}">
+                    <i class="fas fa-exclamation-circle alerta-icon"></i>
+                    <div class="alerta-content">
+                        <div class="alerta-titulo">${alerta.Tipo}</div>
+                        <div class="alerta-descripcion">${alerta.Descripcion}</div>
+                        <div class="alerta-fecha">${new Date(alerta.FechaGeneracion).toLocaleString()}</div>
+                    </div>
+                </div>`;
+            });
+            
+            $('#alertasActivas').html(html);
+        }
+
+        function detectarAnomalias() {
+            const tipoAnalisis = $('#tipoAnalisisAnomalias').val();
+            $('#anomaliasDetectadas').html('<div class="loading">Detectando anomalías...</div>');
+            
+            $.get('@Url.Action("Anomalias")', {
+                tipoAnalisis: tipoAnalisis
+            }, function(response) {
+                if (response.success) {
+                    mostrarAnomalias(response.data);
+                } else {
+                    $('#anomaliasDetectadas').html('<div class="error-message">Error al detectar anomalías</div>');
+                }
+            }).fail(function() {
+                $('#anomaliasDetectadas').html('<div class="error-message">Error al detectar anomalías</div>');
+            });
+        }
+
+        function mostrarAnomalias(anomalias) {
+            if (anomalias.length === 0) {
+                $('#anomaliasDetectadas').html('<div class="success-message">No se detectaron anomalías</div>');
+                return;
+            }
+            
+            let html = '<table class="tabla-datos"><thead><tr><th>Fecha</th><th>Cantidad</th><th>Desviación</th><th>Tipo</th></tr></thead><tbody>';
+            
+            anomalias.forEach(anomalia => {
+                html += `<tr>
+                    <td>${anomalia.Fecha}</td>
+                    <td>${anomalia.Cantidad}</td>
+                    <td>${anomalia.Desviacion}</td>
+                    <td>${anomalia.Tipo}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            $('#anomaliasDetectadas').html(html);
+        }
+
+        function detectarPatronesInusuales() {
+            const fechaInicio = $('#fechaInicioPatrones').val();
+            const fechaFin = $('#fechaFinPatrones').val();
+            
+            if (!fechaInicio || !fechaFin) {
+                alert('Por favor selecciona las fechas');
+                return;
+            }
+            
+            $('#patronesInusuales').html('<div class="loading">Detectando patrones inusuales...</div>');
+            
+            $.get('@Url.Action("PatronesInusuales")', {
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin
+            }, function(response) {
+                if (response.success) {
+                    mostrarPatronesInusuales(response.data);
+                } else {
+                    $('#patronesInusuales').html('<div class="error-message">Error al detectar patrones</div>');
+                }
+            }).fail(function() {
+                $('#patronesInusuales').html('<div class="error-message">Error al detectar patrones</div>');
+            });
+        }
+
+        function mostrarPatronesInusuales(patrones) {
+            if (patrones.length === 0) {
+                $('#patronesInusuales').html('<div class="success-message">No se detectaron patrones inusuales</div>');
+                return;
+            }
+            
+            let html = '<table class="tabla-datos"><thead><tr><th>Usuario/Espacio</th><th>Cantidad</th><th>Patrón</th><th>Severidad</th></tr></thead><tbody>';
+            
+            patrones.forEach(patron => {
+                html += `<tr>
+                    <td>${patron.Usuario || patron.IdEspacio}</td>
+                    <td>${patron.CantidadPrestamos || patron.CantidadReservasLargas}</td>
+                    <td>${patron.Patron}</td>
+                    <td>${patron.Severidad}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            $('#patronesInusuales').html(html);
+        }
+
+        function configurarAlerta() {
+            const tipoAlerta = $('#tipoAlerta').val();
+            const umbral = parseFloat($('#umbralAlerta').val());
+            const activo = $('#activoAlerta').val() === 'true';
+            
+            if (isNaN(umbral)) {
+                alert('Por favor ingresa un umbral válido');
+                return;
+            }
+            
+            $('#configuracionResultado').html('<div class="loading">Configurando alerta...</div>');
+            
+            $.post('@Url.Action("ConfigurarAlertas")', {
+                tipoAlerta: tipoAlerta,
+                umbral: umbral,
+                activo: activo
+            }, function(response) {
+                if (response.success) {
+                    $('#configuracionResultado').html(`<div class="success-message">${response.data.Mensaje}</div>`);
+                } else {
+                    $('#configuracionResultado').html(`<div class="error-message">${response.message}</div>`);
+                }
+            }).fail(function() {
+                $('#configuracionResultado').html('<div class="error-message">Error al configurar alerta</div>');
+            });
+        }
+
+        function cargarGraficoAlertas() {
+            $('#graficoAlertas').html('<div class="loading">Cargando historial de alertas...</div>');
+            
+            // Placeholder para gráfico de alertas
+            const ctx = document.createElement('canvas');
+            $('#graficoAlertas').html(ctx);
+            
+            if (chartAlertas) {
+                chartAlertas.destroy();
+            }
+            
+            chartAlertas = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Alertas Críticas',
+                        data: [2, 1, 3, 2, 1, 0],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Alertas Altas',
+                        data: [5, 3, 7, 4, 6, 2],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Alertas Medias',
+                        data: [8, 6, 10, 7, 9, 5],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Historial de Alertas por Mes'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function actualizarEstadisticasAlertas(alertas) {
+            const totalAlertas = alertas.length;
+            const alertasCriticas = alertas.filter(a => a.Severidad === 'Crítica').length;
+            const alertasAltas = alertas.filter(a => a.Severidad === 'Alta').length;
+            const alertasMedia = alertas.filter(a => a.Severidad === 'Media').length;
+            
+            $('#totalAlertas').text(totalAlertas);
+            $('#alertasCriticas').text(alertasCriticas);
+            $('#alertasAltas').text(alertasAltas);
+            $('#alertasMedia').text(alertasMedia);
+            $('#anomaliasDetectadas').text('-'); // Placeholder
+        }
+
+        function exportarDatos(tipo) {
+            window.open('@Url.Action("ExportarDatos")' + 
+                '?tipoDatos=' + tipo + 
+                '&formato=excel', '_blank');
+        }
+    </script>
+}
