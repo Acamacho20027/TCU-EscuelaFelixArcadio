@@ -293,6 +293,7 @@
     <Content Include="Content\reservas.css" />
     <Content Include="Content\sanciones.css" />
     <Content Include="Content\sports-buttons-fix.css" />
+    <Content Include="Content\ver-reporte.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />

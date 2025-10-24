@@ -379,7 +379,14 @@
             $('#accion').val('');
             $('#searchInput').val('');
             $('.historial-card').show();
+            // Enviar formulario para recargar con filtros limpios
+            $('#filtrosForm').submit();
         }
+
+        // Funcionalidad de filtros
+        $('#fechaInicio, #fechaFin, #accion').on('change', function() {
+            $('#filtrosForm').submit();
+        });
 
         function limpiarFormulario() {
             $('#formAprobacion')[0].reset();
