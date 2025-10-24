@@ -1627,9 +1627,9 @@ startxref
                     contenido += "q\n0.1 0.3 0.6 rg\n40 520 532 25 re\nf\nQ\n";
                     contenido += "q\n0.2 0.2 0.2 rg\n40 545 532 1 re\nf\nQ\n";
                     
-                    // Encabezados específicos para préstamos
-                    var encabezados = new[] { "ID", "Numero Prestamo", "Usuario", "Fecha Prestamo", "Fecha Devolucion", "Estado", "Observaciones", "Cantidad", "Responsable", "Actualizacion", "Alerta" };
-                    var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+                    // Encabezados específicos para préstamos (solo campos importantes)
+                    var encabezados = new[] { "ID", "Numero Prestamo", "Usuario", "Fecha Prestamo", "Estado" };
+                    var posicionesX = new[] { 50, 120, 280, 420, 520 };
                     
                     for (int i = 0; i < encabezados.Length; i++)
                     {
@@ -1648,15 +1648,11 @@ startxref
                         var numeroPrestamo = prestamo.NumeroPrestamo ?? "N/A";
                         var usuario = prestamo.NombreCompleto ?? "N/A";
                         var fechaPrestamo = prestamo.FechadeCreacion.ToString("dd/MM/yyyy");
-                        var fechaDevolucion = prestamo.FechaDevolucion?.ToString("dd/MM/yyyy") ?? "N/A";
                         var estado = prestamo.Estado ?? "Activo";
-                        var observaciones = prestamo.MotivoPrestamo ?? "N/A";
-                        var cantidad = "1"; // No hay cantidad en el modelo
-                        var responsable = prestamo.Usuario ?? "N/A";
                         
                         if (!string.IsNullOrEmpty(numeroPrestamo) && numeroPrestamo != "N/A")
                         {
-                            contenido += CrearFilaTablaPrestamos(contador + 1, numeroPrestamo, usuario, fechaPrestamo, fechaDevolucion, estado, observaciones, cantidad, responsable, yActual);
+                            contenido += CrearFilaTablaPrestamosSimple(contador + 1, numeroPrestamo, usuario, fechaPrestamo, estado, yActual);
                             yActual -= 20;
                             contador++;
                         }
@@ -1699,9 +1695,9 @@ startxref
                         contenido += "q\n0.1 0.3 0.6 rg\n40 520 532 25 re\nf\nQ\n";
                         contenido += "q\n0.2 0.2 0.2 rg\n40 545 532 1 re\nf\nQ\n";
                         
-                        // Encabezados específicos para sanciones
-                        var encabezados = new[] { "ID", "Usuario", "Motivo", "Fecha Sancion", "Fecha Fin", "Estado", "Tipo", "Observaciones", "Responsable", "Actualizacion", "Alerta" };
-                        var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+                        // Encabezados específicos para sanciones (solo campos importantes)
+                        var encabezados = new[] { "ID", "Usuario", "Motivo", "Fecha Sancion" };
+                        var posicionesX = new[] { 50, 200, 350, 500 };
                         
                         for (int i = 0; i < encabezados.Length; i++)
                         {
@@ -1752,7 +1748,7 @@ startxref
                             
                             if (!string.IsNullOrEmpty(usuario) && usuario != "N/A")
                             {
-                                contenido += CrearFilaTablaSanciones(contador + 1, usuario, motivo, fechaSancion, fechaFin, estado, tipo, observaciones, responsable, yActual);
+                                contenido += CrearFilaTablaSancionesSimple(contador + 1, usuario, motivo, fechaSancion, estado, yActual);
                                 yActual -= 20;
                                 contador++;
                             }
@@ -1798,9 +1794,9 @@ startxref
                     contenido += "q\n0.1 0.3 0.6 rg\n40 520 532 25 re\nf\nQ\n";
                     contenido += "q\n0.2 0.2 0.2 rg\n40 545 532 1 re\nf\nQ\n";
                     
-                    // Encabezados específicos para aprobaciones
-                    var encabezados = new[] { "ID", "Solicitante", "Numero Prestamo", "Fecha Revision", "Accion", "Estado Nuevo", "Revisor", "Comentarios", "Motivo Rechazo", "Actualizacion", "Alerta" };
-                    var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+                    // Encabezados específicos para aprobaciones (solo campos importantes)
+                    var encabezados = new[] { "ID", "Solicitante", "Numero Prestamo", "Fecha Revision" };
+                    var posicionesX = new[] { 50, 200, 350, 500 };
                     
                     for (int i = 0; i < encabezados.Length; i++)
                     {
@@ -1852,12 +1848,12 @@ startxref
                                     motivoRechazo = valor;
                             }
                             
-                            if (!string.IsNullOrEmpty(solicitante) && solicitante != "N/A")
-                            {
-                                contenido += CrearFilaTablaAprobaciones(contador + 1, solicitante, numeroPrestamo, fechaRevision, accion, estadoNuevo, revisor, comentarios, motivoRechazo, yActual);
-                                yActual -= 20;
-                                contador++;
-                            }
+                                if (!string.IsNullOrEmpty(solicitante) && solicitante != "N/A")
+                                {
+                                    contenido += CrearFilaTablaAprobacionesSimple(contador + 1, solicitante, numeroPrestamo, fechaRevision, accion, yActual);
+                                    yActual -= 20;
+                                    contador++;
+                                }
                         }
                     }
                     
@@ -1879,6 +1875,35 @@ startxref
             return contenido;
         }
 
+        private string CrearFilaTablaPrestamosSimple(int id, string numeroPrestamo, string usuario, string fechaPrestamo, string estado, int yPosicion)
+        {
+            var contenido = "";
+            
+            // Fondo alternado para filas
+            var colorFondo = id % 2 == 0 ? "0.99 0.99 1.0" : "0.96 0.96 0.98";
+            contenido += $"q\n{colorFondo} rg\n40 520 532 18 re\nf\nQ\n";
+            contenido += $"q\n0.9 0.9 0.9 rg\n40 {yPosicion - 1} 532 0.5 re\nf\nQ\n";
+            
+            var posicionesX = new[] { 50, 120, 280, 420, 520 };
+            var datos = new[] 
+            { 
+                id.ToString(), 
+                LimpiarTextoParaPDF(numeroPrestamo),
+                LimpiarTextoParaPDF(usuario),
+                LimpiarTextoParaPDF(fechaPrestamo),
+                LimpiarTextoParaPDF(estado)
+            };
+            
+            for (int i = 0; i < datos.Length; i++)
+            {
+                var colorTexto = (i == 4 && estado.ToLower().Contains("activo")) ? "0.2 0.7 0.2" : "0.2 0.2 0.2";
+                contenido += $"BT\n/F1 8 Tf\n{colorTexto} rg\n{posicionesX[i]} {yPosicion + 2} Td\n";
+                contenido += $"({datos[i]}) Tj\nET\n";
+            }
+            
+            return contenido;
+        }
+
         private string CrearFilaTablaPrestamos(int id, string producto, string usuario, string fechaPrestamo, string fechaDevolucion, string estado, string observaciones, string cantidad, string responsable, int yPosicion)
         {
             var contenido = "";
@@ -1888,7 +1913,7 @@ startxref
             contenido += $"q\n{colorFondo} rg\n40 520 532 18 re\nf\nQ\n";
             contenido += $"q\n0.9 0.9 0.9 rg\n40 {yPosicion - 1} 532 0.5 re\nf\nQ\n";
             
-            var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+            var posicionesX = new[] { 50, 120, 280, 420, 520, 570, 590, 600, 610, 620, 630 };
             var datos = new[] 
             { 
                 id.ToString(), 
@@ -1915,6 +1940,33 @@ startxref
             return contenido;
         }
 
+        private string CrearFilaTablaSancionesSimple(int id, string usuario, string motivo, string fechaSancion, string estado, int yPosicion)
+        {
+            var contenido = "";
+            
+            // Fondo alternado para filas
+            var colorFondo = id % 2 == 0 ? "0.99 0.99 1.0" : "0.96 0.96 0.98";
+            contenido += $"q\n{colorFondo} rg\n40 520 532 18 re\nf\nQ\n";
+            contenido += $"q\n0.9 0.9 0.9 rg\n40 {yPosicion - 1} 532 0.5 re\nf\nQ\n";
+            
+            var posicionesX = new[] { 50, 200, 350, 500 };
+            var datos = new[] 
+            { 
+                id.ToString(), 
+                LimpiarTextoParaPDF(usuario),
+                LimpiarTextoParaPDF(motivo),
+                LimpiarTextoParaPDF(fechaSancion)
+            };
+            
+            for (int i = 0; i < datos.Length; i++)
+            {
+                contenido += $"BT\n/F1 8 Tf\n0.2 0.2 0.2 rg\n{posicionesX[i]} {yPosicion + 2} Td\n";
+                contenido += $"({datos[i]}) Tj\nET\n";
+            }
+            
+            return contenido;
+        }
+
         private string CrearFilaTablaSanciones(int id, string usuario, string motivo, string fechaSancion, string fechaFin, string estado, string tipo, string observaciones, string responsable, int yPosicion)
         {
             var contenido = "";
@@ -1924,7 +1976,7 @@ startxref
             contenido += $"q\n{colorFondo} rg\n40 520 532 18 re\nf\nQ\n";
             contenido += $"q\n0.9 0.9 0.9 rg\n40 {yPosicion - 1} 532 0.5 re\nf\nQ\n";
             
-            var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+            var posicionesX = new[] { 50, 300, 450, 550, 600, 620, 630, 640, 650, 660, 670 };
             var datos = new[] 
             { 
                 id.ToString(), 
@@ -1951,6 +2003,33 @@ startxref
             return contenido;
         }
 
+        private string CrearFilaTablaAprobacionesSimple(int id, string solicitante, string numeroPrestamo, string fechaRevision, string accion, int yPosicion)
+        {
+            var contenido = "";
+            
+            // Fondo alternado para filas
+            var colorFondo = id % 2 == 0 ? "0.99 0.99 1.0" : "0.96 0.96 0.98";
+            contenido += $"q\n{colorFondo} rg\n40 520 532 18 re\nf\nQ\n";
+            contenido += $"q\n0.9 0.9 0.9 rg\n40 {yPosicion - 1} 532 0.5 re\nf\nQ\n";
+            
+            var posicionesX = new[] { 50, 200, 350, 500 };
+            var datos = new[] 
+            { 
+                id.ToString(), 
+                LimpiarTextoParaPDF(solicitante),
+                LimpiarTextoParaPDF(numeroPrestamo),
+                LimpiarTextoParaPDF(fechaRevision)
+            };
+            
+            for (int i = 0; i < datos.Length; i++)
+            {
+                contenido += $"BT\n/F1 8 Tf\n0.2 0.2 0.2 rg\n{posicionesX[i]} {yPosicion + 2} Td\n";
+                contenido += $"({datos[i]}) Tj\nET\n";
+            }
+            
+            return contenido;
+        }
+
         private string CrearFilaTablaAprobaciones(int id, string solicitante, string numeroPrestamo, string fechaRevision, string accion, string estadoNuevo, string revisor, string comentarios, string motivoRechazo, int yPosicion)
         {
             var contenido = "";
@@ -1960,7 +2039,7 @@ startxref
             contenido += $"q\n{colorFondo} rg\n40 520 532 18 re\nf\nQ\n";
             contenido += $"q\n0.9 0.9 0.9 rg\n40 {yPosicion - 1} 532 0.5 re\nf\nQ\n";
             
-            var posicionesX = new[] { 50, 80, 150, 200, 260, 310, 360, 410, 460, 520, 580 };
+            var posicionesX = new[] { 50, 300, 450, 550, 600, 620, 630, 640, 650, 660, 670 };
             var datos = new[] 
             { 
                 id.ToString(), 
