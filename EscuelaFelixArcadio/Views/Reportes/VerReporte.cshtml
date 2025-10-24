@@ -5,62 +5,18 @@
 
 @section Styles {
     <link href="~/Content/reportes.css" rel="stylesheet" />
+    <link href="~/Content/ver-reporte.css" rel="stylesheet" />
 }
 
 <div class="reportes-container">
     <!-- Header -->
-    <div class="reportes-header">
-        <h1>
-            <i class="fas fa-eye header-icon"></i>
-            @ViewBag.Title
-        </h1>
-        <div class="header-subtitle">
-            Visualización detallada del reporte generado
-        </div>
+    <div class="ver-reporte-header">
+        <a href="@Url.Action("Index", "Reportes")" class="btn-volver-reportes">
+            <i class="fas fa-arrow-left"></i> Volver a Reportes
+        </a>
+        <h1 class="ver-reporte-title">@ViewBag.Title</h1>
+        <div class="ver-reporte-spacer"></div>
     </div>
-
-    <!-- Información del reporte -->
-    @if (ViewBag.Reporte != null)
-    {
-        <div class="form-section">
-            <div class="filtros-header">
-                <i class="fas fa-info-circle filtros-icon"></i>
-                <h3>Información del Reporte</h3>
-            </div>
-            
-            <div class="filtros-grid">
-                <div class="filtro-group">
-                    <label>Nombre del Reporte</label>
-                    <input type="text" value="@ViewBag.Reporte.NombreReporte" readonly />
-                </div>
-                
-                <div class="filtro-group">
-                    <label>Tipo de Reporte</label>
-                    <input type="text" value="@ViewBag.Reporte.TipoReporte" readonly />
-                </div>
-                
-                <div class="filtro-group">
-                    <label>Formato</label>
-                    <input type="text" value="@ViewBag.Reporte.Formato" readonly />
-                </div>
-                
-                <div class="filtro-group">
-                    <label>Fecha de Generación</label>
-                    <input type="text" value="@ViewBag.Reporte.FechaGeneracion.ToString("dd/MM/yyyy HH:mm")" readonly />
-                </div>
-                
-                <div class="filtro-group">
-                    <label>Generado por</label>
-                    <input type="text" value="@ViewBag.Reporte.GeneradoPor" readonly />
-                </div>
-                
-                <div class="filtro-group">
-                    <label>Filtros Utilizados</label>
-                    <textarea readonly rows="2">@ViewBag.Reporte.FiltrosUtilizados</textarea>
-                </div>
-            </div>
-        </div>
-    }
 
     <!-- Comentarios y anotaciones -->
     <div class="comentarios-section">
@@ -72,15 +28,16 @@
         <!-- Formulario para agregar comentario -->
         <div class="form-section">
             <form id="formComentario">
+                @Html.AntiForgeryToken()
                 <div class="filtros-grid">
                     <div class="filtro-group">
-                        <label for="comentario">Nuevo Comentario</label>
-                        <textarea id="comentario" name="comentario" rows="3" placeholder="Escribe tu comentario aquí..."></textarea>
+                        <label for="Comentario">Nuevo Comentario</label>
+                        <textarea id="Comentario" name="Comentario" rows="3" placeholder="Escribe tu comentario aquí..."></textarea>
                     </div>
                     
                     <div class="filtro-group">
-                        <label for="esAnotacion">Tipo</label>
-                        <select id="esAnotacion" name="esAnotacion">
+                        <label for="EsAnotacion">Tipo</label>
+                        <select id="EsAnotacion" name="EsAnotacion">
                             <option value="false">Comentario General</option>
                             <option value="true">Anotación Específica</option>
                         </select>
@@ -88,7 +45,7 @@
                 </div>
                 
                 <div class="form-actions">
-                    <button type="submit" class="btn-primary">
+                    <button type="submit" class="btn-primary btn-agregar-comentario">
                         <i class="fas fa-plus"></i>
                         Agregar Comentario
                     </button>
@@ -107,10 +64,6 @@
                             @(comentario.IdUsuario?.Substring(0, 1).ToUpper() ?? "U")
                         </div>
                         <div class="comentario-content">
-                            <div class="comentario-header">
-                                <div class="comentario-usuario">@(comentario.IdUsuario ?? "Usuario")</div>
-                                <div class="comentario-fecha">@comentario.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</div>
-                            </div>
                             <div class="comentario-texto">@comentario.Comentario</div>
                             @if (comentario.EsAnotacion)
                             {
@@ -145,113 +98,55 @@
                     <i class="fas fa-download"></i>
                     Descargar
                 </button>
-                <button type="button" class="btn-exportar btn-excel" onclick="compartirReporte()">
-                    <i class="fas fa-share"></i>
-                    Compartir
-                </button>
             </div>
         </div>
         
-        <div class="tabla-responsive">
-            <table class="tabla-datos">
-                <thead>
-                    <tr>
-                        @if (ViewBag.Datos != null && ((IEnumerable<dynamic>)ViewBag.Datos).Any())
-                        {
-                            var primerElemento = ((IEnumerable<dynamic>)ViewBag.Datos).First();
-                            foreach (var propiedad in primerElemento.GetType().GetProperties())
-                            {
-                                <th>@propiedad.Name</th>
-                            }
-                        }
-                        else
-                        {
-                            <th>No hay datos disponibles</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (ViewBag.Datos != null)
-                    {
-                        foreach (var item in (IEnumerable<dynamic>)ViewBag.Datos)
-                        {
-                            <tr>
-                                @foreach (var propiedad in item.GetType().GetProperties())
-                                {
-                                    <td>@propiedad.GetValue(item)</td>
+        <!-- Cards Grid -->
+        <div class="inventario-cards-grid">
+            @if (ViewBag.Datos != null && ((IEnumerable<dynamic>)ViewBag.Datos).Any())
+            {
+                var datos = (IEnumerable<dynamic>)ViewBag.Datos;
+                foreach (var item in datos)
+                {
+                    <div class="inventario-card">
+                        <div class="inventario-card-header">
+                            <div class="inventario-card-title">
+                                @{
+                                    var propiedades = item.GetType().GetProperties();
+                                    var primeraPropiedad = propiedades.Length > 0 ? propiedades[0] : null;
+                                    var segundaPropiedad = propiedades.Length > 1 ? propiedades[1] : null;
                                 }
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="100%" class="text-center">
-                                <div class="loading">Cargando datos del reporte...</div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Acciones adicionales -->
-    <div class="dashboard-grid">
-        <div class="dashboard-card">
-            <h3>
-                <i class="fas fa-edit card-icon"></i>
-                Editar Reporte
-            </h3>
-            <div class="card-description">
-                Modifica los filtros y configuración de este reporte.
-            </div>
-            <button type="button" class="card-action" onclick="editarReporte()">
-                <i class="fas fa-edit"></i>
-                Editar
-            </button>
-        </div>
-
-        <div class="dashboard-card">
-            <h3>
-                <i class="fas fa-copy card-icon"></i>
-                Duplicar Reporte
-            </h3>
-            <div class="card-description">
-                Crea una copia de este reporte con una nueva configuración.
-            </div>
-            <button type="button" class="card-action" onclick="duplicarReporte()">
-                <i class="fas fa-copy"></i>
-                Duplicar
-            </button>
-        </div>
-
-        <div class="dashboard-card">
-            <h3>
-                <i class="fas fa-calendar card-icon"></i>
-                Programar Generación
-            </h3>
-            <div class="card-description">
-                Programa la generación automática de este reporte.
-            </div>
-            <button type="button" class="card-action" onclick="programarGeneracion()">
-                <i class="fas fa-calendar"></i>
-                Programar
-            </button>
-        </div>
-
-        <div class="dashboard-card">
-            <h3>
-                <i class="fas fa-chart-line card-icon"></i>
-                Crear Gráfico
-            </h3>
-            <div class="card-description">
-                Genera gráficos basados en los datos de este reporte.
-            </div>
-            <button type="button" class="card-action" onclick="crearGrafico()">
-                <i class="fas fa-chart-line"></i>
-                Crear Gráfico
-            </button>
+                                @if (primeraPropiedad != null && segundaPropiedad != null)
+                                {
+                                    <span class="inventario-id">@primeraPropiedad.GetValue(item)</span>
+                                    <span class="inventario-nombre">@segundaPropiedad.GetValue(item)</span>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="inventario-card-body">
+                            <div class="inventario-details">
+                                @for (int i = 2; i < propiedades.Length; i++)
+                                {
+                                    var propiedad = propiedades[i];
+                                    <div class="inventario-detail-item">
+                                        <span class="inventario-detail-label">@propiedad.Name:</span>
+                                        <span class="inventario-detail-value">@propiedad.GetValue(item)</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h4>No hay datos disponibles</h4>
+                    <p>No se encontraron registros para mostrar.</p>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -267,40 +162,58 @@
         });
 
         function agregarComentario() {
-            var comentario = $('#comentario').val();
-            var esAnotacion = $('#esAnotacion').val() === 'true';
+            var comentario = $('#Comentario').val();
+            var esAnotacion = $('#EsAnotacion').val() === 'true';
             
             if (!comentario || comentario.trim() === '') {
                 alert('Por favor escribe un comentario');
                 return;
             }
             
+            console.log('Enviando comentario:', {
+                IdReporteGuardado: @(ViewBag.ReporteId ?? 0),
+                Comentario: comentario,
+                EsAnotacion: esAnotacion
+            });
+            
             $.ajax({
                 url: '@Url.Action("AgregarComentario")',
                 type: 'POST',
                 data: {
-                    idReporte: @(ViewBag.Reporte?.IdReporteGuardado ?? 0),
-                    comentario: comentario,
-                    esAnotacion: esAnotacion,
+                    IdReporteGuardado: @(ViewBag.ReporteId ?? 0),
+                    Comentario: comentario,
+                    EsAnotacion: esAnotacion,
+                    IdUsuario: '',
+                    FechaCreacion: '',
                     __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                 },
                 success: function(response) {
+                    console.log('Respuesta del servidor:', response);
                     if (response.success) {
-                        alert('Comentario agregado exitosamente');
-                        location.reload();
+                        mostrarModalExito();
                     } else {
                         alert('Error: ' + response.message);
                     }
                 },
-                error: function() {
-                    alert('Error al agregar el comentario');
+                error: function(xhr, status, error) {
+                    console.log('Error AJAX:', xhr.responseText);
+                    console.log('Status:', status);
+                    console.log('Error:', error);
+                    alert('Error al agregar el comentario: ' + error);
                 }
             });
         }
 
         function descargarReporte() {
             var url = '@Url.Action("ExportarPDF", new { tipoReporte = ViewBag.Reporte?.TipoReporte ?? "reporte", filtros = ViewBag.Reporte?.FiltrosUtilizados ?? "" })';
-            window.open(url, '_blank');
+            
+            // Crear un elemento temporal para forzar la descarga
+            var link = document.createElement('a');
+            link.href = url;
+            link.download = 'reporte.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function compartirReporte() {
@@ -355,6 +268,39 @@
             } else {
                 alert('Tipo de gráfico no válido');
             }
+        }
+
+        function mostrarModalExito() {
+            // Crear modal si no existe
+            if ($('#modalExito').length === 0) {
+                $('body').append(`
+                    <div id="modalExito" class="modal-exito-overlay" style="display: flex;">
+                        <div class="modal-exito-content">
+                            <div class="modal-exito-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="modal-exito-title">¡Comentario Agregado!</div>
+                            <div class="modal-exito-message">El comentario se ha agregado exitosamente al reporte.</div>
+                            <div class="modal-exito-actions">
+                                <button class="btn-modal-exito" onclick="cerrarModalExito()">Aceptar</button>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            } else {
+                $('#modalExito').show();
+            }
+            
+            // Auto-cerrar después de 3 segundos
+            setTimeout(function() {
+                cerrarModalExito();
+            }, 3000);
+        }
+
+        function cerrarModalExito() {
+            $('#modalExito').fadeOut(300, function() {
+                location.reload();
+            });
         }
     </script>
 }
