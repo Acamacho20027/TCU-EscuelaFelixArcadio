@@ -4,7 +4,7 @@
 }
 
 @section Styles {
-    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+    <link href="~/Content/estadisticas.css?v=15.0" rel="stylesheet" />
 }
 
 <div class="estadisticas-container">
@@ -13,27 +13,91 @@
         <div class="header-left">
             <a href="@Url.Action("Index")" class="btn-volver">
                 <i class="fas fa-arrow-left"></i>
-                Volver al Dashboard
+                Volver a Estadísticas
             </a>
         </div>
         <h1 class="estadisticas-title">@ViewBag.Title</h1>
         <div class="header-actions"></div>
     </div>
 
-    <!-- Filtros de Fecha -->
-    <div class="filtros-fecha">
-        <div class="filtro-grupo">
-            <label class="filtro-label">Fecha Inicio</label>
-            <input type="date" id="fechaInicio" class="filtro-input" />
+    <!-- Filtros Avanzados -->
+    <div class="filtros-avanzados">
+        <h3>Filtros Avanzados</h3>
+        
+        <!-- Barra de búsqueda -->
+        <div class="barra-busqueda">
+            <input type="text" placeholder="Buscar por usuario, nombre, actividad..." />
         </div>
-        <div class="filtro-grupo">
-            <label class="filtro-label">Fecha Fin</label>
-            <input type="date" id="fechaFin" class="filtro-input" />
+        
+        <!-- Primera fila de filtros -->
+        <div class="filtros-fila">
+            <div class="filtro-grupo">
+                <label class="filtro-label">Tipo de Usuario</label>
+                <select class="filtro-input">
+                    <option>Todos los tipos</option>
+                    <option>Estudiante</option>
+                    <option>Profesor</option>
+                    <option>Administrador</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Nivel de Actividad</label>
+                <select class="filtro-input">
+                    <option>Todos los niveles</option>
+                    <option>Alto</option>
+                    <option>Medio</option>
+                    <option>Bajo</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Período</label>
+                <select class="filtro-input">
+                    <option>Todos los períodos</option>
+                    <option>Última semana</option>
+                    <option>Último mes</option>
+                    <option>Último año</option>
+                </select>
+            </div>
         </div>
-        <button class="btn-filtrar" onclick="aplicarFiltros()">
-            <i class="fas fa-filter"></i>
-            Filtrar
-        </button>
+        
+        <!-- Segunda fila de filtros -->
+        <div class="filtros-fila-segunda">
+            <div class="filtro-grupo">
+                <label class="filtro-label">Fecha Inicio</label>
+                <input type="date" class="filtro-input" />
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Fecha Fin</label>
+                <input type="date" class="filtro-input" />
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Ordenar por:</label>
+                <select class="filtro-input">
+                    <option>Actividad</option>
+                    <option>Nombre</option>
+                    <option>Fecha</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Orden:</label>
+                <select class="filtro-input">
+                    <option>Ascendente</option>
+                    <option>Descendente</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Mostrar:</label>
+                <select class="filtro-input">
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                </select>
+            </div>
+            <button class="btn-limpiar-filtros" onclick="limpiarFiltros()">
+                <i class="fas fa-times"></i>
+                Limpiar Filtros
+            </button>
+        </div>
     </div>
 
     <!-- Gráfico de Usuarios -->

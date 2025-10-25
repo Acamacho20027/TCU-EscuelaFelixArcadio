@@ -4,20 +4,22 @@
 }
 
 @section Styles {
-    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+    <link href="~/Content/estadisticas.css?v=16.0" rel="stylesheet" />
 }
 
 <div class="estadisticas-container">
     <!-- Header Principal -->
-    <div class="estadisticas-header">
+    <div class="estadisticas-header-index">
         <h1 class="estadisticas-title">@ViewBag.Title</h1>
     </div>
 
     <!-- Dashboard Principal -->
     <div class="dashboard-principal">
         <div class="filtros-header">
-            <i class="fas fa-chart-line filtros-icon"></i>
-            <h3>Indicadores Clave del Sistema</h3>
+            <div class="filtros-title-group">
+                <i class="fas fa-chart-line filtros-icon"></i>
+                <h3>Indicadores Clave del Sistema</h3>
+            </div>
         </div>
         
         <!-- KPIs Grid -->
@@ -155,7 +157,7 @@
         <!-- Estadísticas de Actividad -->
         <div class="dashboard-card">
             <h3>
-                <i class="fas fa-activity card-icon"></i>
+                <i class="fas fa-server card-icon"></i>
                 Estadísticas de Actividad
             </h3>
             <div class="card-description">
@@ -168,29 +170,6 @@
         </div>
     </div>
 
-    <!-- Estadísticas Generales -->
-    <div class="estadisticas-grid" id="estadisticasGenerales">
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="totalPrestamos">-</div>
-            <div class="estadistica-label">Total Préstamos</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="totalReservas">-</div>
-            <div class="estadistica-label">Total Reservas</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="usuariosActivos">-</div>
-            <div class="estadistica-label">Usuarios Activos</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="productosStockBajo">-</div>
-            <div class="estadistica-label">Stock Bajo</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="espaciosDisponibles">-</div>
-            <div class="estadistica-label">Espacios Disponibles</div>
-        </div>
-    </div>
 </div>
 
 @section scripts {
@@ -199,13 +178,11 @@
             // Cargar datos del dashboard
             cargarDashboardData();
             cargarKPIs();
-            cargarEstadisticasGenerales();
             
             // Actualizar datos cada 5 minutos
             setInterval(function() {
                 cargarDashboardData();
                 cargarKPIs();
-                cargarEstadisticasGenerales();
             }, 300000);
         });
 
@@ -239,20 +216,6 @@
             });
         }
 
-        function cargarEstadisticasGenerales() {
-            $.get('@Url.Action("DashboardData")', function(response) {
-                if (response.success) {
-                    var data = response.data;
-                    $('#totalPrestamos').text(data.PrestamosActivos || 0);
-                    $('#totalReservas').text(data.EspaciosOcupados || 0);
-                    $('#usuariosActivos').text(data.CantidadUsuarioMasActivo || 0);
-                    $('#productosStockBajo').text('0'); // Placeholder
-                    $('#espaciosDisponibles').text('0'); // Placeholder
-                }
-            }).fail(function() {
-                console.log('Error al cargar estadísticas generales');
-            });
-        }
 
         function actualizarVariacion(selector, valor) {
             var elemento = $(selector);
