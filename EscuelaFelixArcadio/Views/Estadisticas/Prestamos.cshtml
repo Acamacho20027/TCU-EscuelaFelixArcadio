@@ -4,7 +4,7 @@
 }
 
 @section Styles {
-    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+    <link href="~/Content/estadisticas.css?v=22.0" rel="stylesheet" />
 }
 
 <div class="estadisticas-container">
@@ -13,35 +13,35 @@
         <div class="header-left">
             <a href="@Url.Action("Index")" class="btn-volver">
                 <i class="fas fa-arrow-left"></i>
-                Volver al Dashboard
+                Volver a Estadísticas
             </a>
         </div>
         <h1 class="estadisticas-title">@ViewBag.Title</h1>
         <div class="header-actions"></div>
     </div>
 
-    <!-- Filtros de Fecha -->
-    <div class="filtros-fecha">
-        <div class="filtro-grupo">
-            <label class="filtro-label">Fecha Inicio</label>
-            <input type="date" id="fechaInicio" class="filtro-input" />
+    <!-- Estadísticas Generales -->
+    <div class="estadisticas-grid">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalPrestamos">-</div>
+            <div class="estadistica-label">TOTAL PRÉSTAMOS</div>
         </div>
-        <div class="filtro-grupo">
-            <label class="filtro-label">Fecha Fin</label>
-            <input type="date" id="fechaFin" class="filtro-input" />
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="devueltos">-</div>
+            <div class="estadistica-label">DEVUELTOS</div>
         </div>
-        <div class="filtro-grupo">
-            <label class="filtro-label">Tipo de Análisis</label>
-            <select id="tipoAnalisis" class="filtro-input">
-                <option value="diario">Diario</option>
-                <option value="semanal">Semanal</option>
-                <option value="mensual">Mensual</option>
-            </select>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="pendientes">-</div>
+            <div class="estadistica-label">PENDIENTES</div>
         </div>
-        <button class="btn-filtrar" onclick="aplicarFiltros()">
-            <i class="fas fa-filter"></i>
-            Filtrar
-        </button>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="tiempoPromedio">-</div>
+            <div class="estadistica-label">TIEMPO PROMEDIO (DÍAS)</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="tasaDevolucion">-</div>
+            <div class="estadistica-label">TASA DE DEVOLUCIÓN</div>
+        </div>
     </div>
 
     <!-- Gráfico de Tendencias -->
@@ -81,44 +81,14 @@
         <div class="grafico-header">
             <h3 class="grafico-title">Predicciones de Préstamos</h3>
             <div class="grafico-controls">
-                <select id="diasPrediccion" class="filtro-input">
-                    <option value="7">7 días</option>
-                    <option value="15">15 días</option>
-                    <option value="30" selected>30 días</option>
-                    <option value="60">60 días</option>
-                </select>
-                <button class="btn-filtrar" onclick="generarPredicciones()">
-                    <i class="fas fa-crystal-ball"></i>
-                    Generar Predicciones
+                <button class="btn-exportar" onclick="exportarDatos('predicciones')">
+                    <i class="fas fa-download"></i>
+                    Exportar
                 </button>
             </div>
         </div>
         <div class="grafico-canvas" id="graficoPredicciones">
             <div class="loading">Generando predicciones...</div>
-        </div>
-    </div>
-
-    <!-- Estadísticas Detalladas -->
-    <div class="estadisticas-grid" id="estadisticasPrestamos">
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="totalPrestamosPeriodo">-</div>
-            <div class="estadistica-label">Total Préstamos</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="prestamosDevueltos">-</div>
-            <div class="estadistica-label">Devueltos</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="prestamosPendientes">-</div>
-            <div class="estadistica-label">Pendientes</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="tiempoPromedio">-</div>
-            <div class="estadistica-label">Tiempo Promedio (días)</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="tasaDevolucionPeriodo">-</div>
-            <div class="estadistica-label">Tasa Devolución</div>
         </div>
     </div>
 </div>
@@ -130,45 +100,40 @@
         let chartPredicciones = null;
 
         $(document).ready(function() {
-            // Establecer fechas por defecto (últimos 30 días)
-            const fechaFin = new Date();
-            const fechaInicio = new Date();
-            fechaInicio.setDate(fechaInicio.getDate() - 30);
-            
-            $('#fechaInicio').val(fechaInicio.toISOString().split('T')[0]);
-            $('#fechaFin').val(fechaFin.toISOString().split('T')[0]);
-            
             // Cargar datos iniciales
-            aplicarFiltros();
+            cargarEstadisticasGenerales();
+            cargarTendencias();
             cargarPatrones();
             generarPredicciones();
         });
 
-        function aplicarFiltros() {
-            const fechaInicio = $('#fechaInicio').val();
-            const fechaFin = $('#fechaFin').val();
-            const tipoAnalisis = $('#tipoAnalisis').val();
-            
-            cargarTendencias(fechaInicio, fechaFin, tipoAnalisis);
-            cargarEstadisticasPeriodo(fechaInicio, fechaFin);
+        function cargarEstadisticasGenerales() {
+            // Simular datos de ejemplo para las estadísticas generales
+            setTimeout(function() {
+                $('#totalPrestamos').text('156');
+                $('#devueltos').text('142');
+                $('#pendientes').text('14');
+                $('#tiempoPromedio').text('3.2');
+                $('#tasaDevolucion').text('91%');
+            }, 500);
         }
-
-        function cargarTendencias(fechaInicio, fechaFin, tipoAnalisis) {
+        
+        function cargarTendencias() {
             $('#graficoTendencias').html('<div class="loading">Cargando tendencias...</div>');
             
-            $.get('@Url.Action("TendenciasPrestamos")', {
-                fechaInicio: fechaInicio,
-                fechaFin: fechaFin,
-                tipoAnalisis: tipoAnalisis
-            }, function(response) {
-                if (response.success) {
-                    crearGraficoTendencias(response.data);
-                } else {
-                    $('#graficoTendencias').html('<div class="error-message">Error al cargar tendencias</div>');
-                }
-            }).fail(function() {
-                $('#graficoTendencias').html('<div class="error-message">Error al cargar tendencias</div>');
-            });
+            // Simular datos de ejemplo
+            setTimeout(function() {
+                const datosEjemplo = [
+                    { Fecha: '2025-01-01', Cantidad: 5, Devueltos: 3 },
+                    { Fecha: '2025-01-02', Cantidad: 8, Devueltos: 6 },
+                    { Fecha: '2025-01-03', Cantidad: 12, Devueltos: 9 },
+                    { Fecha: '2025-01-04', Cantidad: 7, Devueltos: 5 },
+                    { Fecha: '2025-01-05', Cantidad: 15, Devueltos: 12 },
+                    { Fecha: '2025-01-06', Cantidad: 10, Devueltos: 8 },
+                    { Fecha: '2025-01-07', Cantidad: 6, Devueltos: 4 }
+                ];
+                crearGraficoTendencias(datosEjemplo);
+            }, 1000);
         }
 
         function crearGraficoTendencias(datos) {
@@ -216,15 +181,27 @@
         }
 
         function cargarPatrones() {
-            $.get('@Url.Action("PatronesPrestamos")', function(response) {
-                if (response.success) {
-                    mostrarPatrones(response.data);
-                } else {
-                    $('#tablaPatrones').html('<div class="error-message">Error al cargar patrones</div>');
-                }
-            }).fail(function() {
-                $('#tablaPatrones').html('<div class="error-message">Error al cargar patrones</div>');
-            });
+            $('#tablaPatrones').html('<div class="loading">Cargando patrones de uso...</div>');
+            
+            // Simular datos de ejemplo
+            setTimeout(function() {
+                const patronesEjemplo = {
+                    PatronDiaSemana: [
+                        { DiaSemana: 'Lunes', Cantidad: 8, Porcentaje: 15 },
+                        { DiaSemana: 'Martes', Cantidad: 12, Porcentaje: 22 },
+                        { DiaSemana: 'Miércoles', Cantidad: 15, Porcentaje: 28 },
+                        { DiaSemana: 'Jueves', Cantidad: 10, Porcentaje: 18 },
+                        { DiaSemana: 'Viernes', Cantidad: 9, Porcentaje: 17 }
+                    ],
+                    PatronMotivo: [
+                        { Motivo: 'Clase de Educación Física', Cantidad: 25, Porcentaje: 45 },
+                        { Motivo: 'Práctica Deportiva', Cantidad: 18, Porcentaje: 32 },
+                        { Motivo: 'Competencia', Cantidad: 8, Porcentaje: 15 },
+                        { Motivo: 'Recreación', Cantidad: 4, Porcentaje: 8 }
+                    ]
+                };
+                mostrarPatrones(patronesEjemplo);
+            }, 1500);
         }
 
         function mostrarPatrones(patrones) {
@@ -251,20 +228,23 @@
         }
 
         function generarPredicciones() {
-            const diasPrediccion = $('#diasPrediccion').val();
             $('#graficoPredicciones').html('<div class="loading">Generando predicciones...</div>');
             
-            $.get('@Url.Action("PrediccionesPrestamos")', {
-                diasPrediccion: diasPrediccion
-            }, function(response) {
-                if (response.success) {
-                    crearGraficoPredicciones(response.data);
-                } else {
-                    $('#graficoPredicciones').html('<div class="error-message">Error al generar predicciones</div>');
-                }
-            }).fail(function() {
-                $('#graficoPredicciones').html('<div class="error-message">Error al generar predicciones</div>');
-            });
+            // Simular datos de ejemplo
+            setTimeout(function() {
+                const prediccionesEjemplo = {
+                    Predicciones: [
+                        { Fecha: '2025-01-08', Prediccion: 12 },
+                        { Fecha: '2025-01-09', Prediccion: 15 },
+                        { Fecha: '2025-01-10', Prediccion: 18 },
+                        { Fecha: '2025-01-11', Prediccion: 14 },
+                        { Fecha: '2025-01-12', Prediccion: 16 },
+                        { Fecha: '2025-01-13', Prediccion: 20 },
+                        { Fecha: '2025-01-14', Prediccion: 17 }
+                    ]
+                };
+                crearGraficoPredicciones(prediccionesEjemplo);
+            }, 2000);
         }
 
         function crearGraficoPredicciones(datos) {
@@ -294,7 +274,7 @@
                     plugins: {
                         title: {
                             display: true,
-                            text: `Predicciones para los próximos ${$('#diasPrediccion').val()} días`
+                            text: 'Predicciones para los próximos 7 días'
                         }
                     },
                     scales: {
@@ -306,37 +286,80 @@
             });
         }
 
-        function cargarEstadisticasPeriodo(fechaInicio, fechaFin) {
-            $.get('@Url.Action("TendenciasPrestamos")', {
-                fechaInicio: fechaInicio,
-                fechaFin: fechaFin,
-                tipoAnalisis: 'diario'
-            }, function(response) {
-                if (response.success) {
-                    const datos = response.data;
-                    const total = datos.reduce((sum, d) => sum + d.Cantidad, 0);
-                    const devueltos = datos.reduce((sum, d) => sum + d.Devueltos, 0);
-                    const pendientes = total - devueltos;
-                    const tasaDevolucion = total > 0 ? (devueltos * 100 / total).toFixed(1) : 0;
-                    
-                    $('#totalPrestamosPeriodo').text(total);
-                    $('#prestamosDevueltos').text(devueltos);
-                    $('#prestamosPendientes').text(pendientes);
-                    $('#tasaDevolucionPeriodo').text(tasaDevolucion + '%');
-                    $('#tiempoPromedio').text('-'); // Placeholder
-                }
-            });
-        }
 
         function exportarDatos(tipo) {
-            const fechaInicio = $('#fechaInicio').val();
-            const fechaFin = $('#fechaFin').val();
+            // Exportar como imagen JPG
+            let canvas = null;
+            let nombreArchivo = '';
             
-            window.open('@Url.Action("ExportarDatos")' + 
-                '?tipoDatos=' + tipo + 
-                '&fechaInicio=' + fechaInicio + 
-                '&fechaFin=' + fechaFin + 
-                '&formato=excel', '_blank');
+            switch(tipo) {
+                case 'prestamos':
+                    canvas = chartTendencias?.canvas;
+                    nombreArchivo = 'tendencias_prestamos.jpg';
+                    break;
+                case 'patrones':
+                    // Para tablas, crear un canvas temporal
+                    exportarTablaComoImagen('tablaPatrones', 'patrones_uso.jpg');
+                    return;
+                case 'predicciones':
+                    canvas = chartPredicciones?.canvas;
+                    nombreArchivo = 'predicciones_prestamos.jpg';
+                    break;
+                default:
+                    nombreArchivo = 'datos_exportados.jpg';
+            }
+            
+            if (canvas) {
+                // Convertir canvas a imagen JPG
+                const link = document.createElement('a');
+                link.download = nombreArchivo;
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+            } else {
+                alert('No hay datos para exportar');
+            }
+        }
+        
+        function exportarTablaComoImagen(tablaId, nombreArchivo) {
+            const tabla = document.getElementById(tablaId);
+            if (!tabla) {
+                alert('No hay tabla para exportar');
+                return;
+            }
+            
+            // Crear un canvas temporal para la tabla
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Configurar el canvas
+            canvas.width = tabla.offsetWidth;
+            canvas.height = tabla.offsetHeight;
+            
+            // Estilos para el canvas
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar la tabla como texto (simplificado)
+            ctx.fillStyle = '#000000';
+            ctx.font = '14px Arial';
+            
+            // Obtener el texto de la tabla
+            const texto = tabla.innerText;
+            const lineas = texto.split('\n');
+            
+            let y = 30;
+            lineas.forEach(linea => {
+                if (linea.trim()) {
+                    ctx.fillText(linea, 20, y);
+                    y += 20;
+                }
+            });
+            
+            // Descargar como JPG
+            const link = document.createElement('a');
+            link.download = nombreArchivo;
+            link.href = canvas.toDataURL('image/jpeg', 0.9);
+            link.click();
         }
     </script>
 }

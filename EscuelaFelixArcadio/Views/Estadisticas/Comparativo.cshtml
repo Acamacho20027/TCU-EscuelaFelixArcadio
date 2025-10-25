@@ -4,7 +4,7 @@
 }
 
 @section Styles {
-    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+    <link href="~/Content/estadisticas.css?v=15.0" rel="stylesheet" />
 }
 
 <div class="estadisticas-container">
@@ -13,49 +13,90 @@
         <div class="header-left">
             <a href="@Url.Action("Index")" class="btn-volver">
                 <i class="fas fa-arrow-left"></i>
-                Volver al Dashboard
+                Volver a Estadísticas
             </a>
         </div>
         <h1 class="estadisticas-title">@ViewBag.Title</h1>
         <div class="header-actions"></div>
     </div>
 
-    <!-- Configuración de Períodos -->
-    <div class="comparativo-container">
-        <div class="filtros-header">
-            <i class="fas fa-balance-scale filtros-icon"></i>
-            <h3>Configuración de Períodos de Comparación</h3>
+    <!-- Filtros Avanzados -->
+    <div class="filtros-avanzados">
+        <h3>Filtros Avanzados</h3>
+        
+        <!-- Barra de búsqueda -->
+        <div class="barra-busqueda">
+            <input type="text" placeholder="Buscar por análisis, período, métrica..." />
         </div>
         
-        <div class="filtros-fecha">
+        <!-- Primera fila de filtros -->
+        <div class="filtros-fila">
             <div class="filtro-grupo">
                 <label class="filtro-label">Tipo de Análisis</label>
-                <select id="tipoAnalisis" class="filtro-input">
-                    <option value="prestamos">Préstamos</option>
-                    <option value="espacios">Espacios</option>
-                    <option value="usuarios">Usuarios</option>
-                    <option value="inventario">Inventario</option>
+                <select class="filtro-input">
+                    <option>Todos los tipos</option>
+                    <option>Préstamos</option>
+                    <option>Espacios</option>
+                    <option>Usuarios</option>
+                    <option>Inventario</option>
                 </select>
             </div>
             <div class="filtro-grupo">
-                <label class="filtro-label">Período 1 - Inicio</label>
-                <input type="date" id="periodo1Inicio" class="filtro-input" />
+                <label class="filtro-label">Métrica</label>
+                <select class="filtro-input">
+                    <option>Todas las métricas</option>
+                    <option>Cantidad</option>
+                    <option>Frecuencia</option>
+                    <option>Eficiencia</option>
+                </select>
             </div>
             <div class="filtro-grupo">
-                <label class="filtro-label">Período 1 - Fin</label>
-                <input type="date" id="periodo1Fin" class="filtro-input" />
+                <label class="filtro-label">Período</label>
+                <select class="filtro-input">
+                    <option>Todos los períodos</option>
+                    <option>Último mes</option>
+                    <option>Últimos 3 meses</option>
+                    <option>Último año</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Segunda fila de filtros -->
+        <div class="filtros-fila-segunda">
+            <div class="filtro-grupo">
+                <label class="filtro-label">Fecha Inicio</label>
+                <input type="date" class="filtro-input" />
             </div>
             <div class="filtro-grupo">
-                <label class="filtro-label">Período 2 - Inicio</label>
-                <input type="date" id="periodo2Inicio" class="filtro-input" />
+                <label class="filtro-label">Fecha Fin</label>
+                <input type="date" class="filtro-input" />
             </div>
             <div class="filtro-grupo">
-                <label class="filtro-label">Período 2 - Fin</label>
-                <input type="date" id="periodo2Fin" class="filtro-input" />
+                <label class="filtro-label">Ordenar por:</label>
+                <select class="filtro-input">
+                    <option>Fecha</option>
+                    <option>Variación</option>
+                    <option>Tipo</option>
+                </select>
             </div>
-            <button class="btn-filtrar" onclick="compararPeriodos()">
-                <i class="fas fa-exchange-alt"></i>
-                Comparar
+            <div class="filtro-grupo">
+                <label class="filtro-label">Orden:</label>
+                <select class="filtro-input">
+                    <option>Ascendente</option>
+                    <option>Descendente</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label class="filtro-label">Mostrar:</label>
+                <select class="filtro-input">
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                </select>
+            </div>
+            <button class="btn-limpiar-filtros" onclick="limpiarFiltros()">
+                <i class="fas fa-times"></i>
+                Limpiar Filtros
             </button>
         </div>
     </div>

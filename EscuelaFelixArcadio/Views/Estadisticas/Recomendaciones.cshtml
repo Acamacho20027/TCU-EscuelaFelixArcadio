@@ -4,7 +4,7 @@
 }
 
 @section Styles {
-    <link href="~/Content/estadisticas.css?v=1.0" rel="stylesheet" />
+    <link href="~/Content/estadisticas.css?v=30.0" rel="stylesheet" />
 }
 
 <div class="estadisticas-container">
@@ -13,67 +13,34 @@
         <div class="header-left">
             <a href="@Url.Action("Index")" class="btn-volver">
                 <i class="fas fa-arrow-left"></i>
-                Volver al Dashboard
+                Volver a Estadísticas
             </a>
         </div>
         <h1 class="estadisticas-title">@ViewBag.Title</h1>
         <div class="header-actions"></div>
     </div>
 
-    <!-- Recomendaciones de Horarios -->
-    <div class="recomendaciones-container">
-        <div class="filtros-header">
-            <i class="fas fa-clock filtros-icon"></i>
-            <h3>Recomendaciones de Horarios</h3>
+    <!-- Estadísticas Generales -->
+    <div class="estadisticas-grid">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="totalRecomendaciones">-</div>
+            <div class="estadistica-label">TOTAL RECOMENDACIONES</div>
         </div>
-        <div class="filtros-fecha">
-            <div class="filtro-grupo">
-                <label class="filtro-label">Espacio</label>
-                <select id="espacioHorarios" class="filtro-input">
-                    <option value="">Todos los espacios</option>
-                </select>
-            </div>
-            <button class="btn-filtrar" onclick="cargarRecomendacionesHorarios()">
-                <i class="fas fa-search"></i>
-                Generar Recomendaciones
-            </button>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="recomendacionesAlta">-</div>
+            <div class="estadistica-label">PRIORIDAD ALTA</div>
         </div>
-        <div id="recomendacionesHorarios">
-            <div class="loading">Generando recomendaciones de horarios...</div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="recomendacionesMedia">-</div>
+            <div class="estadistica-label">PRIORIDAD MEDIA</div>
         </div>
-    </div>
-
-    <!-- Recomendaciones de Equipamiento -->
-    <div class="recomendaciones-container">
-        <div class="filtros-header">
-            <i class="fas fa-dumbbell filtros-icon"></i>
-            <h3>Recomendaciones de Equipamiento</h3>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="recomendacionesBaja">-</div>
+            <div class="estadistica-label">PRIORIDAD BAJA</div>
         </div>
-        <div class="filtros-fecha">
-            <button class="btn-filtrar" onclick="cargarRecomendacionesEquipamiento()">
-                <i class="fas fa-search"></i>
-                Generar Recomendaciones
-            </button>
-        </div>
-        <div id="recomendacionesEquipamiento">
-            <div class="loading">Generando recomendaciones de equipamiento...</div>
-        </div>
-    </div>
-
-    <!-- Recomendaciones de Mantenimiento -->
-    <div class="recomendaciones-container">
-        <div class="filtros-header">
-            <i class="fas fa-tools filtros-icon"></i>
-            <h3>Recomendaciones de Mantenimiento</h3>
-        </div>
-        <div class="filtros-fecha">
-            <button class="btn-filtrar" onclick="cargarRecomendacionesMantenimiento()">
-                <i class="fas fa-search"></i>
-                Generar Recomendaciones
-            </button>
-        </div>
-        <div id="recomendacionesMantenimiento">
-            <div class="loading">Generando recomendaciones de mantenimiento...</div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="ahorroEstimado">-</div>
+            <div class="estadistica-label">AHORRO ESTIMADO</div>
         </div>
     </div>
 
@@ -82,7 +49,7 @@
         <div class="grafico-header">
             <h3 class="grafico-title">Análisis de Patrones de Uso</h3>
             <div class="grafico-controls">
-                <button class="btn-exportar" onclick="exportarDatos('patrones')">
+                <button class="btn-exportar" onclick="exportarGraficoComoImagen('graficoPatrones', 'analisis-patrones-uso')">
                     <i class="fas fa-download"></i>
                     Exportar
                 </button>
@@ -93,27 +60,41 @@
         </div>
     </div>
 
-    <!-- Resumen de Recomendaciones -->
-    <div class="estadisticas-grid" id="resumenRecomendaciones">
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="totalRecomendaciones">-</div>
-            <div class="estadistica-label">Total Recomendaciones</div>
+    <!-- Recomendaciones de Equipamiento -->
+    <div class="recomendaciones-container">
+        <div class="filtros-header">
+            <div class="filtros-title-group">
+                <i class="fas fa-dumbbell filtros-icon"></i>
+                <h3>Recomendaciones de Equipamiento</h3>
+            </div>
+            <div class="grafico-controls">
+                <button class="btn-filtrar" onclick="cargarRecomendacionesEquipamiento()">
+                    <i class="fas fa-search"></i>
+                    Generar Recomendaciones
+                </button>
+            </div>
         </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="recomendacionesAlta">-</div>
-            <div class="estadistica-label">Prioridad Alta</div>
+        <div id="recomendacionesEquipamiento">
+            <div class="loading">Generando recomendaciones de equipamiento...</div>
         </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="recomendacionesMedia">-</div>
-            <div class="estadistica-label">Prioridad Media</div>
+    </div>
+
+    <!-- Recomendaciones de Mantenimiento -->
+    <div class="recomendaciones-container">
+        <div class="filtros-header">
+            <div class="filtros-title-group">
+                <i class="fas fa-tools filtros-icon"></i>
+                <h3>Recomendaciones de Mantenimiento</h3>
+            </div>
+            <div class="grafico-controls">
+                <button class="btn-filtrar" onclick="cargarRecomendacionesMantenimiento()">
+                    <i class="fas fa-search"></i>
+                    Generar Recomendaciones
+                </button>
+            </div>
         </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="recomendacionesBaja">-</div>
-            <div class="estadistica-label">Prioridad Baja</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="ahorroEstimado">-</div>
-            <div class="estadistica-label">Ahorro Estimado</div>
+        <div id="recomendacionesMantenimiento">
+            <div class="loading">Generando recomendaciones de mantenimiento...</div>
         </div>
     </div>
 </div>
@@ -124,39 +105,43 @@
         let chartPatrones = null;
 
         $(document).ready(function() {
-            // Cargar espacios
-            cargarEspacios();
-            
             // Cargar recomendaciones iniciales
             cargarRecomendacionesHorarios();
             cargarRecomendacionesEquipamiento();
             cargarRecomendacionesMantenimiento();
             cargarGraficoPatrones();
+            
+            // Actualizar resumen después de cargar todo
+            setTimeout(actualizarResumen, 2000);
         });
 
-        function cargarEspacios() {
-            // Placeholder para cargar espacios desde el servidor
-            $('#espacioHorarios').append('<option value="1">Cancha de Fútbol</option>');
-            $('#espacioHorarios').append('<option value="2">Cancha de Baloncesto</option>');
-            $('#espacioHorarios').append('<option value="3">Gimnasio</option>');
-            $('#espacioHorarios').append('<option value="4">Piscina</option>');
-        }
-
         function cargarRecomendacionesHorarios() {
-            const idEspacio = $('#espacioHorarios').val();
             $('#recomendacionesHorarios').html('<div class="loading">Generando recomendaciones de horarios...</div>');
             
-            $.get('@Url.Action("RecomendacionesHorarios")', {
-                idEspacio: idEspacio || null
-            }, function(response) {
-                if (response.success) {
-                    mostrarRecomendacionesHorarios(response.data);
-                } else {
-                    $('#recomendacionesHorarios').html('<div class="error-message">Error al generar recomendaciones</div>');
-                }
-            }).fail(function() {
-                $('#recomendacionesHorarios').html('<div class="error-message">Error al generar recomendaciones</div>');
-            });
+            // Simular datos de ejemplo
+            setTimeout(function() {
+                const datosEjemplo = {
+                    HorariosDemandados: [
+                        { DiaSemana: 'Lunes', HoraInicio: 8, Cantidad: 15, TasaExito: 95 },
+                        { DiaSemana: 'Martes', HoraInicio: 14, Cantidad: 12, TasaExito: 92 },
+                        { DiaSemana: 'Miércoles', HoraInicio: 16, Cantidad: 18, TasaExito: 88 },
+                        { DiaSemana: 'Jueves', HoraInicio: 10, Cantidad: 14, TasaExito: 90 },
+                        { DiaSemana: 'Viernes', HoraInicio: 18, Cantidad: 20, TasaExito: 85 }
+                    ],
+                    HorariosMenosDemandados: [
+                        { DiaSemana: 'Lunes', HoraInicio: 6, Cantidad: 2, TasaExito: 100 },
+                        { DiaSemana: 'Martes', HoraInicio: 20, Cantidad: 3, TasaExito: 95 },
+                        { DiaSemana: 'Miércoles', HoraInicio: 7, Cantidad: 1, TasaExito: 100 },
+                        { DiaSemana: 'Jueves', HoraInicio: 21, Cantidad: 4, TasaExito: 90 },
+                        { DiaSemana: 'Viernes', HoraInicio: 5, Cantidad: 1, TasaExito: 100 }
+                    ],
+                    Recomendaciones: [
+                        { Tipo: 'Horario', Prioridad: 'Alta', Descripcion: 'Considerar extender horarios matutinos', Beneficio: 'Aumentar disponibilidad' },
+                        { Tipo: 'Horario', Prioridad: 'Media', Descripcion: 'Optimizar horarios vespertinos', Beneficio: 'Mejorar distribución' }
+                    ]
+                };
+                mostrarRecomendacionesHorarios(datosEjemplo);
+            }, 1000);
         }
 
         function mostrarRecomendacionesHorarios(datos) {
@@ -209,15 +194,28 @@
         function cargarRecomendacionesEquipamiento() {
             $('#recomendacionesEquipamiento').html('<div class="loading">Generando recomendaciones de equipamiento...</div>');
             
-            $.get('@Url.Action("RecomendacionesEquipamiento")', function(response) {
-                if (response.success) {
-                    mostrarRecomendacionesEquipamiento(response.data);
-                } else {
-                    $('#recomendacionesEquipamiento').html('<div class="error-message">Error al generar recomendaciones</div>');
-                }
-            }).fail(function() {
-                $('#recomendacionesEquipamiento').html('<div class="error-message">Error al generar recomendaciones</div>');
-            });
+            // Simular datos de ejemplo
+            setTimeout(function() {
+                const datosEjemplo = {
+                    MotivosFrecuentes: [
+                        { Motivo: 'Clase de Educación Física', Cantidad: 45, TasaDevolucion: 95 },
+                        { Motivo: 'Práctica Deportiva', Cantidad: 32, TasaDevolucion: 88 },
+                        { Motivo: 'Competencia', Cantidad: 18, TasaDevolucion: 92 },
+                        { Motivo: 'Recreación', Cantidad: 12, TasaDevolucion: 85 }
+                    ],
+                    TiemposPorMotivo: [
+                        { Motivo: 'Clase de Educación Física', TiempoPromedio: 2.5, Cantidad: 45 },
+                        { Motivo: 'Práctica Deportiva', TiempoPromedio: 3.2, Cantidad: 32 },
+                        { Motivo: 'Competencia', TiempoPromedio: 1.8, Cantidad: 18 },
+                        { Motivo: 'Recreación', TiempoPromedio: 4.1, Cantidad: 12 }
+                    ],
+                    Recomendaciones: [
+                        { Tipo: 'Equipamiento', Prioridad: 'Alta', Descripcion: 'Aumentar stock de balones de fútbol', Beneficio: 'Reducir conflictos' },
+                        { Tipo: 'Equipamiento', Prioridad: 'Media', Descripcion: 'Adquirir más raquetas de tenis', Beneficio: 'Mejorar disponibilidad' }
+                    ]
+                };
+                mostrarRecomendacionesEquipamiento(datosEjemplo);
+            }, 1200);
         }
 
         function mostrarRecomendacionesEquipamiento(datos) {
@@ -268,15 +266,22 @@
         function cargarRecomendacionesMantenimiento() {
             $('#recomendacionesMantenimiento').html('<div class="loading">Generando recomendaciones de mantenimiento...</div>');
             
-            $.get('@Url.Action("RecomendacionesMantenimiento")', function(response) {
-                if (response.success) {
-                    mostrarRecomendacionesMantenimiento(response.data);
-                } else {
-                    $('#recomendacionesMantenimiento').html('<div class="error-message">Error al generar recomendaciones</div>');
-                }
-            }).fail(function() {
-                $('#recomendacionesMantenimiento').html('<div class="error-message">Error al generar recomendaciones</div>');
-            });
+            // Simular datos de ejemplo
+            setTimeout(function() {
+                const datosEjemplo = {
+                    EquipamientoUtilizado: [
+                        { Equipamiento: 'Balones de Fútbol', CantidadUsos: 45, TiempoTotalUso: 112.5, TasaDesgaste: 0.15 },
+                        { Equipamiento: 'Raquetas de Tenis', CantidadUsos: 32, TiempoTotalUso: 102.4, TasaDesgaste: 0.22 },
+                        { Equipamiento: 'Pelotas de Basketball', CantidadUsos: 28, TiempoTotalUso: 89.6, TasaDesgaste: 0.18 },
+                        { Equipamiento: 'Conos de Entrenamiento', CantidadUsos: 38, TiempoTotalUso: 76.0, TasaDesgaste: 0.12 }
+                    ],
+                    Recomendaciones: [
+                        { Tipo: 'Mantenimiento', Prioridad: 'Alta', Equipamiento: 'Balones de Fútbol', Descripcion: 'Revisar presión y estado general', AccionRecomendada: 'Calibración urgente' },
+                        { Tipo: 'Mantenimiento', Prioridad: 'Media', Equipamiento: 'Raquetas de Tenis', Descripcion: 'Verificar tensión de cuerdas', AccionRecomendada: 'Reencordado programado' }
+                    ]
+                };
+                mostrarRecomendacionesMantenimiento(datosEjemplo);
+            }, 1500);
         }
 
         function mostrarRecomendacionesMantenimiento(datos) {
@@ -357,16 +362,46 @@
                 '&formato=excel', '_blank');
         }
 
+        function exportarGraficoComoImagen(canvasId, nombreArchivo) {
+            const canvas = document.getElementById(canvasId).querySelector('canvas');
+            if (!canvas) {
+                alert('No hay gráfico disponible para exportar');
+                return;
+            }
+
+            // Crear un canvas temporal con mayor resolución
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Configurar dimensiones para mejor calidad
+            tempCanvas.width = canvas.width * 2;
+            tempCanvas.height = canvas.height * 2;
+            
+            // Escalar el contenido
+            tempCtx.scale(2, 2);
+            tempCtx.drawImage(canvas, 0, 0);
+            
+            // Convertir a imagen JPG
+            const dataURL = tempCanvas.toDataURL('image/jpeg', 0.9);
+            
+            // Crear enlace de descarga
+            const link = document.createElement('a');
+            link.download = nombreArchivo + '.jpg';
+            link.href = dataURL;
+            
+            // Simular click para descargar
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         // Actualizar resumen de recomendaciones
         function actualizarResumen() {
             $('#totalRecomendaciones').text('12');
             $('#recomendacionesAlta').text('3');
             $('#recomendacionesMedia').text('5');
             $('#recomendacionesBaja').text('4');
-            $('#ahorroEstimado').text('$2,500');
+            $('#ahorroEstimado').text('₡1,250,000');
         }
-
-        // Llamar a actualizar resumen después de cargar todas las recomendaciones
-        setTimeout(actualizarResumen, 2000);
     </script>
 }
