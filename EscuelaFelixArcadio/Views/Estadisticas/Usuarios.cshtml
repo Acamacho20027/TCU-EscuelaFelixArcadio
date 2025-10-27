@@ -20,134 +20,6 @@
         <div class="header-actions"></div>
     </div>
 
-    <!-- Filtros Avanzados -->
-    <div class="filtros-avanzados">
-        <h3>Filtros Avanzados</h3>
-        
-        <!-- Barra de búsqueda -->
-        <div class="barra-busqueda">
-            <input type="text" placeholder="Buscar por usuario, nombre, actividad..." />
-        </div>
-        
-        <!-- Primera fila de filtros -->
-        <div class="filtros-fila">
-            <div class="filtro-grupo">
-                <label class="filtro-label">Tipo de Usuario</label>
-                <select class="filtro-input">
-                    <option>Todos los tipos</option>
-                    <option>Estudiante</option>
-                    <option>Profesor</option>
-                    <option>Administrador</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Nivel de Actividad</label>
-                <select class="filtro-input">
-                    <option>Todos los niveles</option>
-                    <option>Alto</option>
-                    <option>Medio</option>
-                    <option>Bajo</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Período</label>
-                <select class="filtro-input">
-                    <option>Todos los períodos</option>
-                    <option>Última semana</option>
-                    <option>Último mes</option>
-                    <option>Último año</option>
-                </select>
-            </div>
-        </div>
-        
-        <!-- Segunda fila de filtros -->
-        <div class="filtros-fila-segunda">
-            <div class="filtro-grupo">
-                <label class="filtro-label">Fecha Inicio</label>
-                <input type="date" class="filtro-input" />
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Fecha Fin</label>
-                <input type="date" class="filtro-input" />
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Ordenar por:</label>
-                <select class="filtro-input">
-                    <option>Actividad</option>
-                    <option>Nombre</option>
-                    <option>Fecha</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Orden:</label>
-                <select class="filtro-input">
-                    <option>Ascendente</option>
-                    <option>Descendente</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Mostrar:</label>
-                <select class="filtro-input">
-                    <option>10</option>
-                    <option>25</option>
-                    <option>50</option>
-                </select>
-            </div>
-            <button class="btn-limpiar-filtros" onclick="limpiarFiltros()">
-                <i class="fas fa-times"></i>
-                Limpiar Filtros
-            </button>
-        </div>
-    </div>
-
-    <!-- Gráfico de Usuarios -->
-    <div class="graficos-container">
-        <div class="grafico-header">
-            <h3 class="grafico-title">Análisis de Actividad de Usuarios</h3>
-            <div class="grafico-controls">
-                <button class="btn-exportar" onclick="exportarDatos('usuarios')">
-                    <i class="fas fa-download"></i>
-                    Exportar
-                </button>
-            </div>
-        </div>
-        <div class="grafico-canvas" id="graficoUsuarios">
-            <div class="loading">Cargando análisis de usuarios...</div>
-        </div>
-    </div>
-
-    <!-- Tabla de Usuarios Más Activos -->
-    <div class="tabla-container">
-        <div class="tabla-header">
-            <h3 class="tabla-title">Usuarios Más Activos</h3>
-            <div class="tabla-actions">
-                <button class="btn-exportar" onclick="exportarDatos('activos')">
-                    <i class="fas fa-download"></i>
-                    Exportar
-                </button>
-            </div>
-        </div>
-        <div id="tablaUsuariosActivos">
-            <div class="loading">Cargando usuarios más activos...</div>
-        </div>
-    </div>
-
-    <!-- Análisis de Comportamiento -->
-    <div class="tabla-container">
-        <div class="tabla-header">
-            <h3 class="tabla-title">Análisis de Comportamiento</h3>
-            <div class="tabla-actions">
-                <button class="btn-exportar" onclick="exportarDatos('comportamiento')">
-                    <i class="fas fa-download"></i>
-                    Exportar
-                </button>
-            </div>
-        </div>
-        <div id="tablaComportamiento">
-            <div class="loading">Cargando análisis de comportamiento...</div>
-        </div>
-    </div>
-
     <!-- Estadísticas de Usuarios -->
     <div class="estadisticas-grid" id="estadisticasUsuarios">
         <div class="estadistica-card">
@@ -171,10 +43,59 @@
             <div class="estadistica-label">Usuarios Sancionados</div>
         </div>
     </div>
+
+    <!-- Tabla de Usuarios Más Activos -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Usuarios Más Activos</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarUsuariosActivos()">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaUsuariosActivos">
+            <div class="loading">Cargando usuarios más activos...</div>
+        </div>
+    </div>
+
+    <!-- Gráfico de Usuarios -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Análisis de Actividad de Usuarios</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarGraficoUsuarios()">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoUsuarios">
+            <div class="loading">Cargando análisis de usuarios...</div>
+        </div>
+    </div>
+
+    <!-- Análisis de Comportamiento -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Análisis de Comportamiento</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarComportamiento()">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaComportamiento">
+            <div class="loading">Cargando análisis de comportamiento...</div>
+        </div>
+    </div>
 </div>
 
 @section scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         let chartUsuarios = null;
 
@@ -184,20 +105,13 @@
             const fechaInicio = new Date();
             fechaInicio.setDate(fechaInicio.getDate() - 30);
             
-            $('#fechaInicio').val(fechaInicio.toISOString().split('T')[0]);
-            $('#fechaFin').val(fechaFin.toISOString().split('T')[0]);
+            const fechaInicioStr = fechaInicio.toISOString().split('T')[0];
+            const fechaFinStr = fechaFin.toISOString().split('T')[0];
             
             // Cargar datos iniciales
-            aplicarFiltros();
+            cargarDatosUsuarios(fechaInicioStr, fechaFinStr);
+            cargarGraficoUsuarios(fechaInicioStr, fechaFinStr);
         });
-
-        function aplicarFiltros() {
-            const fechaInicio = $('#fechaInicio').val();
-            const fechaFin = $('#fechaFin').val();
-            
-            cargarDatosUsuarios(fechaInicio, fechaFin);
-            cargarGraficoUsuarios(fechaInicio, fechaFin);
-        }
 
         function cargarDatosUsuarios(fechaInicio, fechaFin) {
             $('#tablaUsuariosActivos').html('<div class="loading">Cargando usuarios más activos...</div>');
@@ -360,15 +274,60 @@
             $('#usuariosSancionados').text(usuariosSancionados);
         }
 
-        function exportarDatos(tipo) {
-            const fechaInicio = $('#fechaInicio').val();
-            const fechaFin = $('#fechaFin').val();
-            
-            window.open('@Url.Action("ExportarDatos")' + 
-                '?tipoDatos=' + tipo + 
-                '&fechaInicio=' + fechaInicio + 
-                '&fechaFin=' + fechaFin + 
-                '&formato=excel', '_blank');
+        function exportarGraficoUsuarios() {
+            const canvas = document.querySelector('#graficoUsuarios canvas');
+            if (canvas) {
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                const scale = 2;
+                tempCanvas.width = canvas.width * scale;
+                tempCanvas.height = canvas.height * scale;
+                tempCtx.scale(scale, scale);
+                
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                tempCanvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'analisis_usuarios_' + new Date().toISOString().split('T')[0] + '.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 'image/jpeg', 0.9);
+            }
+        }
+
+        function exportarUsuariosActivos() {
+            const tabla = document.getElementById('tablaUsuariosActivos');
+            if (tabla) {
+                html2canvas(tabla).then(canvas => {
+                    const url = canvas.toDataURL('image/jpeg', 0.9);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'usuarios_activos_' + new Date().toISOString().split('T')[0] + '.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+            }
+        }
+
+        function exportarComportamiento() {
+            const tabla = document.getElementById('tablaComportamiento');
+            if (tabla) {
+                html2canvas(tabla).then(canvas => {
+                    const url = canvas.toDataURL('image/jpeg', 0.9);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'analisis_comportamiento_' + new Date().toISOString().split('T')[0] + '.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+            }
         }
     </script>
 }

@@ -20,84 +20,27 @@
         <div class="header-actions"></div>
     </div>
 
-    <!-- Filtros Avanzados -->
-    <div class="filtros-avanzados">
-        <h3>Filtros Avanzados</h3>
-        
-        <!-- Barra de búsqueda -->
-        <div class="barra-busqueda">
-            <input type="text" placeholder="Buscar por análisis, período, métrica..." />
+    <!-- Estadísticas Comparativas -->
+    <div class="estadisticas-grid" id="estadisticasComparativas">
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="diferenciaTotal">-</div>
+            <div class="estadistica-label">Diferencia Total</div>
         </div>
-        
-        <!-- Primera fila de filtros -->
-        <div class="filtros-fila">
-            <div class="filtro-grupo">
-                <label class="filtro-label">Tipo de Análisis</label>
-                <select class="filtro-input">
-                    <option>Todos los tipos</option>
-                    <option>Préstamos</option>
-                    <option>Espacios</option>
-                    <option>Usuarios</option>
-                    <option>Inventario</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Métrica</label>
-                <select class="filtro-input">
-                    <option>Todas las métricas</option>
-                    <option>Cantidad</option>
-                    <option>Frecuencia</option>
-                    <option>Eficiencia</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Período</label>
-                <select class="filtro-input">
-                    <option>Todos los períodos</option>
-                    <option>Último mes</option>
-                    <option>Últimos 3 meses</option>
-                    <option>Último año</option>
-                </select>
-            </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="porcentajeCambio">-</div>
+            <div class="estadistica-label">% Cambio</div>
         </div>
-        
-        <!-- Segunda fila de filtros -->
-        <div class="filtros-fila-segunda">
-            <div class="filtro-grupo">
-                <label class="filtro-label">Fecha Inicio</label>
-                <input type="date" class="filtro-input" />
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Fecha Fin</label>
-                <input type="date" class="filtro-input" />
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Ordenar por:</label>
-                <select class="filtro-input">
-                    <option>Fecha</option>
-                    <option>Variación</option>
-                    <option>Tipo</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Orden:</label>
-                <select class="filtro-input">
-                    <option>Ascendente</option>
-                    <option>Descendente</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Mostrar:</label>
-                <select class="filtro-input">
-                    <option>10</option>
-                    <option>25</option>
-                    <option>50</option>
-                </select>
-            </div>
-            <button class="btn-limpiar-filtros" onclick="limpiarFiltros()">
-                <i class="fas fa-times"></i>
-                Limpiar Filtros
-            </button>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="tendencia">-</div>
+            <div class="estadistica-label">Tendencia</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="significancia">-</div>
+            <div class="estadistica-label">Significancia</div>
+        </div>
+        <div class="estadistica-card">
+            <div class="estadistica-valor" id="confianza">-</div>
+            <div class="estadistica-label">Nivel Confianza</div>
         </div>
     </div>
 
@@ -149,43 +92,9 @@
     <div class="tabla-container">
         <div class="tabla-header">
             <h3 class="tabla-title">Variaciones Temporales</h3>
-            <div class="tabla-actions">
-                <select id="periodoVariacion" class="filtro-input">
-                    <option value="mensual">Mensual</option>
-                    <option value="semanal">Semanal</option>
-                </select>
-                <button class="btn-filtrar" onclick="cargarVariaciones()">
-                    <i class="fas fa-chart-line"></i>
-                    Analizar
-                </button>
-            </div>
         </div>
         <div id="tablaVariaciones">
-            <div class="loading">Selecciona tipo de análisis para ver variaciones</div>
-        </div>
-    </div>
-
-    <!-- Estadísticas Comparativas -->
-    <div class="estadisticas-grid" id="estadisticasComparativas">
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="diferenciaTotal">-</div>
-            <div class="estadistica-label">Diferencia Total</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="porcentajeCambio">-</div>
-            <div class="estadistica-label">% Cambio</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="tendencia">-</div>
-            <div class="estadistica-label">Tendencia</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="significancia">-</div>
-            <div class="estadistica-label">Significancia</div>
-        </div>
-        <div class="estadistica-card">
-            <div class="estadistica-valor" id="confianza">-</div>
-            <div class="estadistica-label">Nivel Confianza</div>
+            <div class="loading">Cargando variaciones...</div>
         </div>
     </div>
 </div>
@@ -206,25 +115,31 @@
             const fechaInicio2 = new Date();
             fechaInicio2.setDate(fechaInicio2.getDate() - 60);
             
-            $('#periodo1Inicio').val(fechaInicio2.toISOString().split('T')[0]);
-            $('#periodo1Fin').val(fechaFin2.toISOString().split('T')[0]);
-            $('#periodo2Inicio').val(fechaInicio.toISOString().split('T')[0]);
-            $('#periodo2Fin').val(fechaFin.toISOString().split('T')[0]);
+            // Comparar períodos con fechas por defecto
+            compararPeriodos('prestamos', fechaInicio2.toISOString().split('T')[0], fechaFin2.toISOString().split('T')[0], 
+                            fechaInicio.toISOString().split('T')[0], fechaFin.toISOString().split('T')[0]);
             
-            // Comparar períodos por defecto
-            compararPeriodos();
+            // Cargar variaciones temporales automáticamente
+            cargarVariaciones();
         });
 
-        function compararPeriodos() {
-            const tipoAnalisis = $('#tipoAnalisis').val();
-            const periodo1Inicio = $('#periodo1Inicio').val();
-            const periodo1Fin = $('#periodo1Fin').val();
-            const periodo2Inicio = $('#periodo2Inicio').val();
-            const periodo2Fin = $('#periodo2Fin').val();
+        function compararPeriodos(tipoAnalisis = 'prestamos', periodo1Inicio = null, periodo1Fin = null, periodo2Inicio = null, periodo2Fin = null) {
+            // Si no se proporcionan fechas, usar valores por defecto
+            if (!periodo1Inicio) {
+                const fechaFin2 = new Date();
+                fechaFin2.setDate(fechaFin2.getDate() - 30);
+                const fechaInicio2 = new Date();
+                fechaInicio2.setDate(fechaInicio2.getDate() - 60);
+                periodo1Inicio = fechaInicio2.toISOString().split('T')[0];
+                periodo1Fin = fechaFin2.toISOString().split('T')[0];
+            }
             
-            if (!periodo1Inicio || !periodo1Fin || !periodo2Inicio || !periodo2Fin) {
-                alert('Por favor selecciona todas las fechas');
-                return;
+            if (!periodo2Inicio) {
+                const fechaFin = new Date();
+                const fechaInicio = new Date();
+                fechaInicio.setDate(fechaInicio.getDate() - 30);
+                periodo2Inicio = fechaInicio.toISOString().split('T')[0];
+                periodo2Fin = fechaFin.toISOString().split('T')[0];
             }
             
             $('#diferenciasContenido').html('<div class="loading">Comparando períodos...</div>');
@@ -238,9 +153,9 @@
                 periodo2Fin: periodo2Fin
             }, function(response) {
                 if (response.success) {
-                    mostrarComparacion(response.data);
-                    crearGraficoComparativo(response.data);
-                    actualizarEstadisticasComparativas(response.data);
+                    mostrarComparacion(response.data, tipoAnalisis);
+                    crearGraficoComparativo(response.data, tipoAnalisis);
+                    actualizarEstadisticasComparativas(response.data, tipoAnalisis);
                 } else {
                     $('#diferenciasContenido').html('<div class="error-message">Error al comparar períodos</div>');
                 }
@@ -249,37 +164,41 @@
             });
         }
 
-        function mostrarComparacion(datos) {
+        function mostrarComparacion(datos, tipoAnalisis = 'prestamos') {
+            if (!datos || !datos.Periodo1 || !datos.Periodo2) {
+                $('#diferenciasContenido').html('<div class="error-message">No hay datos disponibles</div>');
+                return;
+            }
+            
             // Actualizar fechas
             $('#periodo1Fecha').text(datos.Periodo1.Inicio + ' - ' + datos.Periodo1.Fin);
             $('#periodo2Fecha').text(datos.Periodo2.Inicio + ' - ' + datos.Periodo2.Fin);
             
             // Actualizar valores según el tipo de análisis
-            const tipoAnalisis = $('#tipoAnalisis').val();
-            let valor1, valor2, label1, label2;
+            let valor1 = 0, valor2 = 0, label1 = '', label2 = '';
             
             switch (tipoAnalisis) {
                 case 'prestamos':
-                    valor1 = datos.Periodo1.TotalPrestamos;
-                    valor2 = datos.Periodo2.TotalPrestamos;
+                    valor1 = datos.Periodo1.TotalPrestamos || 0;
+                    valor2 = datos.Periodo2.TotalPrestamos || 0;
                     label1 = 'Total Préstamos';
                     label2 = 'Total Préstamos';
                     break;
                 case 'espacios':
-                    valor1 = datos.Periodo1.TotalReservas;
-                    valor2 = datos.Periodo2.TotalReservas;
+                    valor1 = datos.Periodo1.TotalReservas || 0;
+                    valor2 = datos.Periodo2.TotalReservas || 0;
                     label1 = 'Total Reservas';
                     label2 = 'Total Reservas';
                     break;
                 case 'usuarios':
-                    valor1 = datos.Periodo1.UsuariosUnicos;
-                    valor2 = datos.Periodo2.UsuariosUnicos;
+                    valor1 = datos.Periodo1.UsuariosUnicos || 0;
+                    valor2 = datos.Periodo2.UsuariosUnicos || 0;
                     label1 = 'Usuarios Únicos';
                     label2 = 'Usuarios Únicos';
                     break;
                 case 'inventario':
-                    valor1 = datos.Periodo1.TotalItems;
-                    valor2 = datos.Periodo2.TotalItems;
+                    valor1 = datos.Periodo1.TotalItems || 0;
+                    valor2 = datos.Periodo2.TotalItems || 0;
                     label1 = 'Total Items';
                     label2 = 'Total Items';
                     break;
@@ -292,23 +211,30 @@
             
             // Mostrar diferencias
             let html = '';
-            for (const [key, value] of Object.entries(datos.Diferencias)) {
-                if (typeof value === 'number') {
-                    const esPorcentaje = key.includes('Porc');
-                    const valorFormateado = esPorcentaje ? value.toFixed(1) + '%' : value;
-                    const clase = value > 0 ? 'positiva' : value < 0 ? 'negativa' : '';
-                    
-                    html += `<div class="diferencia-item">
-                        <div class="diferencia-label">${key.replace(/([A-Z])/g, ' $1').trim()}</div>
-                        <div class="diferencia-valor ${clase}">${valorFormateado}</div>
-                    </div>`;
+            if (datos.Diferencias) {
+                for (const [key, value] of Object.entries(datos.Diferencias)) {
+                    if (typeof value === 'number') {
+                        const esPorcentaje = key.includes('Porc');
+                        const valorFormateado = esPorcentaje ? value.toFixed(1) + '%' : value;
+                        const clase = value > 0 ? 'positiva' : value < 0 ? 'negativa' : '';
+                        
+                        html += `<div class="diferencia-item">
+                            <div class="diferencia-label">${key.replace(/([A-Z])/g, ' $1').trim()}</div>
+                            <div class="diferencia-valor ${clase}">${valorFormateado}</div>
+                        </div>`;
+                    }
                 }
             }
             
             $('#diferenciasContenido').html(html);
         }
 
-        function crearGraficoComparativo(datos) {
+        function crearGraficoComparativo(datos, tipoAnalisis = 'prestamos') {
+            if (!datos || !datos.Periodo1 || !datos.Periodo2) {
+                $('#graficoComparativo').html('<div class="error-message">No hay datos disponibles para el gráfico</div>');
+                return;
+            }
+            
             const ctx = document.createElement('canvas');
             $('#graficoComparativo').html(ctx);
             
@@ -316,33 +242,32 @@
                 chartComparativo.destroy();
             }
             
-            const tipoAnalisis = $('#tipoAnalisis').val();
             let label1, label2, valor1, valor2;
             
             switch (tipoAnalisis) {
                 case 'prestamos':
                     label1 = 'Préstamos P1';
                     label2 = 'Préstamos P2';
-                    valor1 = datos.Periodo1.TotalPrestamos;
-                    valor2 = datos.Periodo2.TotalPrestamos;
+                    valor1 = datos.Periodo1.TotalPrestamos || 0;
+                    valor2 = datos.Periodo2.TotalPrestamos || 0;
                     break;
                 case 'espacios':
                     label1 = 'Reservas P1';
                     label2 = 'Reservas P2';
-                    valor1 = datos.Periodo1.TotalReservas;
-                    valor2 = datos.Periodo2.TotalReservas;
+                    valor1 = datos.Periodo1.TotalReservas || 0;
+                    valor2 = datos.Periodo2.TotalReservas || 0;
                     break;
                 case 'usuarios':
                     label1 = 'Usuarios P1';
                     label2 = 'Usuarios P2';
-                    valor1 = datos.Periodo1.UsuariosUnicos;
-                    valor2 = datos.Periodo2.UsuariosUnicos;
+                    valor1 = datos.Periodo1.UsuariosUnicos || 0;
+                    valor2 = datos.Periodo2.UsuariosUnicos || 0;
                     break;
                 case 'inventario':
                     label1 = 'Items P1';
                     label2 = 'Items P2';
-                    valor1 = datos.Periodo1.TotalItems;
-                    valor2 = datos.Periodo2.TotalItems;
+                    valor1 = datos.Periodo1.TotalItems || 0;
+                    valor2 = datos.Periodo2.TotalItems || 0;
                     break;
             }
             
@@ -353,21 +278,94 @@
                     datasets: [{
                         label: 'Comparación',
                         data: [valor1, valor2],
-                        backgroundColor: ['#10b981', '#3b82f6']
+                        backgroundColor: ['#10b981', '#3b82f6'],
+                        borderColor: ['#0ea47e', '#2563eb'],
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        barThickness: 'flex',
+                        maxBarThickness: 100
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 20,
+                            bottom: 10
+                        }
+                    },
                     plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15,
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                }
+                            }
+                        },
                         title: {
                             display: true,
-                            text: `Comparación de ${tipoAnalisis.charAt(0).toUpperCase() + tipoAnalisis.slice(1)}`
+                            text: `Comparación de ${tipoAnalisis.charAt(0).toUpperCase() + tipoAnalisis.slice(1)}`,
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                top: 10,
+                                bottom: 20
+                            },
+                            color: '#1f2937'
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y}`;
+                                }
+                            }
                         }
                     },
                     scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            }
+                        },
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                lineWidth: 1
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                },
+                                callback: function(value) {
+                                    return value;
+                                }
+                            }
                         }
                     }
                 }
@@ -375,8 +373,8 @@
         }
 
         function cargarVariaciones() {
-            const tipoAnalisis = $('#tipoAnalisis').val();
-            const periodo = $('#periodoVariacion').val();
+            const tipoAnalisis = 'prestamos';
+            const periodo = 'mensual';
             
             $('#tablaVariaciones').html('<div class="loading">Cargando variaciones temporales...</div>');
             
@@ -395,43 +393,52 @@
         }
 
         function mostrarVariaciones(datos) {
-            let html = '<table class="tabla-datos"><thead><tr><th>Período</th><th>Valor</th><th>Variación</th><th>Tendencia</th></tr></thead><tbody>';
+            if (!datos || !Array.isArray(datos) || datos.length === 0) {
+                $('#tablaVariaciones').html('<div class="error-message">No hay datos de variaciones disponibles</div>');
+                return;
+            }
             
-            datos.forEach(d => {
+            let html = '<div style="overflow-x: auto;"><table class="tabla-datos" style="width: 100%; border-collapse: collapse; font-size: 14px;"><thead><tr style="background-color: #f8f9fa; border-bottom: 2px solid #e0e0e0;"><th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Período</th><th style="padding: 12px; text-align: center; font-weight: 600; color: #333;">Valor</th><th style="padding: 12px; text-align: center; font-weight: 600; color: #333;">Variación</th><th style="padding: 12px; text-align: center; font-weight: 600; color: #333;">Tendencia</th></tr></thead><tbody>';
+            
+            datos.forEach((d, index) => {
                 const claseVariacion = d.Variacion > 0 ? 'positiva' : d.Variacion < 0 ? 'negativa' : '';
-                html += `<tr>
-                    <td>${d.Periodo}</td>
-                    <td>${d.Valor}</td>
-                    <td class="${claseVariacion}">${d.Variacion.toFixed(1)}%</td>
-                    <td>${d.Tendencia}</td>
+                const badgeClass = d.Tendencia === 'Creciente' ? 'badge-success' : d.Tendencia === 'Decreciente' ? 'badge-danger' : 'badge-info';
+                const bgColor = index % 2 === 0 ? '#ffffff' : '#f8f9fa';
+                
+                html += `<tr style="background-color: ${bgColor}; border-bottom: 1px solid #e0e0e0;">
+                    <td style="padding: 12px; font-weight: 500; color: #495057;">${d.Periodo || '-'}</td>
+                    <td style="padding: 12px; text-align: center; font-weight: 600; color: #333;">${d.Valor || 0}</td>
+                    <td style="padding: 12px; text-align: center;"><span class="${claseVariacion}" style="color: ${claseVariacion === 'positiva' ? '#10b981' : claseVariacion === 'negativa' ? '#ef4444' : '#6b7280'}; font-weight: 600;">${d.Variacion ? (d.Variacion > 0 ? '+' : '') + d.Variacion.toFixed(1) : '0.0'}%</td>
+                    <td style="padding: 12px; text-align: center;"><span style="background-color: ${d.Tendencia === 'Creciente' ? '#dcfce7' : d.Tendencia === 'Decreciente' ? '#fee2e2' : '#e0f2fe'}; color: ${d.Tendencia === 'Creciente' ? '#16a34a' : d.Tendencia === 'Decreciente' ? '#dc2626' : '#0284c7'}; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">${d.Tendencia || 'Estable'}</span></td>
                 </tr>`;
             });
             
-            html += '</tbody></table>';
+            html += '</tbody></table></div>';
             $('#tablaVariaciones').html(html);
         }
 
-        function actualizarEstadisticasComparativas(datos) {
-            const tipoAnalisis = $('#tipoAnalisis').val();
-            let diferenciaTotal, porcentajeCambio;
+        function actualizarEstadisticasComparativas(datos, tipoAnalisis = 'prestamos') {
+            let diferenciaTotal = 0, porcentajeCambio = 0;
             
-            switch (tipoAnalisis) {
-                case 'prestamos':
-                    diferenciaTotal = datos.Diferencias.TotalPrestamos;
-                    porcentajeCambio = datos.Diferencias.TotalPrestamosPorc;
-                    break;
-                case 'espacios':
-                    diferenciaTotal = datos.Diferencias.TotalReservas;
-                    porcentajeCambio = datos.Diferencias.TotalReservasPorc;
-                    break;
-                case 'usuarios':
-                    diferenciaTotal = datos.Diferencias.UsuariosUnicos;
-                    porcentajeCambio = datos.Diferencias.UsuariosUnicosPorc;
-                    break;
-                case 'inventario':
-                    diferenciaTotal = datos.Diferencias.TotalItems;
-                    porcentajeCambio = datos.Diferencias.TotalItemsPorc;
-                    break;
+            if (datos && datos.Diferencias) {
+                switch (tipoAnalisis) {
+                    case 'prestamos':
+                        diferenciaTotal = datos.Diferencias.TotalPrestamos || 0;
+                        porcentajeCambio = datos.Diferencias.TotalPrestamosPorc || 0;
+                        break;
+                    case 'espacios':
+                        diferenciaTotal = datos.Diferencias.TotalReservas || 0;
+                        porcentajeCambio = datos.Diferencias.TotalReservasPorc || 0;
+                        break;
+                    case 'usuarios':
+                        diferenciaTotal = datos.Diferencias.UsuariosUnicos || 0;
+                        porcentajeCambio = datos.Diferencias.UsuariosUnicosPorc || 0;
+                        break;
+                    case 'inventario':
+                        diferenciaTotal = datos.Diferencias.TotalItems || 0;
+                        porcentajeCambio = datos.Diferencias.TotalItemsPorc || 0;
+                        break;
+                }
             }
             
             $('#diferenciaTotal').text(diferenciaTotal);
@@ -442,17 +449,44 @@
         }
 
         function exportarDatos(tipo) {
-            const tipoAnalisis = $('#tipoAnalisis').val();
-            const periodo1Inicio = $('#periodo1Inicio').val();
-            const periodo1Fin = $('#periodo1Fin').val();
-            const periodo2Inicio = $('#periodo2Inicio').val();
-            const periodo2Fin = $('#periodo2Fin').val();
+            // Exportar como imagen JPG
+            let canvas = null;
+            let nombreArchivo = '';
             
-            window.open('@Url.Action("ExportarDatos")' + 
-                '?tipoDatos=' + tipo + 
-                '&fechaInicio=' + periodo1Inicio + 
-                '&fechaFin=' + periodo2Fin + 
-                '&formato=excel', '_blank');
+            const tipoAnalisis = 'prestamos';
+            
+            // Obtener el canvas del gráfico
+            if (chartComparativo && chartComparativo.canvas) {
+                canvas = chartComparativo.canvas;
+                nombreArchivo = `comparativo_${tipoAnalisis}_${new Date().getTime()}`;
+                
+                // Crear un canvas temporal con mayor resolución para mejor calidad
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Configurar dimensiones para mejor calidad (2x para alta resolución)
+                tempCanvas.width = canvas.width * 2;
+                tempCanvas.height = canvas.height * 2;
+                
+                // Escalar el contenido
+                tempCtx.scale(2, 2);
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                // Convertir a imagen JPG con alta calidad
+                const dataURL = tempCanvas.toDataURL('image/jpeg', 0.9);
+                
+                // Crear enlace de descarga
+                const link = document.createElement('a');
+                link.download = nombreArchivo + '.jpg';
+                link.href = dataURL;
+                
+                // Simular click para descargar
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert('No hay gráfico para exportar');
+            }
         }
     </script>
 }

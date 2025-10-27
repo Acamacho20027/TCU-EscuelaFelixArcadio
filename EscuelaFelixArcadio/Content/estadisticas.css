@@ -106,6 +106,10 @@
     border: 1px solid #e2e8f0;
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-align: center;
 }
 
 .dashboard-card::before {
@@ -125,16 +129,17 @@
 }
 
 .dashboard-card h3 {
+    margin: 0 0 1rem 0;
+    color: #1e293b;
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 1rem;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.75rem;
 }
 
-.card-icon {
+.dashboard-card .card-icon {
     font-size: 1.8rem;
     color: #8080FF;
     background: rgba(128, 128, 255, 0.1);
@@ -147,16 +152,19 @@
     justify-content: center;
 }
 
-.card-description {
+.dashboard-card .card-description {
     color: #64748b;
     font-size: 1rem;
     line-height: 1.6;
-    margin-bottom: 2rem;
+    margin-bottom: 20px;
+    flex-grow: 1;
+    text-align: center;
 }
 
-.card-action {
-    display: inline-flex;
+.dashboard-card .card-action {
+    display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     background: linear-gradient(135deg, #64748b, #475569);
     color: white;
@@ -167,12 +175,16 @@
     font-size: 0.95rem;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(100, 116, 139, 0.2);
+    width: fit-content;
+    margin: 0 auto;
+    margin-top: auto;
+    align-self: center;
 }
 
-.card-action:hover {
+.dashboard-card .card-action:hover {
     background: linear-gradient(135deg, #475569, #334155);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(100, 116, 139, 0.4);
     text-decoration: none;
     color: white;
 }
