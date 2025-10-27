@@ -20,152 +20,6 @@
         <div class="header-actions"></div>
     </div>
 
-    <!-- Filtros Avanzados -->
-    <div class="filtros-avanzados">
-        <h3>Filtros Avanzados</h3>
-        
-        <!-- Barra de búsqueda -->
-        <div class="barra-busqueda">
-            <input type="text" placeholder="Buscar por actividad, módulo, usuario..." />
-        </div>
-        
-        <!-- Primera fila de filtros -->
-        <div class="filtros-fila">
-            <div class="filtro-grupo">
-                <label class="filtro-label">Módulo</label>
-                <select class="filtro-input">
-                    <option>Todos los módulos</option>
-                    <option>Préstamos</option>
-                    <option>Espacios</option>
-                    <option>Inventario</option>
-                    <option>Usuarios</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Tipo de Actividad</label>
-                <select class="filtro-input">
-                    <option>Todos los tipos</option>
-                    <option>Creación</option>
-                    <option>Modificación</option>
-                    <option>Eliminación</option>
-                    <option>Consulta</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Nivel</label>
-                <select class="filtro-input">
-                    <option>Todos los niveles</option>
-                    <option>Info</option>
-                    <option>Warning</option>
-                    <option>Error</option>
-                </select>
-            </div>
-        </div>
-        
-        <!-- Segunda fila de filtros -->
-        <div class="filtros-fila-segunda">
-            <div class="filtro-grupo">
-                <label class="filtro-label">Fecha Inicio</label>
-                <input type="date" class="filtro-input" />
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Fecha Fin</label>
-                <input type="date" class="filtro-input" />
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Ordenar por:</label>
-                <select class="filtro-input">
-                    <option>Fecha</option>
-                    <option>Módulo</option>
-                    <option>Tipo</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Orden:</label>
-                <select class="filtro-input">
-                    <option>Ascendente</option>
-                    <option>Descendente</option>
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label class="filtro-label">Mostrar:</label>
-                <select class="filtro-input">
-                    <option>10</option>
-                    <option>25</option>
-                    <option>50</option>
-                </select>
-            </div>
-            <button class="btn-limpiar-filtros" onclick="limpiarFiltros()">
-                <i class="fas fa-times"></i>
-                Limpiar Filtros
-            </button>
-        </div>
-    </div>
-
-    <!-- Gráfico de Actividad General -->
-    <div class="graficos-container">
-        <div class="grafico-header">
-            <h3 class="grafico-title">Actividad General del Sistema</h3>
-            <div class="grafico-controls">
-                <button class="btn-exportar" onclick="exportarDatos('actividad')">
-                    <i class="fas fa-download"></i>
-                    Exportar
-                </button>
-            </div>
-        </div>
-        <div class="grafico-canvas" id="graficoActividad">
-            <div class="loading">Cargando gráfico de actividad...</div>
-        </div>
-    </div>
-
-    <!-- Heatmap de Actividad -->
-    <div class="graficos-container">
-        <div class="grafico-header">
-            <h3 class="grafico-title">Heatmap de Actividad</h3>
-            <div class="grafico-controls">
-                <button class="btn-exportar" onclick="exportarDatos('heatmap')">
-                    <i class="fas fa-download"></i>
-                    Exportar
-                </button>
-            </div>
-        </div>
-        <div class="grafico-canvas" id="graficoHeatmap">
-            <div class="loading">Cargando heatmap de actividad...</div>
-        </div>
-    </div>
-
-    <!-- Análisis de Patrones de Actividad -->
-    <div class="tabla-container">
-        <div class="tabla-header">
-            <h3 class="tabla-title">Patrones de Actividad</h3>
-            <div class="tabla-actions">
-                <button class="btn-exportar" onclick="exportarDatos('patrones')">
-                    <i class="fas fa-download"></i>
-                    Exportar
-                </button>
-            </div>
-        </div>
-        <div id="tablaPatrones">
-            <div class="loading">Cargando patrones de actividad...</div>
-        </div>
-    </div>
-
-    <!-- Métricas de Rendimiento -->
-    <div class="tabla-container">
-        <div class="tabla-header">
-            <h3 class="tabla-title">Métricas de Rendimiento</h3>
-            <div class="tabla-actions">
-                <button class="btn-exportar" onclick="exportarDatos('rendimiento')">
-                    <i class="fas fa-download"></i>
-                    Exportar
-                </button>
-            </div>
-        </div>
-        <div id="tablaRendimiento">
-            <div class="loading">Cargando métricas de rendimiento...</div>
-        </div>
-    </div>
-
     <!-- Estadísticas de Actividad -->
     <div class="estadisticas-grid" id="estadisticasActividad">
         <div class="estadistica-card">
@@ -189,10 +43,75 @@
             <div class="estadistica-label">Eficiencia Sistema</div>
         </div>
     </div>
+
+    <!-- Análisis de Patrones de Actividad -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Patrones de Actividad</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarPatrones()">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaPatrones">
+            <div class="loading">Cargando patrones de actividad...</div>
+        </div>
+    </div>
+
+    <!-- Gráfico de Actividad General -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Actividad General del Sistema</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarActividadGeneral()">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoActividad">
+            <div class="loading">Cargando gráfico de actividad...</div>
+        </div>
+    </div>
+
+    <!-- Métricas de Rendimiento -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Métricas de Rendimiento</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarRendimiento()">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaRendimiento">
+            <div class="loading">Cargando métricas de rendimiento...</div>
+        </div>
+    </div>
+
+    <!-- Heatmap de Actividad -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Heatmap de Actividad</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarHeatmap()">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoHeatmap">
+            <div class="loading">Cargando heatmap de actividad...</div>
+        </div>
+    </div>
 </div>
 
 @section scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         let chartActividad = null;
         let chartHeatmap = null;
@@ -203,22 +122,15 @@
             const fechaInicio = new Date();
             fechaInicio.setDate(fechaInicio.getDate() - 30);
             
-            $('#fechaInicio').val(fechaInicio.toISOString().split('T')[0]);
-            $('#fechaFin').val(fechaFin.toISOString().split('T')[0]);
+            const fechaInicioStr = fechaInicio.toISOString().split('T')[0];
+            const fechaFinStr = fechaFin.toISOString().split('T')[0];
             
             // Cargar datos iniciales
-            aplicarFiltros();
+            cargarGraficoActividad(fechaInicioStr, fechaFinStr);
+            cargarHeatmapActividad(fechaInicioStr, fechaFinStr);
+            cargarPatronesActividad(fechaInicioStr, fechaFinStr);
+            cargarMetricasRendimiento(fechaInicioStr, fechaFinStr);
         });
-
-        function aplicarFiltros() {
-            const fechaInicio = $('#fechaInicio').val();
-            const fechaFin = $('#fechaFin').val();
-            
-            cargarGraficoActividad(fechaInicio, fechaFin);
-            cargarHeatmapActividad(fechaInicio, fechaFin);
-            cargarPatronesActividad(fechaInicio, fechaFin);
-            cargarMetricasRendimiento(fechaInicio, fechaFin);
-        }
 
         function cargarGraficoActividad(fechaInicio, fechaFin) {
             $('#graficoActividad').html('<div class="loading">Cargando gráfico de actividad...</div>');
@@ -291,7 +203,6 @@
         function cargarHeatmapActividad(fechaInicio, fechaFin) {
             $('#graficoHeatmap').html('<div class="loading">Cargando heatmap de actividad...</div>');
             
-            // Placeholder para heatmap
             const ctx = document.createElement('canvas');
             $('#graficoHeatmap').html(ctx);
             
@@ -299,65 +210,122 @@
                 chartHeatmap.destroy();
             }
             
-            // Datos de ejemplo para el heatmap
-            const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            const diasSemana = ['Domingo', 'Sábado', 'Viernes', 'Jueves', 'Miércoles', 'Martes', 'Lunes'];
             const horas = Array.from({length: 24}, (_, i) => i);
             
+            // Generar datos de actividad más realistas
             const datosHeatmap = [];
-            diasSemana.forEach((dia, diaIndex) => {
-                horas.forEach((hora, horaIndex) => {
-                    const actividad = Math.floor(Math.random() * 10);
-                    datosHeatmap.push({
-                        x: horaIndex,
-                        y: diaIndex,
-                        v: actividad
-                    });
-                });
-            });
+            const colores = [];
+            
+            for (let i = 0; i < diasSemana.length; i++) {
+                const fila = [];
+                const filaColores = [];
+                
+                for (let j = 0; j < 24; j++) {
+                    // Simular patrones de actividad realistas
+                    let actividad;
+                    if (i >= 1 && i <= 5) { // Lunes a Viernes
+                        if (j >= 9 && j <= 17) {
+                            actividad = Math.floor(Math.random() * 8) + 5; // Alta actividad durante horario laboral
+                        } else if (j >= 19 && j <= 22) {
+                            actividad = Math.floor(Math.random() * 6) + 3; // Actividad moderada en la tarde/noche
+                        } else {
+                            actividad = Math.floor(Math.random() * 3); // Baja actividad
+                        }
+                    } else { // Sábado y Domingo
+                        if (j >= 10 && j <= 18) {
+                            actividad = Math.floor(Math.random() * 6) + 3;
+                        } else {
+                            actividad = Math.floor(Math.random() * 3);
+                        }
+                    }
+                    
+                    fila.push(actividad);
+                    
+                    // Asignar colores según el nivel de actividad (0-10)
+                    const intensidad = actividad / 10;
+                    let color;
+                    if (intensidad >= 0.7) {
+                        color = '#dc2626'; // Rojo oscuro - alta actividad
+                    } else if (intensidad >= 0.5) {
+                        color = '#f59e0b'; // Naranja - actividad media-alta
+                    } else if (intensidad >= 0.3) {
+                        color = '#eab308'; // Amarillo - actividad media
+                    } else if (intensidad >= 0.1) {
+                        color = '#84cc16'; // Verde claro - actividad baja
+                    } else {
+                        color = '#d1d5db'; // Gris claro - sin actividad
+                    }
+                    
+                    filaColores.push(color);
+                }
+                
+                datosHeatmap.push(fila);
+                colores.push(filaColores);
+            }
             
             chartHeatmap = new Chart(ctx, {
-                type: 'scatter',
+                type: 'bar',
                 data: {
-                    datasets: [{
-                        label: 'Actividad',
-                        data: datosHeatmap,
-                        backgroundColor: function(context) {
-                            const valor = context.parsed.v;
-                            const intensidad = Math.min(valor / 10, 1);
-                            return `rgba(16, 185, 129, ${intensidad})`;
-                        },
-                        pointRadius: 15
-                    }]
+                    labels: horas,
+                    datasets: diasSemana.map((dia, diaIndex) => ({
+                        label: dia,
+                        data: datosHeatmap[diaIndex],
+                        backgroundColor: colores[diaIndex].map((color, idx) => color),
+                        borderColor: colores[diaIndex].map(() => 'rgba(0, 0, 0, 0.1)'),
+                        borderWidth: 1
+                    }))
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    indexAxis: 'x',
                     plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        },
                         title: {
                             display: true,
-                            text: 'Heatmap de Actividad por Día y Hora'
+                            text: 'Actividad por Hora del Día',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    const day = context.dataset.label;
+                                    const hour = context.label;
+                                    return `${day} ${hour}:00 - Nivel: ${value}/10`;
+                                }
+                            }
                         }
                     },
                     scales: {
                         x: {
-                            type: 'linear',
-                            position: 'bottom',
+                            stacked: false,
                             title: {
                                 display: true,
-                                text: 'Hora del Día'
-                            },
-                            ticks: {
-                                stepSize: 1
+                                text: 'Hora del Día',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
                             }
                         },
                         y: {
+                            stacked: false,
+                            beginAtZero: true,
+                            max: 10,
                             title: {
                                 display: true,
-                                text: 'Día de la Semana'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return diasSemana[value];
+                                text: 'Nivel de Actividad',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
                                 }
                             }
                         }
@@ -434,15 +402,86 @@
             $('#eficienciaSistema').text('94.5%');
         }
 
-        function exportarDatos(tipo) {
-            const fechaInicio = $('#fechaInicio').val();
-            const fechaFin = $('#fechaFin').val();
-            
-            window.open('@Url.Action("ExportarDatos")' + 
-                '?tipoDatos=' + tipo + 
-                '&fechaInicio=' + fechaInicio + 
-                '&fechaFin=' + fechaFin + 
-                '&formato=excel', '_blank');
+        function exportarPatrones() {
+            const tabla = document.getElementById('tablaPatrones');
+            if (tabla) {
+                html2canvas(tabla).then(canvas => {
+                    const url = canvas.toDataURL('image/jpeg', 0.9);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'patrones_actividad_' + new Date().toISOString().split('T')[0] + '.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+            }
+        }
+
+        function exportarActividadGeneral() {
+            const canvas = document.querySelector('#graficoActividad canvas');
+            if (canvas) {
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                const scale = 2;
+                tempCanvas.width = canvas.width * scale;
+                tempCanvas.height = canvas.height * scale;
+                tempCtx.scale(scale, scale);
+                
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                tempCanvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'actividad_general_' + new Date().toISOString().split('T')[0] + '.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 'image/jpeg', 0.9);
+            }
+        }
+
+        function exportarRendimiento() {
+            const tabla = document.getElementById('tablaRendimiento');
+            if (tabla) {
+                html2canvas(tabla).then(canvas => {
+                    const url = canvas.toDataURL('image/jpeg', 0.9);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'metricas_rendimiento_' + new Date().toISOString().split('T')[0] + '.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+            }
+        }
+
+        function exportarHeatmap() {
+            const canvas = document.querySelector('#graficoHeatmap canvas');
+            if (canvas) {
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                const scale = 2;
+                tempCanvas.width = canvas.width * scale;
+                tempCanvas.height = canvas.height * scale;
+                tempCtx.scale(scale, scale);
+                
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                tempCanvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'heatmap_actividad_' + new Date().toISOString().split('T')[0] + '.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 'image/jpeg', 0.9);
+            }
         }
 
         // Actualizar estadísticas después de cargar los datos

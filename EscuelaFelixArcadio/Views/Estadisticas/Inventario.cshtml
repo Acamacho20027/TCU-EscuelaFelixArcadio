@@ -20,65 +20,6 @@
         <div class="header-actions"></div>
     </div>
 
-    <!-- Gráfico de Inventario -->
-    <div class="graficos-container">
-        <div class="grafico-header">
-            <h3 class="grafico-title">Análisis de Inventario</h3>
-            <div class="grafico-controls">
-                <button class="btn-exportar" onclick="exportarDatos('inventario')">
-                    <i class="fas fa-download"></i>
-                    Exportar
-                </button>
-            </div>
-        </div>
-        <div class="grafico-canvas" id="graficoInventario">
-            <div class="loading">Cargando análisis de inventario...</div>
-        </div>
-    </div>
-
-    <!-- Análisis por Categoría -->
-    <div class="tabla-container">
-        <div class="tabla-header">
-            <h3 class="tabla-title">Análisis por Categoría</h3>
-            <div class="tabla-actions">
-                <button class="btn-exportar" onclick="exportarDatos('categorias')">
-                    <i class="fas fa-download"></i>
-                    Exportar
-                </button>
-            </div>
-        </div>
-        <div id="tablaCategorias">
-            <div class="loading">Cargando análisis por categoría...</div>
-        </div>
-    </div>
-
-    <!-- Análisis por Estado -->
-    <div class="tabla-container">
-        <div class="tabla-header">
-            <h3 class="tabla-title">Análisis por Estado</h3>
-            <div class="tabla-actions">
-                <button class="btn-exportar" onclick="exportarDatos('estados')">
-                    <i class="fas fa-download"></i>
-                    Exportar
-                </button>
-            </div>
-        </div>
-        <div id="tablaEstados">
-            <div class="loading">Cargando análisis por estado...</div>
-        </div>
-    </div>
-
-    <!-- Productos con Stock Bajo -->
-    <div class="alertas-container">
-        <div class="filtros-header">
-            <i class="fas fa-exclamation-triangle filtros-icon"></i>
-            <h3>Productos con Stock Bajo</h3>
-        </div>
-        <div id="productosStockBajo">
-            <div class="loading">Cargando productos con stock bajo...</div>
-        </div>
-    </div>
-
     <!-- Estadísticas de Inventario -->
     <div class="estadisticas-grid" id="estadisticasInventario">
         <div class="estadistica-card">
@@ -102,10 +43,59 @@
             <div class="estadistica-label">Valor Total</div>
         </div>
     </div>
+
+    <!-- Análisis por Categoría -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Análisis por Categoría</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarCategorias()">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaCategorias">
+            <div class="loading">Cargando análisis por categoría...</div>
+        </div>
+    </div>
+
+    <!-- Gráfico de Inventario -->
+    <div class="graficos-container">
+        <div class="grafico-header">
+            <h3 class="grafico-title">Análisis de Inventario</h3>
+            <div class="grafico-controls">
+                <button class="btn-exportar" onclick="exportarInventario()">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div class="grafico-canvas" id="graficoInventario">
+            <div class="loading">Cargando análisis de inventario...</div>
+        </div>
+    </div>
+
+    <!-- Análisis por Estado -->
+    <div class="tabla-container">
+        <div class="tabla-header">
+            <h3 class="tabla-title">Análisis por Estado</h3>
+            <div class="tabla-actions">
+                <button class="btn-exportar" onclick="exportarEstados()">
+                    <i class="fas fa-download"></i>
+                    Exportar
+                </button>
+            </div>
+        </div>
+        <div id="tablaEstados">
+            <div class="loading">Cargando análisis por estado...</div>
+        </div>
+    </div>
 </div>
 
 @section scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         let chartInventario = null;
 
@@ -119,7 +109,6 @@
                 if (response.success) {
                     mostrarCategorias(response.data.PorCategoria);
                     mostrarEstados(response.data.PorEstado);
-                    mostrarStockBajo(response.data.StockBajo);
                     actualizarEstadisticasInventario(response.data);
                 } else {
                     console.log('Error al cargar datos de inventario');
@@ -156,27 +145,6 @@
             
             html += '</tbody></table>';
             $('#tablaEstados').html(html);
-        }
-
-        function mostrarStockBajo(stockBajo) {
-            if (stockBajo.length === 0) {
-                $('#productosStockBajo').html('<div class="success-message">No hay productos con stock bajo</div>');
-                return;
-            }
-            
-            let html = '';
-            stockBajo.forEach(p => {
-                html += `<div class="alerta-item alta">
-                    <i class="fas fa-exclamation-circle alerta-icon"></i>
-                    <div class="alerta-content">
-                        <div class="alerta-titulo">${p.Producto}</div>
-                        <div class="alerta-descripcion">Cantidad actual: ${p.Cantidad}, Mínimo requerido: ${p.Minimo}</div>
-                        <div class="alerta-fecha">Diferencia: ${p.Diferencia}</div>
-                    </div>
-                </div>`;
-            });
-            
-            $('#productosStockBajo').html(html);
         }
 
         function cargarGraficoInventario() {
@@ -240,13 +208,65 @@
             $('#totalCantidad').text(totalCantidad);
             $('#productosStockBajo').text(productosStockBajo);
             $('#categoriasActivas').text(categoriasActivas);
-            $('#valorTotalInventario').text('$0'); // Placeholder
+            $('#valorTotalInventario').text('₡0'); // Placeholder
         }
 
-        function exportarDatos(tipo) {
-            window.open('@Url.Action("ExportarDatos")' + 
-                '?tipoDatos=' + tipo + 
-                '&formato=excel', '_blank');
+        function exportarInventario() {
+            const canvas = document.querySelector('#graficoInventario canvas');
+            if (canvas) {
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                const scale = 2;
+                tempCanvas.width = canvas.width * scale;
+                tempCanvas.height = canvas.height * scale;
+                tempCtx.scale(scale, scale);
+                
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                tempCanvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'analisis_inventario_' + new Date().toISOString().split('T')[0] + '.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 'image/jpeg', 0.9);
+            }
+        }
+
+        function exportarCategorias() {
+            // Capturar la tabla como imagen
+            const tabla = document.getElementById('tablaCategorias');
+            if (tabla) {
+                html2canvas(tabla).then(canvas => {
+                    const url = canvas.toDataURL('image/jpeg', 0.9);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'categorias_inventario_' + new Date().toISOString().split('T')[0] + '.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+            }
+        }
+
+        function exportarEstados() {
+            // Capturar la tabla como imagen
+            const tabla = document.getElementById('tablaEstados');
+            if (tabla) {
+                html2canvas(tabla).then(canvas => {
+                    const url = canvas.toDataURL('image/jpeg', 0.9);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'estados_inventario_' + new Date().toISOString().split('T')[0] + '.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+            }
         }
     </script>
 }

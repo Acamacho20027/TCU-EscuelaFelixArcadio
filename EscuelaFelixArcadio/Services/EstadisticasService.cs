@@ -933,10 +933,15 @@ namespace EscuelaFelixArcadio.Services
             var totalP2 = periodo2.Count;
             var devueltosP1 = periodo1.Count(p => p.Devolucion);
             var devueltosP2 = periodo2.Count(p => p.Devolucion);
-            var tiempoPromedioP1 = periodo1.Where(p => p.Devolucion && p.FechaDevolucion.HasValue)
-                                          .Average(p => (p.FechaDevolucion.Value - p.FechadeCreacion).TotalDays);
-            var tiempoPromedioP2 = periodo2.Where(p => p.Devolucion && p.FechaDevolucion.HasValue)
-                                          .Average(p => (p.FechaDevolucion.Value - p.FechadeCreacion).TotalDays);
+            var prestamosDevueltosP1 = periodo1.Where(p => p.Devolucion && p.FechaDevolucion.HasValue).ToList();
+            var prestamosDevueltosP2 = periodo2.Where(p => p.Devolucion && p.FechaDevolucion.HasValue).ToList();
+            
+            var tiempoPromedioP1 = prestamosDevueltosP1.Count > 0 
+                ? prestamosDevueltosP1.Average(p => (p.FechaDevolucion.Value - p.FechadeCreacion).TotalDays)
+                : 0.0;
+            var tiempoPromedioP2 = prestamosDevueltosP2.Count > 0
+                ? prestamosDevueltosP2.Average(p => (p.FechaDevolucion.Value - p.FechadeCreacion).TotalDays)
+                : 0.0;
 
             return new
             {
@@ -947,8 +952,8 @@ namespace EscuelaFelixArcadio.Services
                     TotalPrestamos = totalP1,
                     Devueltos = devueltosP1,
                     Pendientes = totalP1 - devueltosP1,
-                    TasaDevolucion = totalP1 > 0 ? Math.Round(devueltosP1 * 100.0 / totalP1, 2) : 0,
-                    TiempoPromedio = Math.Round(tiempoPromedioP1, 1)
+                    TasaDevolucion = totalP1 > 0 ? (double)Math.Round(devueltosP1 * 100.0 / totalP1, 2) : 0.0,
+                    TiempoPromedio = (double)Math.Round(tiempoPromedioP1, 1)
                 },
                 Periodo2 = new
                 {
@@ -957,16 +962,16 @@ namespace EscuelaFelixArcadio.Services
                     TotalPrestamos = totalP2,
                     Devueltos = devueltosP2,
                     Pendientes = totalP2 - devueltosP2,
-                    TasaDevolucion = totalP2 > 0 ? Math.Round(devueltosP2 * 100.0 / totalP2, 2) : 0,
-                    TiempoPromedio = Math.Round(tiempoPromedioP2, 1)
+                    TasaDevolucion = totalP2 > 0 ? (double)Math.Round(devueltosP2 * 100.0 / totalP2, 2) : 0.0,
+                    TiempoPromedio = (double)Math.Round(tiempoPromedioP2, 1)
                 },
                 Diferencias = new
                 {
                     TotalPrestamos = totalP2 - totalP1,
-                    TotalPrestamosPorc = totalP1 > 0 ? Math.Round((totalP2 - totalP1) * 100.0 / totalP1, 2) : 0,
+                    TotalPrestamosPorc = totalP1 > 0 ? (double)Math.Round((totalP2 - totalP1) * 100.0 / totalP1, 2) : 0.0,
                     Devueltos = devueltosP2 - devueltosP1,
-                    DevueltosPorc = devueltosP1 > 0 ? Math.Round((devueltosP2 - devueltosP1) * 100.0 / devueltosP1, 2) : 0,
-                    TiempoPromedio = Math.Round(tiempoPromedioP2 - tiempoPromedioP1, 1)
+                    DevueltosPorc = devueltosP1 > 0 ? (double)Math.Round((devueltosP2 - devueltosP1) * 100.0 / devueltosP1, 2) : 0.0,
+                    TiempoPromedio = (double)Math.Round(tiempoPromedioP2 - tiempoPromedioP1, 1)
                 }
             };
         }
@@ -996,7 +1001,7 @@ namespace EscuelaFelixArcadio.Services
                     Fin = p1Fin.ToString("yyyy-MM-dd"),
                     TotalReservas = totalR1,
                     Exitosas = exitosasR1,
-                    TasaExito = totalR1 > 0 ? Math.Round(exitosasR1 * 100.0 / totalR1, 2) : 0
+                    TasaExito = totalR1 > 0 ? (double)Math.Round(exitosasR1 * 100.0 / totalR1, 2) : 0.0
                 },
                 Periodo2 = new
                 {
@@ -1004,14 +1009,14 @@ namespace EscuelaFelixArcadio.Services
                     Fin = p2Fin.ToString("yyyy-MM-dd"),
                     TotalReservas = totalR2,
                     Exitosas = exitosasR2,
-                    TasaExito = totalR2 > 0 ? Math.Round(exitosasR2 * 100.0 / totalR2, 2) : 0
+                    TasaExito = totalR2 > 0 ? (double)Math.Round(exitosasR2 * 100.0 / totalR2, 2) : 0.0
                 },
                 Diferencias = new
                 {
                     TotalReservas = totalR2 - totalR1,
-                    TotalReservasPorc = totalR1 > 0 ? Math.Round((totalR2 - totalR1) * 100.0 / totalR1, 2) : 0,
+                    TotalReservasPorc = totalR1 > 0 ? (double)Math.Round((totalR2 - totalR1) * 100.0 / totalR1, 2) : 0.0,
                     Exitosas = exitosasR2 - exitosasR1,
-                    TasaExito = Math.Round((totalR2 > 0 ? exitosasR2 * 100.0 / totalR2 : 0) - (totalR1 > 0 ? exitosasR1 * 100.0 / totalR1 : 0), 2)
+                    TasaExito = (double)Math.Round((totalR2 > 0 ? exitosasR2 * 100.0 / totalR2 : 0) - (totalR1 > 0 ? exitosasR1 * 100.0 / totalR1 : 0), 2)
                 }
             };
         }
@@ -1047,7 +1052,7 @@ namespace EscuelaFelixArcadio.Services
                 Diferencias = new
                 {
                     UsuariosUnicos = usuariosP2 - usuariosP1,
-                    UsuariosUnicosPorc = usuariosP1 > 0 ? Math.Round((usuariosP2 - usuariosP1) * 100.0 / usuariosP1, 2) : 0
+                    UsuariosUnicosPorc = usuariosP1 > 0 ? (double)Math.Round((usuariosP2 - usuariosP1) * 100.0 / usuariosP1, 2) : 0.0
                 }
             };
         }
@@ -1088,7 +1093,7 @@ namespace EscuelaFelixArcadio.Services
                 Diferencias = new
                 {
                     TotalItems = totalItemsP2 - totalItemsP1,
-                    TotalItemsPorc = totalItemsP1 > 0 ? Math.Round((totalItemsP2 - totalItemsP1) * 100.0 / totalItemsP1, 2) : 0,
+                    TotalItemsPorc = totalItemsP1 > 0 ? (double)Math.Round((totalItemsP2 - totalItemsP1) * 100.0 / totalItemsP1, 2) : 0.0,
                     Alertas = alertasP2 - alertasP1
                 }
             };
@@ -1098,6 +1103,7 @@ namespace EscuelaFelixArcadio.Services
         {
             var fechaActual = DateTime.Now;
             var variaciones = new List<object>();
+            int valorAnterior = 0;
 
             switch (periodo.ToLower())
             {
@@ -1107,14 +1113,27 @@ namespace EscuelaFelixArcadio.Services
                         var fechaInicio = new DateTime(fechaActual.Year, fechaActual.Month, 1).AddMonths(-i);
                         var fechaFin = fechaInicio.AddMonths(1).AddDays(-1);
                         
-                        var variacion = CalcularVariacionPeriodo(tipoAnalisis, fechaInicio, fechaFin);
+                        var valorActual = CalcularVariacionPeriodo(tipoAnalisis, fechaInicio, fechaFin);
+                        
+                        // Calcular variación porcentual respecto al período anterior
+                        double porcentajeVariacion = 0;
+                        string tendencia = "Estable";
+                        
+                        if (valorAnterior > 0 && i < 11)
+                        {
+                            porcentajeVariacion = (valorActual.Valor - valorAnterior) * 100.0 / valorAnterior;
+                            tendencia = porcentajeVariacion > 5 ? "Creciente" : porcentajeVariacion < -5 ? "Decreciente" : "Estable";
+                        }
+                        
                         variaciones.Add(new
                         {
-                            Periodo = fechaInicio.ToString("yyyy-MM"),
-                            Valor = variacion.Valor,
-                            Variacion = variacion.Variacion,
-                            Tendencia = variacion.Tendencia
+                            Periodo = fechaInicio.ToString("MM/yyyy"),
+                            Valor = valorActual.Valor,
+                            Variacion = Math.Round(porcentajeVariacion, 1),
+                            Tendencia = tendencia
                         });
+                        
+                        valorAnterior = valorActual.Valor;
                     }
                     break;
 
@@ -1124,14 +1143,27 @@ namespace EscuelaFelixArcadio.Services
                         var fechaInicio = fechaActual.AddDays(-7 * (i + 1));
                         var fechaFin = fechaActual.AddDays(-7 * i);
                         
-                        var variacion = CalcularVariacionPeriodo(tipoAnalisis, fechaInicio, fechaFin);
+                        var valorActual = CalcularVariacionPeriodo(tipoAnalisis, fechaInicio, fechaFin);
+                        
+                        // Calcular variación porcentual respecto al período anterior
+                        double porcentajeVariacion = 0;
+                        string tendencia = "Estable";
+                        
+                        if (valorAnterior > 0 && i < 11)
+                        {
+                            porcentajeVariacion = (valorActual.Valor - valorAnterior) * 100.0 / valorAnterior;
+                            tendencia = porcentajeVariacion > 5 ? "Creciente" : porcentajeVariacion < -5 ? "Decreciente" : "Estable";
+                        }
+                        
                         variaciones.Add(new
                         {
-                            Periodo = $"Semana {GetWeekOfYear(fechaInicio)} - {fechaInicio.Year}",
-                            Valor = variacion.Valor,
-                            Variacion = variacion.Variacion,
-                            Tendencia = variacion.Tendencia
+                            Periodo = $"Sem {GetWeekOfYear(fechaInicio)}",
+                            Valor = valorActual.Valor,
+                            Variacion = Math.Round(porcentajeVariacion, 1),
+                            Tendencia = tendencia
                         });
+                        
+                        valorAnterior = valorActual.Valor;
                     }
                     break;
             }
@@ -1161,7 +1193,7 @@ namespace EscuelaFelixArcadio.Services
                     Severidad = prestamosVencidos > 10 ? "Crítica" : "Alta",
                     Descripcion = $"{prestamosVencidos} préstamos vencidos",
                     AccionRequerida = "Contactar usuarios para devolución",
-                    FechaGeneracion = fechaActual
+                    FechaGeneracion = fechaActual.ToString("yyyy-MM-dd HH:mm:ss")
                 });
             }
 
@@ -1178,7 +1210,7 @@ namespace EscuelaFelixArcadio.Services
                     Severidad = stockBajo > 5 ? "Alta" : "Media",
                     Descripcion = $"{stockBajo} productos con stock bajo",
                     AccionRequerida = "Reabastecer inventario",
-                    FechaGeneracion = fechaActual
+                    FechaGeneracion = fechaActual.ToString("yyyy-MM-dd HH:mm:ss")
                 });
             }
 
@@ -1197,11 +1229,11 @@ namespace EscuelaFelixArcadio.Services
                     Severidad = "Media",
                     Descripcion = $"{espaciosSobreutilizados} espacios con alta demanda",
                     AccionRequerida = "Evaluar necesidad de espacios adicionales",
-                    FechaGeneracion = fechaActual
+                    FechaGeneracion = fechaActual.ToString("yyyy-MM-dd HH:mm:ss")
                 });
             }
 
-            return alertas;
+            return alertas.Count > 0 ? alertas : new List<object>();
         }
 
         public object DetectarAnomalias(string tipoAnalisis)
