@@ -158,6 +158,8 @@ body {
     margin-left: 320px;
     display: flex;
     flex-direction: column;
+    width: calc(100% - 320px);
+    overflow-x: hidden;
 }
 
 .admin-header {
@@ -271,9 +273,13 @@ html, body {
 
 .admin-content {
     flex: 1;
-    padding: 2rem;
+    padding: 0;
     background-color: #f8fafc;
     min-height: calc(100vh - 80px);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 /* ===== WATERMARK/PLACEHOLDER ===== */

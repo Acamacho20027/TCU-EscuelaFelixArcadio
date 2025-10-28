@@ -1,0 +1,74 @@
+﻿@model EscuelaFelixArcadio.Models.MensajeSistema
+
+@{
+    ViewBag.Title = "Eliminar Mensaje";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <h1 class="admin-title">Confirmar Eliminación</h1>
+
+    <div class="alert-custom alert-danger-custom">
+        <i class="fas fa-exclamation-triangle"></i> ¿Está seguro que desea eliminar este mensaje?
+    </div>
+
+    <div class="admin-form">
+        <dl class="dl-horizontal">
+            <dt>Título:</dt>
+            <dd>@Model.Titulo</dd>
+
+            <dt>Tipo:</dt>
+            <dd>
+                @switch (Model.Tipo)
+                {
+                    case "Info":
+                        <span class="badge badge-info"><i class="fas fa-info-circle"></i> Info</span>
+                        break;
+                    case "Advertencia":
+                        <span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Advertencia</span>
+                        break;
+                    case "Error":
+                        <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Error</span>
+                        break;
+                    case "Exito":
+                        <span class="badge badge-success"><i class="fas fa-check-circle"></i> Éxito</span>
+                        break;
+                    default:
+                        <span class="badge badge-secondary">@Model.Tipo</span>
+                        break;
+                }
+            </dd>
+
+            <dt>Estado:</dt>
+            <dd>
+                @if (Model.Activo)
+                {
+                    <span class="badge badge-success">Activo</span>
+                }
+                else
+                {
+                    <span class="badge badge-secondary">Inactivo</span>
+                }
+            </dd>
+        </dl>
+
+        @using (Html.BeginForm("EliminarMensajeSistema", "Administrativo", FormMethod.Post, new { style = "margin-top: 30px;" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Sí, Eliminar
+                </button>
+                <a href="@Url.Action("ListarMensajesSistema", "Administrativo")" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+        }
+    </div>
+</div>

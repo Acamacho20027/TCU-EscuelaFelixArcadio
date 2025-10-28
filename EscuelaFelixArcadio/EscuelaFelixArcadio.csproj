@@ -201,6 +201,10 @@
     <Compile Include="Migrations\202510221925491_AgregarSistemaReportesCompleto.Designer.cs">
       <DependentUpon>202510221925491_AgregarSistemaReportesCompleto.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202510272322172_AgregarTablaMensajeSistema.cs" />
+    <Compile Include="Migrations\202510272322172_AgregarTablaMensajeSistema.Designer.cs">
+      <DependentUpon>202510272322172_AgregarTablaMensajeSistema.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AlertaReporte.cs" />
@@ -219,6 +223,7 @@
     <Compile Include="Models\LogAccesoReporte.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\MantenimientoEspacio.cs" />
+    <Compile Include="Models\MensajeSistema.cs" />
     <Compile Include="Models\MovimientoInventario.cs" />
     <Compile Include="Models\NumeroSerieProducto.cs" />
     <Compile Include="Models\PermisoReporte.cs" />
@@ -238,6 +243,8 @@
     <Compile Include="Models\ViewModels\ReporteInventarioViewModel.cs" />
     <Compile Include="Models\ViewModels\ReportePrestamosViewModel.cs" />
     <Compile Include="Models\ViewModels\ReporteSancionesViewModel.cs" />
+    <Compile Include="Models\ViewModels\UsuarioRolViewModel.cs" />
+    <Compile Include="Models\ViewModels\UsuarioViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\EstadisticasService.cs" />
     <Compile Include="Services\ExportacionService.cs" />
@@ -262,6 +269,7 @@
     <Content Include="bin\roslyn\System.ValueTuple.dll" />
     <Content Include="bin\roslyn\VBCSCompiler.exe" />
     <Content Include="Content\admin-layout.css" />
+    <Content Include="Content\admin-styles.css" />
     <Content Include="Content\auth-pages.css" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
@@ -359,7 +367,6 @@
     <Content Include="Views\Account\CambiarContrasenaTemporal.cshtml" />
     <Content Include="Views\Account\RecuperarContrasena.cshtml" />
     <Content Include="Views\Account\RecuperarContrasenaConfirmacion.cshtml" />
-    <Content Include="Views\Administrativo\Index.cshtml" />
     <Content Include="Views\Categoria\Index.cshtml" />
     <Content Include="Views\Inventario\Index.cshtml" />
     <Content Include="Views\Prestamos\Index.cshtml" />
@@ -427,6 +434,21 @@
     <Content Include="Views\Estadisticas\Recomendaciones.cshtml" />
     <Content Include="Views\Estadisticas\Comparativo.cshtml" />
     <Content Include="Views\Estadisticas\Alertas.cshtml" />
+    <Content Include="Views\Administrativo\Index.cshtml" />
+    <Content Include="Views\Administrativo\ListarUsuarios.cshtml" />
+    <Content Include="Views\Administrativo\ListarUsuariosConRoles.cshtml" />
+    <Content Include="Views\Administrativo\CrearUsuario.cshtml" />
+    <Content Include="Views\Administrativo\DetallesUsuario.cshtml" />
+    <Content Include="Views\Administrativo\EditarUsuario.cshtml" />
+    <Content Include="Views\Administrativo\EliminarUsuario.cshtml" />
+    <Content Include="Views\Administrativo\ListarMensajesSistema.cshtml" />
+    <Content Include="Views\Administrativo\CrearMensajeSistema.cshtml" />
+    <Content Include="Views\Administrativo\EditarMensajeSistema.cshtml" />
+    <Content Include="Views\Administrativo\DetallesMensajeSistema.cshtml" />
+    <Content Include="Views\Administrativo\EliminarMensajeSistema.cshtml" />
+    <Content Include="Views\Administrativo\Usuarios.cshtml" />
+    <Content Include="Views\Administrativo\Roles.cshtml" />
+    <Content Include="Views\Administrativo\Configuracion.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -471,6 +493,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202510221925491_AgregarSistemaReportesCompleto.resx">
       <DependentUpon>202510221925491_AgregarSistemaReportesCompleto.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202510272322172_AgregarTablaMensajeSistema.resx">
+      <DependentUpon>202510272322172_AgregarTablaMensajeSistema.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

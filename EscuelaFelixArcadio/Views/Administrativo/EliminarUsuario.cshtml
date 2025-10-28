@@ -1,0 +1,55 @@
+﻿@model EscuelaFelixArcadio.Models.ViewModels.UsuarioViewModel
+
+@{
+    ViewBag.Title = "Eliminar Usuario";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <h1 class="admin-title">Confirmar Eliminación</h1>
+
+    <div class="alert-custom alert-danger-custom">
+        <i class="fas fa-exclamation-triangle"></i> ¿Está seguro que desea eliminar este usuario?
+    </div>
+
+    <div class="admin-form">
+        <dl class="dl-horizontal">
+            <dt>Email:</dt>
+            <dd>@Model.Email</dd>
+
+            <dt>Teléfono:</dt>
+            <dd>@(Model.PhoneNumber ?? "No registrado")</dd>
+
+            <dt>Estado:</dt>
+            <dd>
+                @if (Model.EstaBloqueado)
+                {
+                    <span class="badge badge-danger">Bloqueado</span>
+                }
+                else
+                {
+                    <span class="badge badge-success">Activo</span>
+                }
+            </dd>
+        </dl>
+
+        @using (Html.BeginForm("EliminarUsuario", "Administrativo", FormMethod.Post, new { style = "margin-top: 30px;" }))
+        {
+            @Html.HiddenFor(m => m.Id)
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Sí, Eliminar
+                </button>
+                <a href="@Url.Action("ListarUsuarios", "Administrativo")" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,64 @@
+﻿@model EscuelaFelixArcadio.Models.ViewModels.UsuarioViewModel
+
+@{
+    ViewBag.Title = "Detalles del Usuario";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <div class="admin-header">
+        <h1 class="admin-title">Detalles del Usuario</h1>
+        <div>
+            <a href="@Url.Action("EditarUsuario", "Administrativo", new { id = Model.Id })" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-form">
+        <dl class="dl-horizontal">
+            <dt>Email:</dt>
+            <dd>@Model.Email</dd>
+
+            <dt>Teléfono:</dt>
+            <dd>@(Model.PhoneNumber ?? "No registrado")</dd>
+
+            <dt>Email Confirmado:</dt>
+            <dd>
+                @if (Model.EmailConfirmed)
+                {
+                    <span class="badge badge-success"><i class="fas fa-check"></i> Confirmado</span>
+                }
+                else
+                {
+                    <span class="badge badge-warning"><i class="fas fa-times"></i> No confirmado</span>
+                }
+            </dd>
+
+            <dt>Estado:</dt>
+            <dd>
+                @if (Model.EstaBloqueado)
+                {
+                    <span class="badge badge-danger"><i class="fas fa-lock"></i> Bloqueado</span>
+                }
+                else
+                {
+                    <span class="badge badge-success"><i class="fas fa-unlock"></i> Activo</span>
+                }
+            </dd>
+
+            <dt>Rol:</dt>
+            <dd><span class="badge badge-primary">@ViewBag.RolUsuario</span></dd>
+        </dl>
+
+        <div style="margin-top: 30px;">
+            <a href="@Url.Action("ListarUsuarios", "Administrativo")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a Lista
+            </a>
+        </div>
+    </div>
+</div>

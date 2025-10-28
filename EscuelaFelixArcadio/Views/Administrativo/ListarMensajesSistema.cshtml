@@ -1,0 +1,115 @@
+﻿@model IEnumerable<EscuelaFelixArcadio.Models.MensajeSistema>
+
+@{
+    ViewBag.Title = "Gestión de Mensajes del Sistema";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <div class="admin-header">
+        <h1 class="admin-title">Mensajes del Sistema</h1>
+        <a href="@Url.Action("CrearMensajeSistema", "Administrativo")" class="btn-create">
+            <i class="fas fa-plus"></i> Nuevo Mensaje
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-custom alert-success-custom">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <!-- Tabla de mensajes -->
+    <div class="table-users">
+        <table class="table table-hover table-users">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Tipo</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th>Rol Destino</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var mensaje in Model)
+                    {
+                        <tr>
+                            <td>@mensaje.Titulo</td>
+                            <td>
+                                @switch (mensaje.Tipo)
+                                {
+                                    case "Info":
+                                        <span class="badge badge-info"><i class="fas fa-info-circle"></i> Info</span>
+                                        break;
+                                    case "Advertencia":
+                                        <span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Advertencia</span>
+                                        break;
+                                    case "Error":
+                                        <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Error</span>
+                                        break;
+                                    case "Exito":
+                                        <span class="badge badge-success"><i class="fas fa-check-circle"></i> Éxito</span>
+                                        break;
+                                    default:
+                                        <span class="badge badge-secondary">@mensaje.Tipo</span>
+                                        break;
+                                }
+                            </td>
+                            <td>@mensaje.FechaInicio.ToString("dd/MM/yyyy")</td>
+                            <td>@(mensaje.FechaFin?.ToString("dd/MM/yyyy") ?? "Indefinido")</td>
+                            <td><span class="badge badge-primary">@(mensaje.RolDestino ?? "Todos")</span></td>
+                            <td>
+                                @if (mensaje.Activo)
+                                {
+                                    <span class="badge badge-success"><i class="fas fa-check"></i> Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary"><i class="fas fa-ban"></i> Inactivo</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-action-group">
+                                    <a href="@Url.Action("DetallesMensajeSistema", "Administrativo", new { id = mensaje.Id })" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("EditarMensajeSistema", "Administrativo", new { id = mensaje.Id })" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="@Url.Action("EliminarMensajeSistema", "Administrativo", new { id = mensaje.Id })" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center" style="padding: 40px;">
+                            <i class="fas fa-bullhorn" style="font-size: 3rem; color: #cbd5e1;"></i>
+                            <p style="margin-top: 20px; color: #6b7280;">No hay mensajes del sistema</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <a href="@Url.Action("Index", "Administrativo")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>

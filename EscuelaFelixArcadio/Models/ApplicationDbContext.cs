@@ -45,6 +45,7 @@ namespace EscuelaFelixArcadio.Models
         public DbSet<ComentarioReporte> ComentarioReporte { get; set; }
         public DbSet<AlertaReporte> AlertaReporte { get; set; }
         public DbSet<HistorialAprobacionPrestamo> HistorialAprobacionPrestamo { get; set; }
+        public DbSet<MensajeSistema> MensajeSistema { get; set; }
 
 
 
@@ -78,6 +79,7 @@ namespace EscuelaFelixArcadio.Models
             modelBuilder.Entity<ComentarioReporte>().ToTable("ComentarioReporte");
             modelBuilder.Entity<AlertaReporte>().ToTable("AlertaReporte");
             modelBuilder.Entity<HistorialAprobacionPrestamo>().ToTable("HistorialAprobacionPrestamo");
+            modelBuilder.Entity<MensajeSistema>().ToTable("MensajeSistema");
 
             modelBuilder.Entity<Categoria>()
            .HasRequired(m => m.Estado)           // la propiedad de navegación
@@ -151,7 +153,5 @@ namespace EscuelaFelixArcadio.Models
         }
 
         public System.Data.Entity.DbSet<EscuelaFelixArcadio.Models.ApplicationRol> IdentityRoles { get; set; }
-
-
     }
 }
