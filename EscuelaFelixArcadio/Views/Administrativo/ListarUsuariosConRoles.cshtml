@@ -1,0 +1,117 @@
+﻿@model IEnumerable<EscuelaFelixArcadio.Models.ViewModels.UsuarioRolViewModel>
+
+@{
+    ViewBag.Title = "Gestión de Roles";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <div class="admin-header">
+        <h1 class="admin-title">Gestión de Roles de Usuarios</h1>
+        <a href="@Url.Action("ListarUsuarios", "Administrativo")" class="btn btn-secondary">
+            <i class="fas fa-users"></i> Ver Todos los Usuarios
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-custom alert-success-custom">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <!-- Tabla de usuarios con roles -->
+    <div class="table-users">
+        <table class="table table-hover table-users">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Rol Actual</th>
+                    <th>Cambiar a Rol</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Email</td>
+                            <td>
+                                <span class="badge badge-primary">@item.RolActual</span>
+                            </td>
+                            <td>
+                                <select class="form-control rol-select" id="rol_@item.UserId" data-userid="@item.UserId">
+                                    @foreach (var rol in item.RolesDisponibles)
+                                    {
+                                        <option value="@rol" @(rol == item.RolActual ? "selected" : "")>@rol</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <button onclick="cambiarRol('@item.UserId')" class="btn btn-sm btn-success cambiar-rol-btn">
+                                    <i class="fas fa-sync"></i> Cambiar
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center" style="padding: 40px;">
+                            <i class="fas fa-users" style="font-size: 3rem; color: #cbd5e1;"></i>
+                            <p style="margin-top: 20px; color: #6b7280;">No se encontraron usuarios</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <a href="@Url.Action("Index", "Administrativo")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function cambiarRol(userId) {
+            var select = document.getElementById('rol_' + userId);
+            var nuevoRol = select.value;
+
+            if (!nuevoRol) {
+                alert('Por favor seleccione un rol');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("CambiarRolUsuario", "Administrativo")',
+                type: 'POST',
+                data: {
+                    userId: userId,
+                    nuevoRol: nuevoRol,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('Error al cambiar el rol del usuario');
+                }
+            });
+        }
+    </script>
+}

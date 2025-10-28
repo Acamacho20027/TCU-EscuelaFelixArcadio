@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "Gestión de Usuarios";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/admin-styles.css?v=8" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <h1 class="admin-title">Gestión de Usuarios</h1>
+
+    <div class="admin-info-card">
+        <div class="admin-info-card-body">
+            <i class="fas fa-users admin-info-icon"></i>
+            <p class="admin-info-text">Esta sección redirige a la gestión completa de usuarios del sistema.</p>
+        </div>
+    </div>
+
+    <div class="admin-actions">
+        <a href="@Url.Action("ListarUsuarios", "Administrativo")" class="btn btn-create">
+            <i class="fas fa-arrow-right"></i> Ver Usuarios
+        </a>
+    </div>
+</div>

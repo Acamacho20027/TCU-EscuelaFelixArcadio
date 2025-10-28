@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "Configuración del Sistema";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link href="~/Content/admin-styles.css?v=8" rel="stylesheet" />
+}
+
+<div class="reportes-container">
+    <h1 class="admin-title">Configuración del Sistema</h1>
+
+    <div class="admin-info-card">
+        <div class="admin-info-card-body">
+            <i class="fas fa-cog admin-info-icon"></i>
+            <p class="admin-info-text">Esta sección estará disponible próximamente para configurar los parámetros del sistema.</p>
+        </div>
+    </div>
+
+    <div class="admin-actions">
+        <a href="@Url.Action("Index", "Administrativo")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver al Panel
+        </a>
+    </div>
+</div>

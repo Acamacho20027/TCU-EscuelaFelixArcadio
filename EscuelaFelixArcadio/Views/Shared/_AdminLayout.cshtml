@@ -10,7 +10,7 @@
     @Scripts.Render("~/bundles/modernizr")
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="~/Content/admin-layout.css?v=2" rel="stylesheet" />
+    <link href="~/Content/admin-layout.css?v=4" rel="stylesheet" />
     <link href="~/Content/documento.css?v=1" rel="stylesheet" />
     @RenderSection("Styles", required: false)
 </head>
@@ -78,7 +78,7 @@
                     <div class="nav-section-title">ADMINISTRACIÓN</div>
                     <ul class="nav-menu">
                         <li class="nav-item">
-                            <a href="@Url.Action("Index", "Administrativo")" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Administrativo" ? "active" : "")">
+                            <a href="@Url.Action("Index", "Administrativo")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Administrativo" ? "active" : "")">
                                 <i class="fas fa-users-cog"></i>
                                 <span>Administrativo</span>
                             </a>
