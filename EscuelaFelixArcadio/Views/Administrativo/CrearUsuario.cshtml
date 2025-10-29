@@ -6,47 +6,66 @@
 }
 
 @section Styles {
-    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+    <link href="~/Content/inventario.css" rel="stylesheet" />
 }
 
-<div class="reportes-container">
-    <h1 class="admin-title">Crear Nuevo Usuario</h1>
+<div class="inventario-container">
+    <div class="inventario-form-container">
+        <h1 class="inventario-form-title">Crear Nuevo Usuario</h1>
 
-    @using (Html.BeginForm("CrearUsuario", "Administrativo", FormMethod.Post, new { @class = "admin-form" }))
-    {
-        @Html.AntiForgeryToken()
+        @using (Html.BeginForm("CrearUsuario", "Administrativo", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
 
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <!-- Mensajes de validación -->
+            @Html.ValidationSummary(true, "", new { @class = "inventario-alert inventario-alert-error" })
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.Email)
-            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @type = "email" })
-            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
-        </div>
+            <!-- Sección: Información de Usuario -->
+            <div class="inventario-form-section">
+                <h2 class="inventario-form-section-title">Información de Usuario</h2>
+                <div class="inventario-form-grid">
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "inventario-form-control", @type = "email", @placeholder = "Ingrese el correo electrónico" } })
+                        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.Password)
-            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-        </div>
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(model => model.Password, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "inventario-form-control", @type = "password", @placeholder = "Ingrese la contraseña" } })
+                        @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.PhoneNumber)
-            @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
-        </div>
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(model => model.PhoneNumber, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.EditorFor(model => model.PhoneNumber, new { htmlAttributes = new { @class = "inventario-form-control", @placeholder = "Ingrese el número de teléfono (opcional)" } })
+                        @Html.ValidationMessageFor(model => model.PhoneNumber, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.RolInicial)
-            @Html.DropDownListFor(m => m.RolInicial, (SelectList)ViewBag.Roles, "Seleccione un rol", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.RolInicial, "", new { @class = "text-danger" })
-        </div>
+            <!-- Sección: Configuración -->
+            <div class="inventario-form-section">
+                <h2 class="inventario-form-section-title">Configuración</h2>
+                <div class="inventario-form-grid">
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(model => model.RolInicial, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.DropDownListFor(model => model.RolInicial, (SelectList)ViewBag.Roles, "Seleccione un rol", htmlAttributes: new { @class = "inventario-form-control" })
+                        @Html.ValidationMessageFor(model => model.RolInicial, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <input type="submit" value="Crear Usuario" class="btn btn-create" />
-            <a href="@Url.Action("ListarUsuarios", "Administrativo")" class="btn btn-secondary">Cancelar</a>
-        </div>
-    }
+            <!-- Botones de acción -->
+            <div class="inventario-form-buttons">
+                <button type="submit" class="btn-inventario-save">
+                    <i class="fas fa-plus"></i>
+                    Crear Usuario
+                </button>
+                @Html.ActionLink("Regresar a la Lista", "ListarUsuarios", "Administrativo", null, new { @class = "btn-inventario-cancel" })
+            </div>
+        }
+    </div>
 </div>
 
 @section Scripts {

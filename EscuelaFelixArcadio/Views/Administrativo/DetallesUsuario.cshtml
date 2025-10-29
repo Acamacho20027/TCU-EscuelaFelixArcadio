@@ -3,61 +3,109 @@
 @{
     ViewBag.Title = "Detalles del Usuario";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    var statusClass = "";
+    if (Model.EstaBloqueado)
+    {
+        statusClass = "error";
+    }
+    else if (Model.EmailConfirmed)
+    {
+        statusClass = "success";
+    }
+    else
+    {
+        statusClass = "warning";
+    }
 }
 
 @section Styles {
-    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+    <link href="~/Content/prestamos.css" rel="stylesheet" />
 }
 
-<div class="reportes-container">
-    <div class="admin-header">
-        <h1 class="admin-title">Detalles del Usuario</h1>
-        <div>
-            <a href="@Url.Action("EditarUsuario", "Administrativo", new { id = Model.Id })" class="btn btn-warning">
-                <i class="fas fa-edit"></i> Editar
-            </a>
+<div class="prestamos-container">
+    <div class="prestamos-details-container">
+        <h2 class="prestamos-details-title">Detalles del Usuario</h2>
+
+        <!-- Informacion principal -->
+        <div class="prestamos-details-card">
+            <h3 class="prestamos-details-card-title">
+                <i class="fas fa-user"></i> Informacion del Usuario
+            </h3>
+            <div class="prestamos-details-grid">
+                <div class="prestamos-details-field">
+                    <label class="prestamos-details-label">ID del Usuario</label>
+                    <div class="prestamos-details-value">
+                        <i class="fas fa-hashtag"></i> @Model.Id
+                    </div>
+                </div>
+
+                <div class="prestamos-details-field">
+                    <label class="prestamos-details-label">Email</label>
+                    <div class="prestamos-details-value">
+                        <i class="fas fa-envelope"></i> @Model.Email
+                    </div>
+                </div>
+
+                <div class="prestamos-details-field">
+                    <label class="prestamos-details-label">Telefono</label>
+                    <div class="prestamos-details-value">
+                        <i class="fas fa-phone"></i> @(Model.PhoneNumber ?? "No registrado")
+                    </div>
+                </div>
+
+                <div class="prestamos-details-field">
+                    <label class="prestamos-details-label">Estado de Email</label>
+                    <div class="prestamos-details-value">
+                        @if (Model.EmailConfirmed)
+                        {
+                            <span class="prestamos-status-badge success">
+                                <i class="fas fa-check-circle"></i> Confirmado
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="prestamos-status-badge warning">
+                                <i class="fas fa-times-circle"></i> No confirmado
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div class="prestamos-details-field">
+                    <label class="prestamos-details-label">Estado del Usuario</label>
+                    <div class="prestamos-details-value">
+                        @if (Model.EstaBloqueado)
+                        {
+                            <span class="prestamos-status-badge error">
+                                <i class="fas fa-lock"></i> Bloqueado
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="prestamos-status-badge success">
+                                <i class="fas fa-unlock"></i> Activo
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div class="prestamos-details-field">
+                    <label class="prestamos-details-label">Rol</label>
+                    <div class="prestamos-details-value">
+                        <i class="fas fa-user-tag"></i> @ViewBag.RolUsuario
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="admin-form">
-        <dl class="dl-horizontal">
-            <dt>Email:</dt>
-            <dd>@Model.Email</dd>
-
-            <dt>Teléfono:</dt>
-            <dd>@(Model.PhoneNumber ?? "No registrado")</dd>
-
-            <dt>Email Confirmado:</dt>
-            <dd>
-                @if (Model.EmailConfirmed)
-                {
-                    <span class="badge badge-success"><i class="fas fa-check"></i> Confirmado</span>
-                }
-                else
-                {
-                    <span class="badge badge-warning"><i class="fas fa-times"></i> No confirmado</span>
-                }
-            </dd>
-
-            <dt>Estado:</dt>
-            <dd>
-                @if (Model.EstaBloqueado)
-                {
-                    <span class="badge badge-danger"><i class="fas fa-lock"></i> Bloqueado</span>
-                }
-                else
-                {
-                    <span class="badge badge-success"><i class="fas fa-unlock"></i> Activo</span>
-                }
-            </dd>
-
-            <dt>Rol:</dt>
-            <dd><span class="badge badge-primary">@ViewBag.RolUsuario</span></dd>
-        </dl>
-
-        <div style="margin-top: 30px;">
-            <a href="@Url.Action("ListarUsuarios", "Administrativo")" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Volver a Lista
+        <!-- Botones de accion -->
+        <div class="prestamos-form-buttons">
+            <a href="@Url.Action("EditarUsuario", "Administrativo", new { id = Model.Id })" class="btn-prestamos-save">
+                Editar Usuario
+            </a>
+            <a href="@Url.Action("ListarUsuarios", "Administrativo")" class="btn-prestamos-cancel">
+                Regresar a la Lista
             </a>
         </div>
     </div>

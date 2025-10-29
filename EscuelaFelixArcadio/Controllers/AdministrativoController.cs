@@ -142,7 +142,7 @@ namespace EscuelaFelixArcadio.Controllers
         #region Gestión de Usuarios (CRUD)
 
         // GET: Listar todos los usuarios
-        public ActionResult ListarUsuarios(string searchEmail = "")
+        public ActionResult ListarUsuarios(string searchEmail = "", int page = 1, int pageSize = 12)
         {
             var usuarios = UserManager.Users.ToList();
             
@@ -151,18 +151,72 @@ namespace EscuelaFelixArcadio.Controllers
                 usuarios = usuarios.Where(u => u.Email.Contains(searchEmail)).ToList();
             }
             
-            var usuariosViewModel = usuarios.Select(u => new UsuarioViewModel
-            {
-                Id = u.Id,
-                Email = u.Email,
-                PhoneNumber = u.PhoneNumber,
-                EstaBloqueado = u.LockoutEnabled && u.LockoutEndDateUtc.HasValue && u.LockoutEndDateUtc.Value > DateTimeOffset.UtcNow,
-                EmailConfirmed = u.EmailConfirmed,
-                FechaRegistro = null // Se puede agregar si existe este campo en el modelo
-            }).ToList();
+            // Calcular paginación
+            var totalItems = usuarios.Count();
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            var skip = (page - 1) * pageSize;
+            
+            var usuariosViewModel = usuarios
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(u => new UsuarioViewModel
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    PhoneNumber = u.PhoneNumber,
+                    EstaBloqueado = u.LockoutEnabled && u.LockoutEndDateUtc.HasValue && u.LockoutEndDateUtc.Value > DateTimeOffset.UtcNow,
+                    EmailConfirmed = u.EmailConfirmed,
+                    FechaRegistro = null
+                }).ToList();
             
             ViewBag.SearchEmail = searchEmail;
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalItems = totalItems;
+            ViewBag.TotalPages = totalPages;
+            
             return View(usuariosViewModel);
+        }
+
+        // AJAX: Buscar usuarios con filtros y paginación
+        [HttpGet]
+        public JsonResult SearchUsuarios(string searchEmail = "", int page = 1, int pageSize = 12)
+        {
+            var usuarios = UserManager.Users.ToList();
+            
+            if (!string.IsNullOrEmpty(searchEmail))
+            {
+                usuarios = usuarios.Where(u => u.Email.Contains(searchEmail)).ToList();
+            }
+            
+            // Calcular paginación
+            var totalItems = usuarios.Count();
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            var skip = (page - 1) * pageSize;
+            
+            var usuariosViewModel = usuarios
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(u => new
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    PhoneNumber = u.PhoneNumber ?? "No registrado",
+                    EstaBloqueado = u.LockoutEnabled && u.LockoutEndDateUtc.HasValue && u.LockoutEndDateUtc.Value > DateTimeOffset.UtcNow,
+                    EmailConfirmed = u.EmailConfirmed,
+                    FechaRegistro = u.LockoutEndDateUtc?.ToString("dd/MM/yyyy") ?? ""
+                }).ToList();
+            
+            var result = new
+            {
+                items = usuariosViewModel,
+                totalItems = totalItems,
+                totalPages = totalPages,
+                currentPage = page,
+                pageSize = pageSize
+            };
+            
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         // GET: Crear usuario
@@ -263,11 +317,22 @@ namespace EscuelaFelixArcadio.Controllers
                 return HttpNotFound();
             }
             
+            // Obtener rol del usuario
+            var rolesUsuario = await UserManager.GetRolesAsync(usuario.Id);
+            var rolUsuario = rolesUsuario.FirstOrDefault() ?? "Sin rol";
+            
+            // Obtener todos los roles para el dropdown
+            var todosLosRoles = RoleManager.Roles.ToList();
+            ViewBag.Roles = new SelectList(todosLosRoles, "Name", "Name", rolUsuario);
+            
             var viewModel = new EditarUsuarioViewModel
             {
                 Id = usuario.Id,
                 Email = usuario.Email,
-                PhoneNumber = usuario.PhoneNumber
+                PhoneNumber = usuario.PhoneNumber,
+                RolInicial = rolUsuario,
+                EmailConfirmed = usuario.EmailConfirmed,
+                EsActivo = !(usuario.LockoutEnabled && usuario.LockoutEndDateUtc.HasValue && usuario.LockoutEndDateUtc.Value > DateTimeOffset.UtcNow)
             };
             
             return View(viewModel);
@@ -287,9 +352,45 @@ namespace EscuelaFelixArcadio.Controllers
                     return HttpNotFound();
                 }
                 
-                usuario.Email = model.Email;
-                usuario.UserName = model.Email;
+                // Actualizar email (solo lectura en la vista, pero mantener)
+                // usuario.Email = model.Email;
+                // usuario.UserName = model.Email;
+                
+                // Actualizar teléfono
                 usuario.PhoneNumber = model.PhoneNumber;
+                
+                // Actualizar confirmación de email
+                usuario.EmailConfirmed = model.EmailConfirmed;
+                
+                // Actualizar rol del usuario
+                if (!string.IsNullOrEmpty(model.RolInicial))
+                {
+                    // Obtener roles actuales
+                    var rolesActuales = await UserManager.GetRolesAsync(usuario.Id);
+                    
+                    // Remover todos los roles
+                    if (rolesActuales.Any())
+                    {
+                        await UserManager.RemoveFromRolesAsync(usuario.Id, rolesActuales.ToArray());
+                    }
+                    
+                    // Agregar nuevo rol
+                    await UserManager.AddToRoleAsync(usuario.Id, model.RolInicial);
+                }
+                
+                // Actualizar estado (bloqueado/activo)
+                if (model.EsActivo)
+                {
+                    // Desbloquear usuario
+                    await UserManager.SetLockoutEnabledAsync(usuario.Id, true);
+                    await UserManager.SetLockoutEndDateAsync(usuario.Id, DateTimeOffset.UtcNow.AddYears(-1));
+                }
+                else
+                {
+                    // Bloquear usuario
+                    await UserManager.SetLockoutEnabledAsync(usuario.Id, true);
+                    await UserManager.SetLockoutEndDateAsync(usuario.Id, DateTimeOffset.UtcNow.AddYears(100));
+                }
                 
                 var resultado = await UserManager.UpdateAsync(usuario);
                 
@@ -301,6 +402,10 @@ namespace EscuelaFelixArcadio.Controllers
                 
                 AddErrors(resultado);
             }
+            
+            // Si hay error, cargar los roles nuevamente
+            var todosLosRoles = RoleManager.Roles.ToList();
+            ViewBag.Roles = new SelectList(todosLosRoles, "Name", "Name", model.RolInicial);
             
             return View(model);
         }
@@ -320,13 +425,21 @@ namespace EscuelaFelixArcadio.Controllers
                 return HttpNotFound();
             }
             
+            // Obtener rol del usuario
+            var roles = await UserManager.GetRolesAsync(usuario.Id);
+            var rolUsuario = roles.FirstOrDefault() ?? "Sin rol";
+            
             var viewModel = new UsuarioViewModel
             {
                 Id = usuario.Id,
                 Email = usuario.Email,
                 PhoneNumber = usuario.PhoneNumber,
-                EstaBloqueado = usuario.LockoutEnabled && usuario.LockoutEndDateUtc.HasValue && usuario.LockoutEndDateUtc.Value > DateTimeOffset.UtcNow
+                EstaBloqueado = usuario.LockoutEnabled && usuario.LockoutEndDateUtc.HasValue && usuario.LockoutEndDateUtc.Value > DateTimeOffset.UtcNow,
+                EmailConfirmed = usuario.EmailConfirmed
             };
+            
+            // Pasar información adicional a la vista
+            ViewBag.RolUsuario = rolUsuario;
             
             return View(viewModel);
         }
