@@ -32,7 +32,7 @@
 
                     <div class="prestamos-form-group">
                         @Html.LabelFor(m => m.PhoneNumber, "Telefono", htmlAttributes: new { @class = "prestamos-form-label" })
-                        @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "prestamos-form-control", @placeholder = "Ingrese el número de teléfono (opcional)" })
+                        @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "prestamos-form-control", @placeholder = "Ingrese el número de teléfono (opcional)", @pattern = "[0-9]+", @title = "Solo se permiten números" })
                         @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
                     </div>
                 </div>
@@ -82,4 +82,23 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function() {
+            // Bloquear letras en el campo Teléfono
+            $('input[name="PhoneNumber"]').on('keypress', function(e) {
+                var char = String.fromCharCode(e.which);
+                if (!/[0-9]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+
+            // Bloquear letras al pegar
+            $('input[name="PhoneNumber"]').on('paste', function(e) {
+                var paste = (e.originalEvent || e).clipboardData.getData('text');
+                if (!/^[0-9]+$/.test(paste)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 }

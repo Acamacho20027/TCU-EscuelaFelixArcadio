@@ -6,74 +6,136 @@
 }
 
 @section Styles {
-    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+    <link href="~/Content/prestamos.css" rel="stylesheet" />
 }
 
-<div class="reportes-container">
-    <h1 class="admin-title">Editar Mensaje del Sistema</h1>
+<div class="prestamos-container">
+    <div class="prestamos-form-container">
+        <h2 class="prestamos-form-title">Editar Mensaje del Sistema</h2>
 
-    @using (Html.BeginForm("EditarMensajeSistema", "Administrativo", FormMethod.Post, new { @class = "admin-form" }))
-    {
-        @Html.AntiForgeryToken()
-        @Html.HiddenFor(m => m.Id)
+        @using (Html.BeginForm("EditarMensajeSistema", "Administrativo", FormMethod.Post, new { @class = "prestamos-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+            
+            @Html.ValidationSummary(true, "", new { @class = "prestamos-alert prestamos-alert-error" })
 
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="prestamos-form-section">
+                <h3 class="prestamos-form-section-title">Informacion del Mensaje</h3>
+                
+                <div class="prestamos-form-grid">
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(m => m.Titulo, "Título", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @Html.TextBoxFor(m => m.Titulo, new { @class = "prestamos-form-control", @placeholder = "Ingrese el título del mensaje", @pattern = "[A-Za-záéíóúÁÉÍÓÚñÑüÜ\\s]+", @title = "Solo se permiten letras y espacios" })
+                        @Html.ValidationMessageFor(m => m.Titulo, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.Titulo)
-            @Html.TextBoxFor(m => m.Titulo, new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.Titulo, "", new { @class = "text-danger" })
-        </div>
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(m => m.Tipo, "Tipo", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @Html.DropDownListFor(m => m.Tipo, new SelectList(new[]
+                        {
+                            new SelectListItem { Text = "Info", Value = "Info", Selected = Model.Tipo == "Info" },
+                            new SelectListItem { Text = "Advertencia", Value = "Advertencia", Selected = Model.Tipo == "Advertencia" },
+                            new SelectListItem { Text = "Error", Value = "Error", Selected = Model.Tipo == "Error" },
+                            new SelectListItem { Text = "Éxito", Value = "Exito", Selected = Model.Tipo == "Exito" }
+                        }, "Value", "Text"), "Seleccione el tipo", htmlAttributes: new { @class = "prestamos-form-control" })
+                        @Html.ValidationMessageFor(m => m.Tipo, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.Contenido)
-            @Html.TextAreaFor(m => m.Contenido, new { @class = "form-control", rows = "5" })
-            @Html.ValidationMessageFor(m => m.Contenido, "", new { @class = "text-danger" })
-        </div>
+                    <div class="prestamos-form-group prestamos-form-group-full">
+                        @Html.LabelFor(m => m.Contenido, "Contenido", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @Html.TextAreaFor(m => m.Contenido, new { @class = "prestamos-form-control", rows = "5", placeholder = "Ingrese el contenido del mensaje" })
+                        @Html.ValidationMessageFor(m => m.Contenido, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            
+            <div class="prestamos-form-section">
+                <h3 class="prestamos-form-section-title">Fechas</h3>
+                
+                <div class="prestamos-form-grid">
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(m => m.FechaInicio, "Fecha de Inicio", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @Html.TextBoxFor(m => m.FechaInicio, "{0:yyyy-MM-dd}", new { @class = "prestamos-form-control", @type = "date" })
+                        @Html.ValidationMessageFor(m => m.FechaInicio, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.Tipo)
-            @Html.DropDownListFor(m => m.Tipo, new SelectList(new[]
-            {
-                new SelectListItem { Text = "Info", Value = "Info" },
-                new SelectListItem { Text = "Advertencia", Value = "Advertencia" },
-                new SelectListItem { Text = "Error", Value = "Error" },
-                new SelectListItem { Text = "Éxito", Value = "Exito" }
-            }, "Value", "Text"), new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.Tipo, "", new { @class = "text-danger" })
-        </div>
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(m => m.FechaFin, "Fecha de Fin", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @Html.TextBoxFor(m => m.FechaFin, "{0:yyyy-MM-dd}", new { @class = "prestamos-form-control", @type = "date" })
+                        @Html.ValidationMessageFor(m => m.FechaFin, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.FechaInicio)
-            @Html.TextBoxFor(m => m.FechaInicio, new { @class = "form-control", @type = "date" })
-            @Html.ValidationMessageFor(m => m.FechaInicio, "", new { @class = "text-danger" })
-        </div>
+            <div class="prestamos-form-section">
+                <h3 class="prestamos-form-section-title">Configuracion</h3>
+                
+                <div class="prestamos-form-grid">
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(m => m.RolDestino, "Rol Destino", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @Html.DropDownListFor(m => m.RolDestino, (SelectList)ViewBag.Roles, "Todos los roles", htmlAttributes: new { @class = "prestamos-form-control" })
+                        @Html.ValidationMessageFor(m => m.RolDestino, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.FechaFin)
-            @Html.TextBoxFor(m => m.FechaFin, new { @class = "form-control", @type = "date" })
-            @Html.ValidationMessageFor(m => m.FechaFin, "", new { @class = "text-danger" })
-        </div>
+                    <div class="prestamos-form-group">
+                        @Html.Label("Estado", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @{
+                            var estadoList = new SelectList(new[]
+                            {
+                                new SelectListItem { Text = "Activo", Value = "true", Selected = Model.Activo },
+                                new SelectListItem { Text = "Inactivo", Value = "false", Selected = !Model.Activo }
+                            }, "Value", "Text");
+                        }
+                        @Html.DropDownList("Estado", estadoList, htmlAttributes: new { @class = "prestamos-form-control" })
+                        <input type="hidden" name="Activo" id="Activo" value="@Model.Activo.ToString().ToLower()" />
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.RolDestino)
-            @Html.DropDownListFor(m => m.RolDestino, (SelectList)ViewBag.Roles, "Todos los roles", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.RolDestino, "", new { @class = "text-danger" })
-        </div>
-
-        <div class="form-group">
-            <label>
-                @Html.CheckBoxFor(m => m.Activo) Activo
-            </label>
-        </div>
-
-        <div class="form-group">
-            <input type="submit" value="Guardar Cambios" class="btn btn-create" />
-            <a href="@Url.Action("ListarMensajesSistema", "Administrativo")" class="btn btn-secondary">Cancelar</a>
-        </div>
-    }
+            <div class="prestamos-form-buttons">
+                <button type="submit" class="btn-prestamos-save">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+                <a href="@Url.Action("ListarMensajesSistema", "Administrativo")" class="btn-prestamos-cancel">
+                    Regresar a la Lista
+                </a>
+            </div>
+        }
+    </div>
 </div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function() {
+            // Configurar el valor inicial
+            var activoInicial = @Model.Activo.ToString().ToLower();
+            
+            // Configurar el dropdown de Estado correctamente
+            $('#Estado').val(activoInicial ? 'true' : 'false');
+            
+            // Manejar el cambio del dropdown de Estado
+            $('#Estado').change(function() {
+                var selectedValue = $(this).val();
+                $('#Activo').val(selectedValue === 'true' ? 'true' : 'false');
+            });
+
+            // Bloquear números en el campo Título
+            $('input[name="Titulo"]').on('keypress', function(e) {
+                var char = String.fromCharCode(e.which);
+                if (!/[A-Za-záéíóúÁÉÍÓÚñÑüÜ\s]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+
+            // Bloquear números al pegar
+            $('input[name="Titulo"]').on('paste', function(e) {
+                var paste = (e.originalEvent || e).clipboardData.getData('text');
+                if (!/^[A-Za-záéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(paste)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 }

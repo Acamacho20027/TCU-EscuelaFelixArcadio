@@ -6,110 +6,410 @@
 }
 
 @section Styles {
-    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+    <link href="~/Content/inventario.css" rel="stylesheet" />
+    <link href="~/Content/listar-usuarios.css" rel="stylesheet" />
 }
 
-<div class="reportes-container">
-    <div class="admin-header">
-        <h1 class="admin-title">Mensajes del Sistema</h1>
-        <a href="@Url.Action("CrearMensajeSistema", "Administrativo")" class="btn-create">
-            <i class="fas fa-plus"></i> Nuevo Mensaje
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Variables globales
+            let currentPage = @(ViewBag.CurrentPage ?? 1);
+            let isLoading = false;
+
+            // Búsqueda con debounce
+            let searchTimeout;
+            $('#searchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    currentPage = 1;
+                    loadMensajes();
+                }, 500);
+            });
+
+            // Limpiar filtros
+            $('#clearFilters').on('click', function() {
+                $('#searchInput').val('');
+                currentPage = 1;
+                loadMensajes();
+            });
+
+            // Cargar mensajes con AJAX
+            function loadMensajes() {
+                if (isLoading) return;
+                
+                isLoading = true;
+                showLoading();
+
+                const params = {
+                    searchTitulo: $('#searchInput').val(),
+                    page: currentPage,
+                    pageSize: 12
+                };
+
+                $.get('@Url.Action("SearchMensajesSistema", "Administrativo")', params)
+                    .done(function(data) {
+                        updateMensajesGrid(data.items);
+                        updatePagination(data);
+                        hideLoading();
+                    })
+                    .fail(function() {
+                        hideLoading();
+                        alert('Error al cargar los mensajes');
+                    })
+                    .always(function() {
+                        isLoading = false;
+                    });
+            }
+
+            // Actualizar grid de mensajes
+            function updateMensajesGrid(items) {
+                const grid = $('.inventario-cards-grid');
+                grid.empty();
+
+                if (items.length === 0) {
+                    grid.html('<div class="inventario-alert inventario-alert-warning"><i class="fas fa-info-circle"></i> No se encontraron mensajes que coincidan con los filtros.</div>');
+                    return;
+                }
+
+                items.forEach(function(item) {
+                    const card = createMensajeCard(item);
+                    grid.append(card);
+                });
+            }
+
+            // Crear card de mensaje
+            function createMensajeCard(item) {
+                const statusClass = item.Activo ? 'disponible' : 'no-disponible';
+                const statusText = item.Activo ? 'Activo' : 'Inactivo';
+                
+                let tipoIcon = 'info-circle';
+                let tipoClass = 'badge-info';
+                if (item.Tipo === 'Advertencia') {
+                    tipoIcon = 'exclamation-triangle';
+                    tipoClass = 'badge-warning';
+                } else if (item.Tipo === 'Error') {
+                    tipoIcon = 'times-circle';
+                    tipoClass = 'badge-danger';
+                } else if (item.Tipo === 'Exito') {
+                    tipoIcon = 'check-circle';
+                    tipoClass = 'badge-success';
+                }
+
+                const fechaFin = item.FechaFin ? new Date(item.FechaFin).toLocaleDateString('es-ES') : 'Indefinido';
+                const fechaInicio = new Date(item.FechaInicio).toLocaleDateString('es-ES');
+
+                return `
+                    <div class="inventario-card">
+                        <div class="inventario-card-status ${statusClass}">${statusText}</div>
+                        <div class="inventario-card-header">
+                            <h3 class="inventario-card-product">${escapeHtml(item.Titulo)}</h3>
+                            <p class="inventario-card-category"><i class="fas fa-${tipoIcon}"></i> ${item.Tipo}</p>
+                        </div>
+                        <div class="inventario-card-quantity">${item.Id}</div>
+                        <div class="inventario-card-details">
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Tipo:</span>
+                                <span class="inventario-card-detail-value">${item.Tipo}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Fecha Inicio:</span>
+                                <span class="inventario-card-detail-value">${fechaInicio}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Fecha Fin:</span>
+                                <span class="inventario-card-detail-value">${fechaFin}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Rol Destino:</span>
+                                <span class="inventario-card-detail-value">${item.RolDestino || 'Todos'}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Estado:</span>
+                                <span class="inventario-card-detail-value">${statusText}</span>
+                            </div>
+                        </div>
+                        <div class="inventario-card-footer">
+                            <div class="inventario-card-id">
+                                <i class="fas fa-bullhorn"></i>
+                                <span>ID: ${item.Id}</span>
+                            </div>
+                            <div class="inventario-card-actions">
+                                <a href="/Administrativo/DetallesMensajeSistema/${item.Id}" class="btn-inventario-action btn-inventario-details">
+                                    <i class="fas fa-eye"></i> Detalle
+                                </a>
+                                <a href="/Administrativo/EliminarMensajeSistema/${item.Id}" class="btn-inventario-action btn-inventario-delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return (text || '').replace(/[&<>"']/g, m => map[m]);
+            }
+
+            // Actualizar paginación
+            function updatePagination(data) {
+                const pagination = $('.inventario-pagination');
+                pagination.empty();
+
+                if (data.totalPages <= 1) {
+                    pagination.append(`<span class="inventario-pagination-btn active">1</span>`);
+                    return;
+                }
+
+                if (data.currentPage > 1) {
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(1)">Primera</a>`);
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${data.currentPage - 1})">Anterior</a>`);
+                } else {
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Primera</span>`);
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Anterior</span>`);
+                }
+
+                const startPage = Math.max(1, data.currentPage - 2);
+                const endPage = Math.min(data.totalPages, data.currentPage + 2);
+
+                if (startPage > 1) {
+                    pagination.append(`<span class="inventario-pagination-dots">...</span>`);
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    if (i === data.currentPage) {
+                        pagination.append(`<span class="inventario-pagination-btn active">${i}</span>`);
+                    } else {
+                        pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${i})">${i}</a>`);
+                    }
+                }
+
+                if (endPage < data.totalPages) {
+                    pagination.append(`<span class="inventario-pagination-dots">...</span>`);
+                }
+
+                if (data.currentPage < data.totalPages) {
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${data.currentPage + 1})">Siguiente</a>`);
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${data.totalPages})">Ultima</a>`);
+                } else {
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Siguiente</span>`);
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Ultima</span>`);
+                }
+            }
+
+            window.changePage = function(page) {
+                currentPage = page;
+                loadMensajes();
+            };
+
+            function showLoading() {
+                $('.inventario-cards-grid').html('<div class="inventario-loading"><div class="inventario-spinner"></div>Cargando mensajes...</div>');
+            }
+
+            function hideLoading() {
+                $('.inventario-loading').remove();
+            }
+        });
+    </script>
+}
+
+<div class="inventario-container">
+    <!-- Header con botón volver, título y botón crear -->
+    <div class="inventario-header">
+        <a href="@Url.Action("Index", "Administrativo")" class="btn-volver">
+            <i class="fas fa-arrow-left"></i>
+            Volver a Panel Administrativo
+        </a>
+        <h1 class="inventario-title">Gestión de Mensajes del Sistema</h1>
+        <a href="@Url.Action("CrearMensajeSistema", "Administrativo")" class="btn-create-inventario">
+            <i class="fas fa-plus"></i>
+            Nuevo Mensaje
         </a>
     </div>
 
+    <!-- Mensajes de éxito/error -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert-custom alert-success-custom">
+        <div class="inventario-alert inventario-alert-success">
             <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
         </div>
     }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="inventario-alert inventario-alert-error">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
 
-    <!-- Tabla de mensajes -->
-    <div class="table-users">
-        <table class="table table-hover table-users">
-            <thead>
-                <tr>
-                    <th>Título</th>
-                    <th>Tipo</th>
-                    <th>Fecha Inicio</th>
-                    <th>Fecha Fin</th>
-                    <th>Rol Destino</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
-                {
-                    foreach (var mensaje in Model)
-                    {
-                        <tr>
-                            <td>@mensaje.Titulo</td>
-                            <td>
-                                @switch (mensaje.Tipo)
-                                {
-                                    case "Info":
-                                        <span class="badge badge-info"><i class="fas fa-info-circle"></i> Info</span>
-                                        break;
-                                    case "Advertencia":
-                                        <span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> Advertencia</span>
-                                        break;
-                                    case "Error":
-                                        <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Error</span>
-                                        break;
-                                    case "Exito":
-                                        <span class="badge badge-success"><i class="fas fa-check-circle"></i> Éxito</span>
-                                        break;
-                                    default:
-                                        <span class="badge badge-secondary">@mensaje.Tipo</span>
-                                        break;
-                                }
-                            </td>
-                            <td>@mensaje.FechaInicio.ToString("dd/MM/yyyy")</td>
-                            <td>@(mensaje.FechaFin?.ToString("dd/MM/yyyy") ?? "Indefinido")</td>
-                            <td><span class="badge badge-primary">@(mensaje.RolDestino ?? "Todos")</span></td>
-                            <td>
-                                @if (mensaje.Activo)
-                                {
-                                    <span class="badge badge-success"><i class="fas fa-check"></i> Activo</span>
+    <!-- Panel de Búsqueda -->
+    <div class="inventario-filters-panel">
+        <!-- Barra de Búsqueda -->
+        <div class="inventario-search-bar">
+            <div style="position: relative;">
+                <i class="fas fa-search inventario-search-icon"></i>
+                <input type="text" id="searchInput" class="inventario-search-input" 
+                       placeholder="Buscar por título..." 
+                       value="@ViewBag.SearchTitulo">
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="inventario-controls-row">
+            <button type="button" id="clearFilters" class="inventario-clear-filters">
+                <i class="fas fa-times"></i> Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Grid de cards de mensajes -->
+    <div class="inventario-cards-grid">
+        @foreach (var mensaje in Model)
+        {
+            string statusClass = mensaje.Activo ? "disponible" : "no-disponible";
+            string statusText = mensaje.Activo ? "Activo" : "Inactivo";
+            
+            string tipoIcon = "fa-info-circle";
+            string tipoClass = "badge-info";
+            if (mensaje.Tipo == "Advertencia")
+            {
+                tipoIcon = "fa-exclamation-triangle";
+                tipoClass = "badge-warning";
+            }
+            else if (mensaje.Tipo == "Error")
+            {
+                tipoIcon = "fa-times-circle";
+                tipoClass = "badge-danger";
+            }
+            else if (mensaje.Tipo == "Exito")
+            {
+                tipoIcon = "fa-check-circle";
+                tipoClass = "badge-success";
+            }
+
+            <div class="inventario-card">
+                <div class="inventario-card-status @statusClass">@statusText</div>
+
+                <div class="inventario-card-header">
+                    <h3 class="inventario-card-product">@mensaje.Titulo</h3>
+                    <p class="inventario-card-category"><i class="fas @tipoIcon"></i> @mensaje.Tipo</p>
+                </div>
+
+                <div class="inventario-card-quantity">@mensaje.Id</div>
+
+                <div class="inventario-card-details">
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Tipo:</span>
+                        <span class="inventario-card-detail-value">@mensaje.Tipo</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Fecha Inicio:</span>
+                        <span class="inventario-card-detail-value">@mensaje.FechaInicio.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Fecha Fin:</span>
+                        <span class="inventario-card-detail-value">@(mensaje.FechaFin?.ToString("dd/MM/yyyy") ?? "Indefinido")</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Rol Destino:</span>
+                        <span class="inventario-card-detail-value">@(mensaje.RolDestino ?? "Todos")</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Estado:</span>
+                        <span class="inventario-card-detail-value">@statusText</span>
+                    </div>
+                </div>
+
+                <div class="inventario-card-footer">
+                    <div class="inventario-card-id">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>ID: @mensaje.Id</span>
+                    </div>
+                    <div class="inventario-card-actions">
+                        <a href="@Url.Action("DetallesMensajeSistema", "Administrativo", new { id = mensaje.Id })" class="btn-inventario-action btn-inventario-details">
+                            <i class="fas fa-eye"></i> Detalle
+                        </a>
+                        <a href="@Url.Action("EliminarMensajeSistema", "Administrativo", new { id = mensaje.Id })" class="btn-inventario-action btn-inventario-delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Mensaje si no hay mensajes -->
+    @if (!Model.Any())
+    {
+        <div class="inventario-alert inventario-alert-warning">
+            <i class="fas fa-info-circle"></i> No hay mensajes del sistema registrados.
+        </div>
+    }
+
+    <!-- Paginación -->
+    @{
+        int totalPages = ViewBag.TotalPages ?? 1;
+        int currentPage = ViewBag.CurrentPage ?? 1;
+    }
+    
+    @if (totalPages >= 1)
+    {
+        <div class="inventario-pagination">
+            
+            @if (currentPage > 1)
+            {
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(1)">Primera</a>
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(@(currentPage - 1))">Anterior</a>
                                 }
                                 else
                                 {
-                                    <span class="badge badge-secondary"><i class="fas fa-ban"></i> Inactivo</span>
-                                }
-                            </td>
-                            <td>
-                                <div class="btn-action-group">
-                                    <a href="@Url.Action("DetallesMensajeSistema", "Administrativo", new { id = mensaje.Id })" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="@Url.Action("EditarMensajeSistema", "Administrativo", new { id = mensaje.Id })" class="btn btn-sm btn-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="@Url.Action("EliminarMensajeSistema", "Administrativo", new { id = mensaje.Id })" class="btn btn-sm btn-danger">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
+                <span class="inventario-pagination-btn" disabled>Primera</span>
+                <span class="inventario-pagination-btn" disabled>Anterior</span>
+            }
+
+            @{
+                int startPage = Math.Max(1, currentPage - 2);
+                int endPage = Math.Min(totalPages, currentPage + 2);
+            }
+
+            @if (startPage > 1)
+            {
+                <span class="inventario-pagination-dots">...</span>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                if (i == currentPage)
+                {
+                    <span class="inventario-pagination-btn active">@i</span>
                 }
                 else
                 {
-                    <tr>
-                        <td colspan="7" class="text-center" style="padding: 40px;">
-                            <i class="fas fa-bullhorn" style="font-size: 3rem; color: #cbd5e1;"></i>
-                            <p style="margin-top: 20px; color: #6b7280;">No hay mensajes del sistema</p>
-                        </td>
-                    </tr>
+                    <a href="#" class="inventario-pagination-btn" onclick="changePage(@i)">@i</a>
                 }
-            </tbody>
-        </table>
-    </div>
+            }
 
-    <div style="margin-top: 20px;">
-        <a href="@Url.Action("Index", "Administrativo")" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Volver
-        </a>
+            @if (endPage < totalPages)
+            {
+                <span class="inventario-pagination-dots">...</span>
+            }
+
+            @if (currentPage < totalPages)
+            {
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(@(currentPage + 1))">Siguiente</a>
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(@totalPages)">Ultima</a>
+            }
+            else
+            {
+                <span class="inventario-pagination-btn" disabled>Siguiente</span>
+                <span class="inventario-pagination-btn" disabled>Ultima</span>
+            }
     </div>
+    }
 </div>
