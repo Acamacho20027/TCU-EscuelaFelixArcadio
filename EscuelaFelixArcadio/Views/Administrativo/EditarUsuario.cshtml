@@ -6,36 +6,78 @@
 }
 
 @section Styles {
-    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+    <link href="~/Content/prestamos.css" rel="stylesheet" />
 }
 
-<div class="reportes-container">
-    <h1 class="admin-title">Editar Usuario</h1>
+<div class="prestamos-container">
+    <div class="prestamos-form-container">
+        <h2 class="prestamos-form-title">Editar Usuario</h2>
 
-    @using (Html.BeginForm("EditarUsuario", "Administrativo", FormMethod.Post, new { @class = "admin-form" }))
-    {
-        @Html.AntiForgeryToken()
-        @Html.HiddenFor(m => m.Id)
+        @using (Html.BeginForm("EditarUsuario", "Administrativo", FormMethod.Post, new { @class = "prestamos-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+            
+            @Html.ValidationSummary(true, "", new { @class = "prestamos-alert prestamos-alert-error" })
 
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="prestamos-form-section">
+                <h3 class="prestamos-form-section-title">Informacion del Usuario</h3>
+                
+                <div class="prestamos-form-grid">
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(m => m.Email, "Email", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @Html.TextBoxFor(m => m.Email, new { @class = "prestamos-form-control", @type = "email", @readonly = "readonly" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.Email)
-            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @type = "email" })
-            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
-        </div>
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(m => m.PhoneNumber, "Telefono", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "prestamos-form-control", @placeholder = "Ingrese el número de teléfono (opcional)" })
+                        @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            
+            <div class="prestamos-form-section">
+                <h3 class="prestamos-form-section-title">Configuracion</h3>
+                
+                <div class="prestamos-form-grid">
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(m => m.RolInicial, "Rol", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @Html.DropDownListFor(m => m.RolInicial, (SelectList)ViewBag.Roles, "Seleccione un rol", htmlAttributes: new { @class = "prestamos-form-control" })
+                        @Html.ValidationMessageFor(m => m.RolInicial, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.PhoneNumber)
-            @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
-        </div>
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(m => m.EmailConfirmed, "Estado del Email", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @Html.DropDownListFor(m => m.EmailConfirmed, new SelectList(new[] {
+                            new SelectListItem { Text = "No Confirmado", Value = "false", Selected = !Model.EmailConfirmed },
+                            new SelectListItem { Text = "Confirmado", Value = "true", Selected = Model.EmailConfirmed }
+                        }, "Value", "Text"), new { @class = "prestamos-form-control" })
+                        @Html.ValidationMessageFor(m => m.EmailConfirmed, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            <input type="submit" value="Guardar Cambios" class="btn btn-create" />
-            <a href="@Url.Action("ListarUsuarios", "Administrativo")" class="btn btn-secondary">Cancelar</a>
-        </div>
-    }
+                    <div class="prestamos-form-group">
+                        @Html.LabelFor(m => m.EsActivo, "Estado del Usuario", htmlAttributes: new { @class = "prestamos-form-label" })
+                        @Html.DropDownListFor(m => m.EsActivo, new SelectList(new[] {
+                            new SelectListItem { Text = "Inactivo", Value = "false", Selected = !Model.EsActivo },
+                            new SelectListItem { Text = "Activo", Value = "true", Selected = Model.EsActivo }
+                        }, "Value", "Text"), new { @class = "prestamos-form-control" })
+                        @Html.ValidationMessageFor(m => m.EsActivo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="prestamos-form-buttons">
+                <button type="submit" class="btn-prestamos-save">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+                <a href="@Url.Action("ListarUsuarios", "Administrativo")" class="btn-prestamos-cancel">
+                    Regresar a la Lista
+                </a>
+            </div>
+        }
+    </div>
 </div>
 
 @section Scripts {

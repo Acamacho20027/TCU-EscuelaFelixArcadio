@@ -61,6 +61,15 @@ namespace EscuelaFelixArcadio.Models.ViewModels
         
         [Display(Name = "Teléfono")]
         public string PhoneNumber { get; set; }
+        
+        [Display(Name = "Rol")]
+        public string RolInicial { get; set; }
+        
+        [Display(Name = "Email Confirmado")]
+        public bool EmailConfirmed { get; set; }
+        
+        [Display(Name = "Estado")]
+        public bool EsActivo { get; set; }
     }
     
     public class CambiarPasswordViewModel

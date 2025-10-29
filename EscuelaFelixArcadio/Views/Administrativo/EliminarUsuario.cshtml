@@ -6,49 +6,58 @@
 }
 
 @section Styles {
-    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+    <link href="~/Content/prestamos.css" rel="stylesheet" />
 }
 
-<div class="reportes-container">
-    <h1 class="admin-title">Confirmar Eliminación</h1>
+<div class="prestamos-container">
+    <div class="prestamos-delete-container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #dc2626; margin-bottom: 1rem;"></i>
+            <h2 class="prestamos-delete-title">¿Eliminar Usuario?</h2>
+            <p class="prestamos-delete-message">
+                Esta accion es permanente y no se puede deshacer. ¿Esta seguro de que desea eliminar este usuario?
+            </p>
+        </div>
 
-    <div class="alert-custom alert-danger-custom">
-        <i class="fas fa-exclamation-triangle"></i> ¿Está seguro que desea eliminar este usuario?
-    </div>
+        <div class="prestamos-delete-info">
+            <h3 class="prestamos-delete-info-title">
+                <i class="fas fa-info-circle"></i> Informacion del Usuario a Eliminar
+            </h3>
+            <div class="prestamos-delete-info-details">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <strong>ID:</strong> @Model.Id.Substring(0, Math.Min(8, Model.Id.Length))...
+                    </div>
+                    <div>
+                        <strong>Email:</strong> @Model.Email
+                    </div>
+                    <div>
+                        <strong>Telefono:</strong> @(Model.PhoneNumber ?? "No registrado")
+                    </div>
+                    <div>
+                        <strong>Email Confirmado:</strong> @(Model.EmailConfirmed ? "Si" : "No")
+                    </div>
+                    <div>
+                        <strong>Estado:</strong> @(Model.EstaBloqueado ? "Bloqueado" : "Activo")
+                    </div>
+                    <div>
+                        <strong>Rol:</strong> @(ViewBag.RolUsuario ?? "Sin rol")
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="admin-form">
-        <dl class="dl-horizontal">
-            <dt>Email:</dt>
-            <dd>@Model.Email</dd>
-
-            <dt>Teléfono:</dt>
-            <dd>@(Model.PhoneNumber ?? "No registrado")</dd>
-
-            <dt>Estado:</dt>
-            <dd>
-                @if (Model.EstaBloqueado)
-                {
-                    <span class="badge badge-danger">Bloqueado</span>
-                }
-                else
-                {
-                    <span class="badge badge-success">Activo</span>
-                }
-            </dd>
-        </dl>
-
-        @using (Html.BeginForm("EliminarUsuario", "Administrativo", FormMethod.Post, new { style = "margin-top: 30px;" }))
+        @using (Html.BeginForm("EliminarUsuario", "Administrativo", FormMethod.Post))
         {
-            @Html.HiddenFor(m => m.Id)
             @Html.AntiForgeryToken()
-
-            <div class="form-group">
-                <button type="submit" class="btn btn-danger">
-                    <i class="fas fa-trash"></i> Sí, Eliminar
+            @Html.HiddenFor(m => m.Id)
+            
+            <div class="prestamos-form-buttons">
+                <button type="submit" class="btn-prestamos-delete-confirm">
+                    <i class="fas fa-trash"></i>
+                    Eliminar Definitivamente
                 </button>
-                <a href="@Url.Action("ListarUsuarios", "Administrativo")" class="btn btn-secondary">
-                    <i class="fas fa-times"></i> Cancelar
-                </a>
+                @Html.ActionLink("Regresar a la Lista", "ListarUsuarios", "Administrativo", null, new { @class = "btn-prestamos-cancel" })
             </div>
         }
     </div>

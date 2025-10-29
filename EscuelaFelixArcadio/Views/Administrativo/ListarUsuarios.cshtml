@@ -6,118 +6,397 @@
 }
 
 @section Styles {
-    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+    <link href="~/Content/inventario.css" rel="stylesheet" />
+    <link href="~/Content/listar-usuarios.css" rel="stylesheet" />
 }
 
-<div class="reportes-container">
-    <div class="admin-header">
-        <h1 class="admin-title">Gestión de Usuarios</h1>
-        <a href="@Url.Action("CrearUsuario", "Administrativo")" class="btn-create">
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Variables globales
+            let currentPage = @ViewBag.CurrentPage;
+            let isLoading = false;
+
+            // Búsqueda con debounce
+            let searchTimeout;
+            $('#searchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    currentPage = 1;
+                    loadUsuarios();
+                }, 500);
+            });
+
+            // Limpiar filtros
+            $('#clearFilters').on('click', function() {
+                $('#searchInput').val('');
+                currentPage = 1;
+                loadUsuarios();
+            });
+
+            // Cargar usuarios con AJAX
+            function loadUsuarios() {
+                if (isLoading) return;
+                
+                isLoading = true;
+                showLoading();
+
+                const params = {
+                    searchEmail: $('#searchInput').val(),
+                    page: currentPage,
+                    pageSize: 12
+                };
+
+                $.get('@Url.Action("SearchUsuarios", "Administrativo")', params)
+                    .done(function(data) {
+                        updateUsuariosGrid(data.items);
+                        updatePagination(data);
+                        hideLoading();
+                    })
+                    .fail(function() {
+                        hideLoading();
+                        alert('Error al cargar los usuarios');
+                    })
+                    .always(function() {
+                        isLoading = false;
+                    });
+            }
+
+            // Actualizar grid de usuarios
+            function updateUsuariosGrid(items) {
+                const grid = $('.inventario-cards-grid');
+                grid.empty();
+
+                if (items.length === 0) {
+                    grid.html('<div class="inventario-alert inventario-alert-warning"><i class="fas fa-info-circle"></i> No se encontraron usuarios que coincidan con los filtros.</div>');
+                    return;
+                }
+
+                items.forEach(function(item) {
+                    const card = createUsuarioCard(item);
+                    grid.append(card);
+                });
+            }
+
+            // Crear card de usuario
+            function createUsuarioCard(item) {
+                const statusClass = item.EstaBloqueado ? 'no-disponible' : 'disponible';
+                const statusText = item.EstaBloqueado ? 'Bloqueado' : 'Activo';
+                const emailStatusClass = item.EmailConfirmed ? 'disponible' : 'no-disponible';
+                const emailStatusText = item.EmailConfirmed ? 'Confirmado' : 'No Confirmado';
+
+                return `
+                    <div class="inventario-card">
+                        <div class="inventario-card-status ${statusClass}">${statusText}</div>
+                        <div class="inventario-card-header">
+                            <h3 class="inventario-card-product">${escapeHtml(item.Email)}</h3>
+                            <p class="inventario-card-category">Usuario</p>
+                        </div>
+                        <div class="inventario-card-quantity">ID</div>
+                        <div class="inventario-card-details">
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Email:</span>
+                                <span class="inventario-card-detail-value">${escapeHtml(item.Email)}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Teléfono:</span>
+                                <span class="inventario-card-detail-value">${escapeHtml(item.PhoneNumber || 'No registrado')}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Estado Email:</span>
+                                <span class="inventario-card-detail-value">${emailStatusText}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Rol:</span>
+                                <span class="inventario-card-detail-value">Usuario</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Estado:</span>
+                                <span class="inventario-card-detail-value">${statusText}</span>
+                            </div>
+                            <div class="inventario-card-detail">
+                                <span class="inventario-card-detail-label">Fecha:</span>
+                                <span class="inventario-card-detail-value">${item.FechaRegistro || 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div class="inventario-card-footer">
+                            <div class="inventario-card-id">
+                                <i class="fas fa-id-card"></i>
+                                <span>ID: ${item.Id.substring(0, 8)}...</span>
+                            </div>
+                            <div class="inventario-card-actions">
+                                <a href="/Administrativo/DetallesUsuario/${item.Id}" class="btn-inventario-action btn-inventario-details">
+                                    <i class="fas fa-eye"></i> Detalle
+                                </a>
+                                <a href="/Administrativo/EliminarUsuario/${item.Id}" class="btn-inventario-action btn-inventario-delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return (text || '').replace(/[&<>"']/g, m => map[m]);
+            }
+
+            // Actualizar paginación
+            function updatePagination(data) {
+                const pagination = $('.inventario-pagination');
+                pagination.empty();
+
+                // Si hay solo 1 página, mostrar solo el número de página
+                if (data.totalPages <= 1) {
+                    pagination.append(`<span class="inventario-pagination-btn active">1</span>`);
+                    return;
+                }
+
+                // Botones de navegación
+                if (data.currentPage > 1) {
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(1)">Primera</a>`);
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${data.currentPage - 1})">Anterior</a>`);
+                } else {
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Primera</span>`);
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Anterior</span>`);
+                }
+
+                // Números de página
+                const startPage = Math.max(1, data.currentPage - 2);
+                const endPage = Math.min(data.totalPages, data.currentPage + 2);
+
+                if (startPage > 1) {
+                    pagination.append(`<span class="inventario-pagination-dots">...</span>`);
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    if (i === data.currentPage) {
+                        pagination.append(`<span class="inventario-pagination-btn active">${i}</span>`);
+                    } else {
+                        pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${i})">${i}</a>`);
+                    }
+                }
+
+                if (endPage < data.totalPages) {
+                    pagination.append(`<span class="inventario-pagination-dots">...</span>`);
+                }
+
+                if (data.currentPage < data.totalPages) {
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${data.currentPage + 1})">Siguiente</a>`);
+                    pagination.append(`<a href="#" class="inventario-pagination-btn" onclick="changePage(${data.totalPages})">Ultima</a>`);
+                } else {
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Siguiente</span>`);
+                    pagination.append(`<span class="inventario-pagination-btn" disabled>Ultima</span>`);
+                }
+            }
+
+            // Cambiar página
+            window.changePage = function(page) {
+                currentPage = page;
+                loadUsuarios();
+            };
+
+            // Mostrar loading
+            function showLoading() {
+                $('.inventario-cards-grid').html('<div class="inventario-loading"><div class="inventario-spinner"></div>Cargando usuarios...</div>');
+            }
+
+            // Ocultar loading
+            function hideLoading() {
+                $('.inventario-loading').remove();
+            }
+        });
+    </script>
+}
+
+<div class="inventario-container">
+    <!-- Header con botón volver, título y botón crear -->
+    <div class="inventario-header">
+        <a href="@Url.Action("Index", "Administrativo")" class="btn-volver">
+            <i class="fas fa-arrow-left"></i>
+            Volver a Panel Administrativo
+        </a>
+        <h1 class="inventario-title">Gestión de Usuarios</h1>
+        <a href="@Url.Action("CrearUsuario", "Administrativo")" class="btn-create-inventario">
             <i class="fas fa-user-plus"></i>
             Nuevo Usuario
         </a>
     </div>
 
+    <!-- Mensajes de éxito/error -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert-custom alert-success-custom">
+        <div class="inventario-alert inventario-alert-success">
             <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
         </div>
     }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="inventario-alert inventario-alert-error">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
 
-    <!-- Búsqueda -->
-    <div class="admin-search">
-        @using (Html.BeginForm("ListarUsuarios", "Administrativo", FormMethod.Get))
+    <!-- Panel de Búsqueda -->
+    <div class="inventario-filters-panel">
+        <!-- Barra de Búsqueda -->
+        <div class="inventario-search-bar">
+            <div style="position: relative;">
+                <i class="fas fa-search inventario-search-icon"></i>
+                <input type="text" id="searchInput" class="inventario-search-input" 
+                       placeholder="Buscar por email..." 
+                       value="@ViewBag.SearchEmail">
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="inventario-controls-row">
+            <button type="button" id="clearFilters" class="inventario-clear-filters">
+                <i class="fas fa-times"></i> Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Grid de cards de usuarios -->
+    <div class="inventario-cards-grid">
+        @foreach (var usuario in Model)
         {
-            <div class="input-group">
-                <input type="text" name="searchEmail" class="form-control" placeholder="Buscar por email..." value="@ViewBag.SearchEmail" />
-                <button type="submit" class="btn-search">
-                    <i class="fas fa-search"></i> Buscar
-                </button>
+            string statusClass = usuario.EstaBloqueado ? "no-disponible" : "disponible";
+            string statusText = usuario.EstaBloqueado ? "Bloqueado" : "Activo";
+            string emailStatusClass = usuario.EmailConfirmed ? "disponible" : "no-disponible";
+            string emailStatusText = usuario.EmailConfirmed ? "Confirmado" : "No Confirmado";
+
+            <div class="inventario-card">
+                <div class="inventario-card-status @statusClass">@statusText</div>
+
+                <div class="inventario-card-header">
+                    <h3 class="inventario-card-product">@usuario.Email</h3>
+                    <p class="inventario-card-category">Usuario</p>
+                </div>
+
+                <div class="inventario-card-quantity">ID</div>
+
+                <div class="inventario-card-details">
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Email:</span>
+                        <span class="inventario-card-detail-value">@usuario.Email</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Teléfono:</span>
+                        <span class="inventario-card-detail-value">@(usuario.PhoneNumber ?? "No registrado")</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Estado Email:</span>
+                        <span class="inventario-card-detail-value">@emailStatusText</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Rol:</span>
+                        <span class="inventario-card-detail-value">Usuario</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Estado:</span>
+                        <span class="inventario-card-detail-value">@statusText</span>
+                    </div>
+                    <div class="inventario-card-detail">
+                        <span class="inventario-card-detail-label">Fecha:</span>
+                        <span class="inventario-card-detail-value">@(usuario.FechaRegistro?.ToString("dd/MM/yyyy") ?? "N/A")</span>
+                    </div>
+                </div>
+
+                <div class="inventario-card-footer">
+                    <div class="inventario-card-id">
+                        <i class="fas fa-id-card"></i>
+                        <span>ID: @usuario.Id.Substring(0, Math.Min(8, usuario.Id.Length))...</span>
+                    </div>
+                    <div class="inventario-card-actions">
+                        <a href="@Url.Action("DetallesUsuario", "Administrativo", new { id = usuario.Id })" class="btn-inventario-action btn-inventario-details">
+                            <i class="fas fa-eye"></i> Detalle
+                        </a>
+                        <a href="@Url.Action("EliminarUsuario", "Administrativo", new { id = usuario.Id })" class="btn-inventario-action btn-inventario-delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
         }
     </div>
 
-    <!-- Tabla de usuarios -->
-    <div class="table-users">
-        <table class="table table-hover table-users">
-            <thead>
-                <tr>
-                    <th>Email</th>
-                    <th>Teléfono</th>
-                    <th>Email Confirmado</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
+    <!-- Mensaje si no hay usuarios -->
+    @if (!Model.Any())
+    {
+        <div class="inventario-alert inventario-alert-warning">
+            <i class="fas fa-info-circle"></i> No hay usuarios registrados. 
+            <a href="@Url.Action("CrearUsuario", "Administrativo")" class="btn-create-inventario" style="margin-left: 1rem; display: inline-block;">
+                Crear el primer usuario
+            </a>
+        </div>
+    }
+
+    <!-- Paginación -->
+    @{
+        int totalPages = ViewBag.TotalPages ?? 1;
+        int currentPage = ViewBag.CurrentPage ?? 1;
+    }
+    
+    @if (totalPages >= 1)
+    {
+        <div class="inventario-pagination">
+            
+            @if (currentPage > 1)
+            {
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(1)">Primera</a>
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(@(currentPage - 1))">Anterior</a>
+                                }
+                                else
+                                {
+                <span class="inventario-pagination-btn" disabled>Primera</span>
+                <span class="inventario-pagination-btn" disabled>Anterior</span>
+            }
+
+            @{
+                int startPage = Math.Max(1, currentPage - 2);
+                int endPage = Math.Min(totalPages, currentPage + 2);
+            }
+
+            @if (startPage > 1)
+            {
+                <span class="inventario-pagination-dots">...</span>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                if (i == currentPage)
                 {
-                    foreach (var usuario in Model)
-                    {
-                        <tr>
-                            <td>@usuario.Email</td>
-                            <td>@(usuario.PhoneNumber ?? "No registrado")</td>
-                            <td>
-                                @if (usuario.EmailConfirmed)
-                                {
-                                    <span class="badge badge-success">
-                                        <i class="fas fa-check"></i> Confirmado
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-warning">
-                                        <i class="fas fa-times"></i> No confirmado
-                                    </span>
-                                }
-                            </td>
-                            <td>
-                                @if (usuario.EstaBloqueado)
-                                {
-                                    <span class="badge badge-danger">
-                                        <i class="fas fa-lock"></i> Bloqueado
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-success">
-                                        <i class="fas fa-unlock"></i> Activo
-                                    </span>
-                                }
-                            </td>
-                            <td>
-                                <div class="btn-action-group">
-                                    <a href="@Url.Action("DetallesUsuario", "Administrativo", new { id = usuario.Id })" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="@Url.Action("EditarUsuario", "Administrativo", new { id = usuario.Id })" class="btn btn-sm btn-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="@Url.Action("EliminarUsuario", "Administrativo", new { id = usuario.Id })" class="btn btn-sm btn-danger">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
+                    <span class="inventario-pagination-btn active">@i</span>
                 }
                 else
                 {
-                    <tr>
-                        <td colspan="5" class="text-center" style="padding: 40px;">
-                            <i class="fas fa-users" style="font-size: 3rem; color: #cbd5e1;"></i>
-                            <p style="margin-top: 20px; color: #6b7280;">No se encontraron usuarios</p>
-                        </td>
-                    </tr>
+                    <a href="#" class="inventario-pagination-btn" onclick="changePage(@i)">@i</a>
                 }
-            </tbody>
-        </table>
-    </div>
+            }
 
-    <div style="margin-top: 20px;">
-        <a href="@Url.Action("Index", "Administrativo")" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Volver
-        </a>
+            @if (endPage < totalPages)
+            {
+                <span class="inventario-pagination-dots">...</span>
+            }
+
+            @if (currentPage < totalPages)
+            {
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(@(currentPage + 1))">Siguiente</a>
+                <a href="#" class="inventario-pagination-btn" onclick="changePage(@totalPages)">Ultima</a>
+            }
+            else
+            {
+                <span class="inventario-pagination-btn" disabled>Siguiente</span>
+                <span class="inventario-pagination-btn" disabled>Ultima</span>
+            }
     </div>
+    }
 </div>
