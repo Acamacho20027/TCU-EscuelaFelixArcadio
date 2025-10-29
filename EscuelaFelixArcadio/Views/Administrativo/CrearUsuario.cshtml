@@ -38,7 +38,7 @@
 
                     <div class="inventario-form-group">
                         @Html.LabelFor(model => model.PhoneNumber, htmlAttributes: new { @class = "inventario-form-label" })
-                        @Html.EditorFor(model => model.PhoneNumber, new { htmlAttributes = new { @class = "inventario-form-control", @placeholder = "Ingrese el número de teléfono (opcional)" } })
+                        @Html.EditorFor(model => model.PhoneNumber, new { htmlAttributes = new { @class = "inventario-form-control", @placeholder = "Ingrese el número de teléfono (opcional)", @pattern = "[0-9]+", @title = "Solo se permiten números" } })
                         @Html.ValidationMessageFor(model => model.PhoneNumber, "", new { @class = "text-danger" })
                     </div>
                 </div>
@@ -70,4 +70,23 @@
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function() {
+            // Bloquear letras en el campo Teléfono
+            $('input[name="PhoneNumber"]').on('keypress', function(e) {
+                var char = String.fromCharCode(e.which);
+                if (!/[0-9]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+
+            // Bloquear letras al pegar
+            $('input[name="PhoneNumber"]').on('paste', function(e) {
+                var paste = (e.originalEvent || e).clipboardData.getData('text');
+                if (!/^[0-9]+$/.test(paste)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 }

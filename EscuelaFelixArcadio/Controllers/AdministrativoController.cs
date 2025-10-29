@@ -573,7 +573,61 @@ namespace EscuelaFelixArcadio.Controllers
             using (var db = new ApplicationDbContext())
             {
                 var mensajes = db.MensajeSistema.ToList();
+                
+                // Configurar paginación inicial
+                ViewBag.TotalPages = 1;
+                ViewBag.CurrentPage = 1;
+                
                 return View(mensajes);
+            }
+        }
+
+        // GET: Buscar mensajes del sistema (AJAX)
+        public JsonResult SearchMensajesSistema(string searchTitulo = "", int page = 1, int pageSize = 12)
+        {
+            using (var db = new ApplicationDbContext())
+            {
+                var mensajes = db.MensajeSistema.ToList();
+                
+                if (!string.IsNullOrEmpty(searchTitulo))
+                {
+                    mensajes = mensajes.Where(m => m.Titulo.Contains(searchTitulo)).ToList();
+                }
+                
+                // Ordenar por fecha de creación descendente
+                mensajes = mensajes.OrderByDescending(m => m.FechaCreacion).ToList();
+                
+                // Calcular paginación
+                var totalItems = mensajes.Count();
+                var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+                var skip = (page - 1) * pageSize;
+                
+                var mensajesViewModel = mensajes
+                    .Skip(skip)
+                    .Take(pageSize)
+                    .Select(m => new
+                    {
+                        Id = m.Id,
+                        Titulo = m.Titulo,
+                        Contenido = m.Contenido,
+                        Tipo = m.Tipo,
+                        FechaInicio = m.FechaInicio,
+                        FechaFin = m.FechaFin,
+                        Activo = m.Activo,
+                        RolDestino = m.RolDestino,
+                        FechaCreacion = m.FechaCreacion
+                    }).ToList();
+                
+                var result = new
+                {
+                    items = mensajesViewModel,
+                    totalItems = totalItems,
+                    totalPages = totalPages,
+                    currentPage = page,
+                    pageSize = pageSize
+                };
+                
+                return Json(result, JsonRequestBehavior.AllowGet);
             }
         }
 

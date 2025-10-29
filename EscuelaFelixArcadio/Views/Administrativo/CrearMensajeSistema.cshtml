@@ -6,73 +6,132 @@
 }
 
 @section Styles {
-    <link href="~/Content/admin-styles.css?v=2" rel="stylesheet" />
+    <link href="~/Content/inventario.css" rel="stylesheet" />
 }
 
-<div class="reportes-container">
-    <h1 class="admin-title">Crear Mensaje del Sistema</h1>
+<div class="inventario-container">
+    <div class="inventario-form-container">
+        <h1 class="inventario-form-title">Crear Mensaje del Sistema</h1>
 
-    @using (Html.BeginForm("CrearMensajeSistema", "Administrativo", FormMethod.Post, new { @class = "admin-form" }))
-    {
-        @Html.AntiForgeryToken()
+        @using (Html.BeginForm("CrearMensajeSistema", "Administrativo", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
 
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <!-- Mensajes de validación -->
+            @Html.ValidationSummary(true, "", new { @class = "inventario-alert inventario-alert-error" })
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.Titulo)
-            @Html.TextBoxFor(m => m.Titulo, new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.Titulo, "", new { @class = "text-danger" })
-        </div>
+            <!-- Sección: Información del Mensaje -->
+            <div class="inventario-form-section">
+                <h2 class="inventario-form-section-title">Información del Mensaje</h2>
+                <div class="inventario-form-grid">
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(m => m.Titulo, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.EditorFor(m => m.Titulo, new { htmlAttributes = new { @class = "inventario-form-control", @placeholder = "Ingrese el título del mensaje", @pattern = "[A-Za-záéíóúÁÉÍÓÚñÑüÜ\\s]+", @title = "Solo se permiten letras y espacios" } })
+                        @Html.ValidationMessageFor(m => m.Titulo, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.Contenido)
-            @Html.TextAreaFor(m => m.Contenido, new { @class = "form-control", rows = "5" })
-            @Html.ValidationMessageFor(m => m.Contenido, "", new { @class = "text-danger" })
-        </div>
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(m => m.Tipo, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.DropDownListFor(m => m.Tipo, new SelectList(new[]
+                        {
+                            new SelectListItem { Text = "Info", Value = "Info" },
+                            new SelectListItem { Text = "Advertencia", Value = "Advertencia" },
+                            new SelectListItem { Text = "Error", Value = "Error" },
+                            new SelectListItem { Text = "Éxito", Value = "Exito" }
+                        }, "Value", "Text"), "Seleccione el tipo", htmlAttributes: new { @class = "inventario-form-control" })
+                        @Html.ValidationMessageFor(m => m.Tipo, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.Tipo)
-            @Html.DropDownListFor(m => m.Tipo, new SelectList(new[]
-            {
-                new SelectListItem { Text = "Info", Value = "Info" },
-                new SelectListItem { Text = "Advertencia", Value = "Advertencia" },
-                new SelectListItem { Text = "Error", Value = "Error" },
-                new SelectListItem { Text = "Éxito", Value = "Exito" }
-            }, "Value", "Text"), new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.Tipo, "", new { @class = "text-danger" })
-        </div>
+                    <div class="inventario-form-group inventario-form-group-full">
+                        @Html.LabelFor(m => m.Contenido, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.TextAreaFor(m => m.Contenido, new { @class = "inventario-form-control", rows = "5", placeholder = "Ingrese el contenido del mensaje" })
+                        @Html.ValidationMessageFor(m => m.Contenido, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.FechaInicio)
-            @Html.TextBoxFor(m => m.FechaInicio, new { @class = "form-control", @type = "date" })
-            @Html.ValidationMessageFor(m => m.FechaInicio, "", new { @class = "text-danger" })
-        </div>
+            <!-- Sección: Fechas -->
+            <div class="inventario-form-section">
+                <h2 class="inventario-form-section-title">Fechas</h2>
+                <div class="inventario-form-grid">
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(m => m.FechaInicio, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.EditorFor(m => m.FechaInicio, new { htmlAttributes = new { @class = "inventario-form-control", @type = "date" } })
+                        @Html.ValidationMessageFor(m => m.FechaInicio, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.FechaFin)
-            @Html.TextBoxFor(m => m.FechaFin, new { @class = "form-control", @type = "date" })
-            @Html.ValidationMessageFor(m => m.FechaFin, "", new { @class = "text-danger" })
-        </div>
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(m => m.FechaFin, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.EditorFor(m => m.FechaFin, new { htmlAttributes = new { @class = "inventario-form-control", @type = "date" } })
+                        @Html.ValidationMessageFor(m => m.FechaFin, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            @Html.LabelFor(m => m.RolDestino)
-            @Html.DropDownListFor(m => m.RolDestino, (SelectList)ViewBag.Roles, "Todos los roles", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.RolDestino, "", new { @class = "text-danger" })
-        </div>
+            <!-- Sección: Configuración -->
+            <div class="inventario-form-section">
+                <h2 class="inventario-form-section-title">Configuración</h2>
+                <div class="inventario-form-grid">
+                    <div class="inventario-form-group">
+                        @Html.LabelFor(m => m.RolDestino, htmlAttributes: new { @class = "inventario-form-label" })
+                        @Html.DropDownListFor(m => m.RolDestino, (SelectList)ViewBag.Roles, "Todos los roles", htmlAttributes: new { @class = "inventario-form-control" })
+                        @Html.ValidationMessageFor(m => m.RolDestino, "", new { @class = "text-danger" })
+                    </div>
 
-        <div class="form-group">
-            <label>
-                @Html.CheckBoxFor(m => m.Activo, new { @checked = "checked" }) Activo
-            </label>
-        </div>
+                    <div class="inventario-form-group">
+                        @Html.Label("Estado", htmlAttributes: new { @class = "inventario-form-label" })
+                        @{
+                            var estadoList = new SelectList(new[]
+                            {
+                                new SelectListItem { Text = "Activo", Value = "true", Selected = true },
+                                new SelectListItem { Text = "Inactivo", Value = "false" }
+                            }, "Value", "Text");
+                        }
+                        @Html.DropDownList("Estado", estadoList, htmlAttributes: new { @class = "inventario-form-control" })
+                        @Html.HiddenFor(m => m.Activo, new { id = "Activo" })
+                    </div>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <input type="submit" value="Crear Mensaje" class="btn btn-create" />
-            <a href="@Url.Action("ListarMensajesSistema", "Administrativo")" class="btn btn-secondary">Cancelar</a>
-        </div>
-    }
+            <!-- Botones de acción -->
+            <div class="inventario-form-buttons">
+                <button type="submit" class="btn-inventario-save">
+                    <i class="fas fa-plus"></i>
+                    Crear Mensaje
+                </button>
+                @Html.ActionLink("Regresar a la Lista", "ListarMensajesSistema", "Administrativo", null, new { @class = "btn-inventario-cancel" })
+            </div>
+        }
+    </div>
 </div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        $(document).ready(function() {
+            // Configurar el valor inicial
+            $('#Activo').val(true);
+            
+            // Manejar el cambio del dropdown de Estado
+            $('#Estado').change(function() {
+                $('#Activo').val($(this).val() === 'true');
+            });
+
+            // Bloquear números en el campo Título
+            $('input[name="Titulo"]').on('keypress', function(e) {
+                var char = String.fromCharCode(e.which);
+                if (!/[A-Za-záéíóúÁÉÍÓÚñÑüÜ\s]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+
+            // Bloquear números al pegar
+            $('input[name="Titulo"]').on('paste', function(e) {
+                var paste = (e.originalEvent || e).clipboardData.getData('text');
+                if (!/^[A-Za-záéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(paste)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 }
