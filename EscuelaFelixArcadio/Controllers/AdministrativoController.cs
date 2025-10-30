@@ -32,6 +32,22 @@ namespace EscuelaFelixArcadio.Controllers
             }
         }
 
+        // Cargar configuración de modo oscuro al iniciar cualquier acción
+        protected override void OnActionExecuting(System.Web.Mvc.ActionExecutingContext filterContext)
+        {
+            base.OnActionExecuting(filterContext);
+            
+            // Cargar modo oscuro de la base de datos
+            using (var db = new ApplicationDbContext())
+            {
+                var modoOscuroConfig = db.ConfiguracionSistema.FirstOrDefault(c => c.Nombre == "ModoOscuro");
+                if (modoOscuroConfig != null && modoOscuroConfig.Valor == "true")
+                {
+                    Session["ModoOscuro"] = true;
+                }
+            }
+        }
+
         // GET: Administrativo
         public ActionResult Index()
         {
@@ -57,7 +73,136 @@ namespace EscuelaFelixArcadio.Controllers
         public ActionResult Configuracion()
         {
             ViewBag.Title = "Configuración del Sistema";
-            return View();
+            
+            // Cargar configuraciones desde la base de datos
+            var configuraciones = LoadConfiguraciones();
+            return View(configuraciones);
+        }
+
+        // POST: Guardar configuraciones del sistema
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult GuardarConfiguracion(Dictionary<string, string> configuraciones)
+        {
+            try
+            {
+                using (var db = new ApplicationDbContext())
+                {
+                    var userId = User.Identity.GetUserId();
+                    
+                    foreach (var kvp in configuraciones)
+                    {
+                        var config = db.ConfiguracionSistema.FirstOrDefault(c => c.Nombre == kvp.Key);
+                        
+                        if (config != null)
+                        {
+                            config.Valor = kvp.Value;
+                            config.FechaActualizacion = DateTime.Now;
+                            config.UsuarioActualizacion = userId;
+                            db.Entry(config).State = System.Data.Entity.EntityState.Modified;
+                        }
+                        else
+                        {
+                            // Crear nueva configuración
+                            config = new ConfiguracionSistema
+                            {
+                                Nombre = kvp.Key,
+                                Valor = kvp.Value,
+                                Categoria = GetCategoriaByKey(kvp.Key),
+                                FechaActualizacion = DateTime.Now,
+                                UsuarioActualizacion = userId
+                            };
+                            db.ConfiguracionSistema.Add(config);
+                        }
+                    }
+                    
+                    db.SaveChanges();
+                }
+                
+                // Aplicar cambios inmediatamente al sistema
+                ApplyConfiguraciones(configuraciones);
+                
+                return Json(new { success = true, message = "Configuración guardada exitosamente" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // Helper: Cargar configuraciones desde BD
+        private Dictionary<string, string> LoadConfiguraciones()
+        {
+            var configuraciones = new Dictionary<string, string>();
+            
+            using (var db = new ApplicationDbContext())
+            {
+                var dbConfigs = db.ConfiguracionSistema.ToDictionary(c => c.Nombre, c => c.Valor);
+                
+                // Valores por defecto si no existen en BD
+                configuraciones["NombreInstitucion"] = dbConfigs.ContainsKey("NombreInstitucion") ? dbConfigs["NombreInstitucion"] : "Escuela Félix Arcadio Montero Monge";
+                configuraciones["CorreoPrincipal"] = dbConfigs.ContainsKey("CorreoPrincipal") ? dbConfigs["CorreoPrincipal"] : "contacto@escuela.edu";
+                configuraciones["TelefonoContacto"] = dbConfigs.ContainsKey("TelefonoContacto") ? dbConfigs["TelefonoContacto"] : "+506 2222-2222";
+                configuraciones["IdiomaSistema"] = dbConfigs.ContainsKey("IdiomaSistema") ? dbConfigs["IdiomaSistema"] : "Español";
+                configuraciones["DuracionSesion"] = dbConfigs.ContainsKey("DuracionSesion") ? dbConfigs["DuracionSesion"] : "30";
+                configuraciones["IntentosLogin"] = dbConfigs.ContainsKey("IntentosLogin") ? dbConfigs["IntentosLogin"] : "3";
+                configuraciones["RequerirPasswordSegura"] = dbConfigs.ContainsKey("RequerirPasswordSegura") ? dbConfigs["RequerirPasswordSegura"] : "true";
+                configuraciones["BloqueoInactividad"] = dbConfigs.ContainsKey("BloqueoInactividad") ? dbConfigs["BloqueoInactividad"] : "true";
+                configuraciones["NotificacionesCorreo"] = dbConfigs.ContainsKey("NotificacionesCorreo") ? dbConfigs["NotificacionesCorreo"] : "true";
+                configuraciones["AlertasPrestamos"] = dbConfigs.ContainsKey("AlertasPrestamos") ? dbConfigs["AlertasPrestamos"] : "true";
+                configuraciones["NotificarSanciones"] = dbConfigs.ContainsKey("NotificarSanciones") ? dbConfigs["NotificarSanciones"] : "false";
+                configuraciones["CorreoNotificaciones"] = dbConfigs.ContainsKey("CorreoNotificaciones") ? dbConfigs["CorreoNotificaciones"] : "noreply@escuela.edu";
+                configuraciones["ModoOscuro"] = dbConfigs.ContainsKey("ModoOscuro") ? dbConfigs["ModoOscuro"] : "false";
+                configuraciones["ZonaHoraria"] = dbConfigs.ContainsKey("ZonaHoraria") ? dbConfigs["ZonaHoraria"] : "America/Costa_Rica";
+                configuraciones["FormatoFecha"] = dbConfigs.ContainsKey("FormatoFecha") ? dbConfigs["FormatoFecha"] : "DD/MM/YYYY HH:MM";
+                configuraciones["MantenerSesion"] = dbConfigs.ContainsKey("MantenerSesion") ? dbConfigs["MantenerSesion"] : "false";
+                configuraciones["ModoMantenimiento"] = dbConfigs.ContainsKey("ModoMantenimiento") ? dbConfigs["ModoMantenimiento"] : "false";
+                configuraciones["FrecuenciaBackup"] = dbConfigs.ContainsKey("FrecuenciaBackup") ? dbConfigs["FrecuenciaBackup"] : "Semanal";
+                configuraciones["RegistroActividades"] = dbConfigs.ContainsKey("RegistroActividades") ? dbConfigs["RegistroActividades"] : "true";
+                configuraciones["LimiteRegistros"] = dbConfigs.ContainsKey("LimiteRegistros") ? dbConfigs["LimiteRegistros"] : "12";
+            }
+            
+            return configuraciones;
+        }
+
+        // Helper: Obtener categoría por clave
+        private string GetCategoriaByKey(string key)
+        {
+            if (key.StartsWith("Nombre") || key.StartsWith("Correo") || key.StartsWith("Telefono") || key.StartsWith("Idioma"))
+                return "General";
+            if (key.StartsWith("Duracion") || key.StartsWith("Intentos") || key.StartsWith("Requerir") || key.StartsWith("Bloqueo"))
+                return "Seguridad";
+            if (key.StartsWith("Notificaciones") || key.StartsWith("Alertas") || key.StartsWith("Notificar"))
+                return "Notificaciones";
+            if (key.StartsWith("ModoOscuro") || key.StartsWith("ZonaHoraria") || key.StartsWith("FormatoFecha") || key.StartsWith("MantenerSesion"))
+                return "Apariencia";
+            return "Sistema";
+        }
+
+        // Helper: Aplicar configuraciones al sistema
+        private void ApplyConfiguraciones(Dictionary<string, string> configuraciones)
+        {
+            // Guardar en variables de sesión para uso en toda la aplicación
+            foreach (var kvp in configuraciones)
+            {
+                Session[$"Config_{kvp.Key}"] = kvp.Value;
+            }
+
+            // Aplicar configuración específica del modo oscuro
+            if (configuraciones.ContainsKey("ModoOscuro") && configuraciones["ModoOscuro"] == "true")
+            {
+                Session["ModoOscuro"] = true;
+            }
+            else
+            {
+                Session["ModoOscuro"] = false;
+            }
+
+            // Aplicar duración de sesión
+            if (configuraciones.ContainsKey("DuracionSesion") && int.TryParse(configuraciones["DuracionSesion"], out int minutos))
+            {
+                Session.Timeout = minutos;
+            }
         }
 
         #region Gestión de Roles

@@ -6,6 +6,35 @@ body {
     background-color: #f8fafc;
 }
 
+/* ===== MODO OSCURO GLOBAL ===== */
+body.dark-mode,
+body[style*="background-color: rgb(15, 23, 42)"] {
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .admin-sidebar,
+body[style*="background-color: rgb(15, 23, 42)"] .admin-sidebar {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .sidebar-header,
+body[style*="background-color: rgb(15, 23, 42)"] .sidebar-header {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .admin-content,
+body[style*="background-color: rgb(15, 23, 42)"] .admin-content {
+    background-color: #0f172a !important;
+}
+
+body.dark-mode .admin-header,
+body[style*="background-color: rgb(15, 23, 42)"] .admin-header {
+    background: #1e293b !important;
+}
+
 .admin-container {
     display: flex;
     min-height: 100vh;

@@ -10,9 +10,63 @@
     @Scripts.Render("~/bundles/modernizr")
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="~/Content/admin-layout.css?v=4" rel="stylesheet" />
+    <link href="~/Content/admin-layout.css?v=5" rel="stylesheet" />
     <link href="~/Content/documento.css?v=1" rel="stylesheet" />
     @RenderSection("Styles", required: false)
+    
+    <style>
+        /* Aplicar modo oscuro si está activo en la sesión */
+        @if (Session["ModoOscuro"] != null && (bool)Session["ModoOscuro"] == true)
+        {
+            <text>
+            body {
+                background-color: #0f172a !important;
+                color: #e2e8f0 !important;
+            }
+            
+            .admin-sidebar {
+                background: #1e293b !important;
+                border-color: #334155 !important;
+            }
+            
+            .sidebar-header {
+                background: #1e293b !important;
+                border-color: #334155 !important;
+            }
+            
+            .admin-content {
+                background-color: #0f172a !important;
+            }
+            
+            .admin-header {
+                background: #1e293b !important;
+            }
+            
+            .config-container,
+            .reportes-container,
+            .dashboard-card,
+            .admin-info-card {
+                background: #1e293b !important;
+                border-color: #334155 !important;
+                color: #e2e8f0 !important;
+            }
+            
+            .nav-link {
+                color: #cbd5e1 !important;
+            }
+            
+            .nav-link:hover,
+            .nav-link.active {
+                background-color: #0f172a !important;
+                color: #3b82f6 !important;
+            }
+            
+            h1, h2, h3, h4 {
+                color: #e2e8f0 !important;
+            }
+            </text>
+        }
+    </style>
 </head>
 <body>
     <div class="admin-container">
