@@ -1,25 +1,413 @@
-﻿@{
+﻿@model Dictionary<string, string>
+@{
     ViewBag.Title = "Configuración del Sistema";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    
+    // Valores por defecto si el modelo es null
+    var configuraciones = Model ?? new Dictionary<string, string>
+    {
+        { "NombreInstitucion", "Escuela Félix Arcadio Montero Monge" },
+        { "CorreoPrincipal", "contacto@escuela.edu" },
+        { "TelefonoContacto", "+506 2222-2222" },
+        { "IdiomaSistema", "Español" },
+        { "DuracionSesion", "30" },
+        { "IntentosLogin", "3" },
+        { "RequerirPasswordSegura", "true" },
+        { "BloqueoInactividad", "true" },
+        { "NotificacionesCorreo", "true" },
+        { "AlertasPrestamos", "true" },
+        { "NotificarSanciones", "false" },
+        { "CorreoNotificaciones", "noreply@escuela.edu" },
+        { "ModoOscuro", "false" },
+        { "ZonaHoraria", "America/Costa_Rica (GMT-6)" },
+        { "FormatoFecha", "DD/MM/YYYY HH:MM" },
+        { "MantenerSesion", "false" },
+        { "ModoMantenimiento", "false" },
+        { "FrecuenciaBackup", "Semanal" },
+        { "RegistroActividades", "true" },
+        { "LimiteRegistros", "12" }
+    };
+    
+    // Verificar modo oscuro de la sesión
+    bool modoOscuro = Session["ModoOscuro"] != null && (bool)Session["ModoOscuro"];
 }
 
 @section Styles {
-    <link href="~/Content/admin-styles.css?v=8" rel="stylesheet" />
+    <link href="~/Content/configuracion.css?v=2" rel="stylesheet" />
+    <link href="~/Content/listar-usuarios.css" rel="stylesheet" />
+    
+    @if (modoOscuro)
+    {
+        <style>
+            body {
+                background-color: #0f172a !important;
+                color: #e2e8f0 !important;
+            }
+        </style>
+    }
 }
 
-<div class="reportes-container">
-    <h1 class="admin-title">Configuración del Sistema</h1>
+<div class="config-container">
+    @Html.AntiForgeryToken()
+    
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px;">
+        <a href="@Url.Action("Index", "Administrativo")" class="btn-volver">
+            <i class="fas fa-arrow-left"></i>
+            Volver a Panel Administrativo
+        </a>
+        <h1 class="config-title" style="margin: 0; flex: 1; text-align: center;">Configuración del Sistema</h1>
+        <div style="width: 200px;"></div>
+    </div>
 
-    <div class="admin-info-card">
-        <div class="admin-info-card-body">
-            <i class="fas fa-cog admin-info-icon"></i>
-            <p class="admin-info-text">Esta sección estará disponible próximamente para configurar los parámetros del sistema.</p>
+    <!-- Panel de Estado Rápido -->
+    <div class="status-panel">
+        <div class="status-card">
+            <i class="fas fa-info-circle status-icon"></i>
+            <div class="status-info">
+                <span class="status-label">Versión del Sistema</span>
+                <span class="status-value">v2.0.1</span>
+            </div>
+        </div>
+        <div class="status-card">
+            <i class="fas fa-calendar-check status-icon"></i>
+            <div class="status-info">
+                <span class="status-label">Último Backup</span>
+                <span class="status-value">Actualizado</span>
+            </div>
+        </div>
+        <div class="status-card">
+            <i class="fas fa-server status-icon"></i>
+            <div class="status-info">
+                <span class="status-label">Estado del Sistema</span>
+                <span class="status-value status-active">Operativo</span>
+            </div>
         </div>
     </div>
 
-    <div class="admin-actions">
-        <a href="@Url.Action("Index", "Administrativo")" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Volver al Panel
-        </a>
+    <!-- Configuraciones por Categorías -->
+    <div class="config-grid">
+        
+        <!-- General -->
+        <div class="config-category">
+            <div class="category-header">
+                <i class="fas fa-cog category-icon"></i>
+                <h3 class="category-title">General</h3>
+            </div>
+            <div class="category-content">
+                <div class="config-item">
+                    <label class="config-label">
+                        <span>Nombre de la Institución</span>
+                    </label>
+                    <input type="text" name="NombreInstitucion" class="config-input" data-config="NombreInstitucion" value="@configuraciones["NombreInstitucion"]" />
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">
+                        <span>Correo Principal</span>
+                    </label>
+                    <input type="email" name="CorreoPrincipal" class="config-input" data-config="CorreoPrincipal" value="@configuraciones["CorreoPrincipal"]" />
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">
+                        <span>Teléfono de Contacto</span>
+                    </label>
+                    <input type="tel" name="TelefonoContacto" class="config-input" data-config="TelefonoContacto" value="@configuraciones["TelefonoContacto"]" />
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">
+                        <span>Idioma del Sistema</span>
+                    </label>
+                    <select name="IdiomaSistema" class="config-select" data-config="IdiomaSistema">
+                        <option value="Español" @(configuraciones["IdiomaSistema"] == "Español" ? "selected" : "")>Español</option>
+                        <option value="Inglés" @(configuraciones["IdiomaSistema"] == "Inglés" ? "selected" : "")>Inglés</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seguridad -->
+        <div class="config-category">
+            <div class="category-header">
+                <i class="fas fa-lock category-icon"></i>
+                <h3 class="category-title">Seguridad</h3>
+            </div>
+            <div class="category-content">
+                <div class="config-item">
+                    <label class="config-label">
+                        <span>Duración de Sesión (minutos)</span>
+                    </label>
+                    <input type="number" name="DuracionSesion" class="config-input" data-config="DuracionSesion" value="@configuraciones["DuracionSesion"]" min="5" max="1440" />
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">
+                        <span>Intentos de Inicio de Sesión</span>
+                    </label>
+                    <input type="number" name="IntentosLogin" class="config-input" data-config="IntentosLogin" value="@configuraciones["IntentosLogin"]" min="1" max="10" />
+                </div>
+                
+                <div class="config-item">
+                    <div class="toggle-container">
+                        <span class="toggle-label">Requerir Contraseña Segura</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="RequerirPasswordSegura" data-config="RequerirPasswordSegura" @(configuraciones["RequerirPasswordSegura"] == "true" ? "checked" : "") />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="config-item">
+                    <div class="toggle-container">
+                        <span class="toggle-label">Bloqueo Automático por Inactividad</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="BloqueoInactividad" data-config="BloqueoInactividad" @(configuraciones["BloqueoInactividad"] == "true" ? "checked" : "") />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notificaciones -->
+        <div class="config-category">
+            <div class="category-header">
+                <i class="fas fa-bell category-icon"></i>
+                <h3 class="category-title">Notificaciones</h3>
+            </div>
+            <div class="category-content">
+                <div class="config-item">
+                    <div class="toggle-container">
+                        <span class="toggle-label">Notificaciones por Correo</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="NotificacionesCorreo" data-config="NotificacionesCorreo" @(configuraciones["NotificacionesCorreo"] == "true" ? "checked" : "") />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="config-item">
+                    <div class="toggle-container">
+                        <span class="toggle-label">Alertas de Préstamos Pendientes</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="AlertasPrestamos" data-config="AlertasPrestamos" @(configuraciones["AlertasPrestamos"] == "true" ? "checked" : "") />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="config-item">
+                    <div class="toggle-container">
+                        <span class="toggle-label">Notificar por Sanciones</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="NotificarSanciones" data-config="NotificarSanciones" @(configuraciones["NotificarSanciones"] == "true" ? "checked" : "") />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">
+                        <span>Correo de Notificaciones</span>
+                    </label>
+                    <input type="email" name="CorreoNotificaciones" class="config-input" data-config="CorreoNotificaciones" value="@configuraciones["CorreoNotificaciones"]" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Apariencia -->
+        <div class="config-category">
+            <div class="category-header">
+                <i class="fas fa-palette category-icon"></i>
+                <h3 class="category-title">Apariencia</h3>
+            </div>
+            <div class="category-content">
+                <div class="config-item">
+                    <div class="toggle-container">
+                        <span class="toggle-label">Modo Oscuro</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="ModoOscuro" data-config="ModoOscuro" id="modoOscuroToggle" @(configuraciones["ModoOscuro"] == "true" ? "checked" : "") />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">
+                        <span>Zona Horaria</span>
+                    </label>
+                    <select name="ZonaHoraria" class="config-select" data-config="ZonaHoraria">
+                        <option value="America/Costa_Rica (GMT-6)" @(configuraciones["ZonaHoraria"] == "America/Costa_Rica (GMT-6)" ? "selected" : "")>America/Costa_Rica (GMT-6)</option>
+                        <option value="America/New_York (GMT-5)" @(configuraciones["ZonaHoraria"] == "America/New_York (GMT-5)" ? "selected" : "")>America/New_York (GMT-5)</option>
+                        <option value="America/Mexico_City (GMT-6)" @(configuraciones["ZonaHoraria"] == "America/Mexico_City (GMT-6)" ? "selected" : "")>America/Mexico_City (GMT-6)</option>
+                    </select>
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">
+                        <span>Formato de Fecha y Hora</span>
+                    </label>
+                    <select name="FormatoFecha" class="config-select" data-config="FormatoFecha">
+                        <option value="DD/MM/YYYY HH:MM" @(configuraciones["FormatoFecha"] == "DD/MM/YYYY HH:MM" ? "selected" : "")>DD/MM/YYYY HH:MM</option>
+                        <option value="YYYY-MM-DD HH:MM" @(configuraciones["FormatoFecha"] == "YYYY-MM-DD HH:MM" ? "selected" : "")>YYYY-MM-DD HH:MM</option>
+                        <option value="MM/DD/YYYY HH:MM" @(configuraciones["FormatoFecha"] == "MM/DD/YYYY HH:MM" ? "selected" : "")>MM/DD/YYYY HH:MM</option>
+                    </select>
+                </div>
+                
+                <div class="config-item">
+                    <div class="toggle-container">
+                        <span class="toggle-label">Mantener Sesión Activa</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="MantenerSesion" data-config="MantenerSesion" @(configuraciones["MantenerSesion"] == "true" ? "checked" : "") />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sistema -->
+        <div class="config-category">
+            <div class="category-header">
+                <i class="fas fa-database category-icon"></i>
+                <h3 class="category-title">Sistema</h3>
+            </div>
+            <div class="category-content">
+                <div class="config-item">
+                    <div class="toggle-container">
+                        <span class="toggle-label">Modo Mantenimiento</span>
+                        <label class="toggle-switch toggle-danger">
+                            <input type="checkbox" name="ModoMantenimiento" data-config="ModoMantenimiento" @(configuraciones["ModoMantenimiento"] == "true" ? "checked" : "") />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">
+                        <span>Frecuencia de Backups Automáticos</span>
+                    </label>
+                    <select name="FrecuenciaBackup" class="config-select" data-config="FrecuenciaBackup">
+                        <option value="Diario" @(configuraciones["FrecuenciaBackup"] == "Diario" ? "selected" : "")>Diario</option>
+                        <option value="Semanal" @(configuraciones["FrecuenciaBackup"] == "Semanal" ? "selected" : "")>Semanal</option>
+                        <option value="Quincenal" @(configuraciones["FrecuenciaBackup"] == "Quincenal" ? "selected" : "")>Quincenal</option>
+                        <option value="Mensual" @(configuraciones["FrecuenciaBackup"] == "Mensual" ? "selected" : "")>Mensual</option>
+                    </select>
+                </div>
+                
+                <div class="config-item">
+                    <div class="toggle-container">
+                        <span class="toggle-label">Registro de Actividades</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="RegistroActividades" data-config="RegistroActividades" @(configuraciones["RegistroActividades"] == "true" ? "checked" : "") />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">
+                        <span>Límite de Registros por Página</span>
+                    </label>
+                    <input type="number" name="LimiteRegistros" class="config-input" data-config="LimiteRegistros" value="@configuraciones["LimiteRegistros"]" min="5" max="50" />
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <!-- Acciones -->
+    <div class="config-actions">
+        <button class="btn-config btn-reset">
+            <i class="fas fa-undo"></i> Restablecer
+        </button>
+        <button class="btn-config btn-save">
+            <i class="fas fa-save"></i> Guardar Cambios
+        </button>
+    </div>
+
+
 </div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jquery")
+    <script>
+        // Funcionalidad de los toggles
+        document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const category = this.closest('.config-category');
+                if (category) {
+                    category.classList.toggle('has-changes', true);
+                }
+            });
+        });
+
+        // Funcionalidad de inputs y selects
+        document.querySelectorAll('.config-input, .config-select').forEach(input => {
+            input.addEventListener('change', function() {
+                const category = this.closest('.config-category');
+                if (category) {
+                    category.classList.toggle('has-changes', true);
+                }
+            });
+        });
+
+        // Botón Guardar
+        document.querySelector('.btn-save')?.addEventListener('click', function() {
+            // Recopilar todos los datos de configuración
+            var configuraciones = {};
+            
+            // Inputs y selects
+            document.querySelectorAll('.config-input, .config-select').forEach(input => {
+                if (input.hasAttribute('data-config')) {
+                    configuraciones[input.getAttribute('data-config')] = input.value;
+                }
+            });
+            
+            // Checkboxes (toggles)
+            document.querySelectorAll('.toggle-switch input[type="checkbox"]').forEach(checkbox => {
+                if (checkbox.hasAttribute('data-config')) {
+                    configuraciones[checkbox.getAttribute('data-config')] = checkbox.checked ? 'true' : 'false';
+                }
+            });
+            
+            // Enviar al servidor
+            $.ajax({
+                url: '@Url.Action("GuardarConfiguracion", "Administrativo")',
+                type: 'POST',
+                data: {
+                    configuraciones: configuraciones,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert('Cambios guardados exitosamente');
+                        
+                        // Remover el indicador de cambios
+                        document.querySelectorAll('.has-changes').forEach(category => {
+                            category.classList.remove('has-changes');
+                        });
+                        
+                        // Si se cambió el modo oscuro, recargar la página
+                        if (configuraciones['ModoOscuro']) {
+                            location.reload();
+                        }
+                    } else {
+                        alert('Error al guardar: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Error al guardar las configuraciones');
+                }
+            });
+        });
+
+        // Botón Restablecer
+        document.querySelector('.btn-reset')?.addEventListener('click', function() {
+            if (confirm('¿Estás seguro de que deseas restablecer todos los cambios?')) {
+                location.reload();
+            }
+        });
+    </script>
+}

@@ -205,6 +205,10 @@
     <Compile Include="Migrations\202510272322172_AgregarTablaMensajeSistema.Designer.cs">
       <DependentUpon>202510272322172_AgregarTablaMensajeSistema.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202510292346597_AgregarTablaConfiguracionSistema.cs" />
+    <Compile Include="Migrations\202510292346597_AgregarTablaConfiguracionSistema.Designer.cs">
+      <DependentUpon>202510292346597_AgregarTablaConfiguracionSistema.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AlertaReporte.cs" />
@@ -215,6 +219,7 @@
     <Compile Include="Models\Categoria.cs" />
     <Compile Include="Models\ComentarioReporte.cs" />
     <Compile Include="Models\ConfiguracionReporte.cs" />
+    <Compile Include="Models\ConfiguracionSistema.cs" />
     <Compile Include="Models\Documento.cs" />
     <Compile Include="Models\Espacio.cs" />
     <Compile Include="Models\Estado.cs" />
@@ -253,6 +258,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Base de Datos\CambiardeUsuarioaAdmin.sql" />
+    <Content Include="Base de Datos\CrearTablaConfiguracionSistema.sql" />
     <Content Include="Base de Datos\HabilitarBloqueoUsuarios.sql" />
     <Content Include="Base de Datos\InsertsBaseDatos.sql" />
     <Content Include="Base de Datos\NumeroSerieProductoActualizado.sql" />
@@ -289,6 +295,7 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\categoria.css" />
     <Content Include="Content\comparar-periodos.css" />
+    <Content Include="Content\configuracion.css" />
     <Content Include="Content\documento.css" />
     <Content Include="Content\espacios.css" />
     <Content Include="Content\estadisticas.css" />
@@ -497,6 +504,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202510272322172_AgregarTablaMensajeSistema.resx">
       <DependentUpon>202510272322172_AgregarTablaMensajeSistema.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202510292346597_AgregarTablaConfiguracionSistema.resx">
+      <DependentUpon>202510292346597_AgregarTablaConfiguracionSistema.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
