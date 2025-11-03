@@ -14,7 +14,7 @@
     <!-- Header with title and create button -->
     <div class="documento-header">
         <h1 class="documento-title">Documentos Deportivos</h1>
-        @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
+        @if (User.IsInRole("Administrador") || User.IsInRole("Docente"))
         {
             <a href="@Url.Action("Create", "Documento")" class="btn-create-documento">
                 <i class="fas fa-plus"></i>
@@ -163,7 +163,7 @@
             <i class="fas fa-folder-open"></i>
             <h3>No hay documentos disponibles</h3>
             <p>
-                @if (User.IsInRole("Administrador") || User.IsInRole("Profesor"))
+                @if (User.IsInRole("Administrador") || User.IsInRole("Docente"))
                 {
                     <text>Comienza subiendo tu primer documento deportivo.</text>
                 }

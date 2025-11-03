@@ -9,7 +9,7 @@ using System.Data.SqlClient;
 
 namespace EscuelaFelixArcadio.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Docente")]
     public class InventarioController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();

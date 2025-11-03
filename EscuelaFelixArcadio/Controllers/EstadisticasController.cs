@@ -9,7 +9,7 @@ using Microsoft.AspNet.Identity;
 
 namespace EscuelaFelixArcadio.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Docente")]
     public class EstadisticasController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();

@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 
 namespace EscuelaFelixArcadio.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Docente")]
     public class ReportesController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();

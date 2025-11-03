@@ -11,7 +11,7 @@ using Microsoft.AspNet.Identity;
 
 namespace EscuelaFelixArcadio.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Administrador,Docente,Estudiante")]
     public class DocumentoController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
@@ -116,13 +116,13 @@ namespace EscuelaFelixArcadio.Controllers
         }
 
         // GET: Documento/Create
-        [Authorize(Roles = "Administrador,Profesor")]
+        [Authorize(Roles = "Administrador,Docente")]
         public ActionResult Create()
         {
             System.Diagnostics.Debug.WriteLine("=== MÉTODO GET CREATE ===");
             System.Diagnostics.Debug.WriteLine($"Usuario: {User.Identity.Name}");
             System.Diagnostics.Debug.WriteLine($"IsInRole Admin: {User.IsInRole("Administrador")}");
-            System.Diagnostics.Debug.WriteLine($"IsInRole Profesor: {User.IsInRole("Profesor")}");
+            System.Diagnostics.Debug.WriteLine($"IsInRole Docente: {User.IsInRole("Docente")}");
             
             ViewBag.Title = "Subir Documento";
             
@@ -145,7 +145,7 @@ namespace EscuelaFelixArcadio.Controllers
         // POST: Documento/Create - Carga de archivo PDF
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador,Profesor")]
+        [Authorize(Roles = "Administrador,Docente")]
         public ActionResult Create(string Titulo, string Descripcion, string TipoDocumento, HttpPostedFileBase archivo, string Publico)
         {
             try
@@ -262,7 +262,7 @@ namespace EscuelaFelixArcadio.Controllers
         }
 
         // GET: Documento/Edit/5
-        [Authorize(Roles = "Administrador,Profesor")]
+        [Authorize(Roles = "Administrador,Docente")]
         public ActionResult Edit(long? id)
         {
             if (id == null)
@@ -301,7 +301,7 @@ namespace EscuelaFelixArcadio.Controllers
         // POST: Documento/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador,Profesor")]
+        [Authorize(Roles = "Administrador,Docente")]
         public ActionResult Edit([Bind(Include = "IdDocumento,Titulo,Descripcion,TipoDocumento,Publico,NombreArchivo,RutaArchivo,TamanoArchivo,FechaSubida,Id,Activo")] Documento documento, HttpPostedFileBase archivo)
         {
             try
@@ -389,7 +389,7 @@ namespace EscuelaFelixArcadio.Controllers
         }
 
         // GET: Documento/Delete/5
-        [Authorize(Roles = "Administrador,Profesor")]
+        [Authorize(Roles = "Administrador,Docente")]
         public ActionResult Delete(long? id)
         {
             if (id == null)
@@ -419,7 +419,7 @@ namespace EscuelaFelixArcadio.Controllers
         // POST: Documento/Delete/5 - Eliminación física de la base de datos
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrador,Profesor")]
+        [Authorize(Roles = "Administrador,Docente")]
         public ActionResult DeleteConfirmed(long id)
         {
             try

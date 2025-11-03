@@ -257,12 +257,14 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Base de Datos\AsignarRolEstudiante.sql" />
     <Content Include="Base de Datos\CambiardeUsuarioaAdmin.sql" />
     <Content Include="Base de Datos\CrearTablaConfiguracionSistema.sql" />
     <Content Include="Base de Datos\HabilitarBloqueoUsuarios.sql" />
     <Content Include="Base de Datos\InsertsBaseDatos.sql" />
     <Content Include="Base de Datos\NumeroSerieProductoActualizado.sql" />
     <Content Include="Base de Datos\ResetearIntentosBloqueo.sql" />
+    <Content Include="Base de Datos\VerificarRolesUsuarios.sql" />
     <Content Include="bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll" />
     <Content Include="bin\roslyn\Microsoft.CodeAnalysis.dll" />
     <Content Include="bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll" />
@@ -457,6 +459,7 @@
     <Content Include="Views\Administrativo\Usuarios.cshtml" />
     <Content Include="Views\Administrativo\Roles.cshtml" />
     <Content Include="Views\Administrativo\Configuracion.cshtml" />
+    <Content Include="Views\Shared\_MenuNavegacion.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

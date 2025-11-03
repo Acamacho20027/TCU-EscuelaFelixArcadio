@@ -8,7 +8,7 @@ using System.Data.Entity;
 
 namespace EscuelaFelixArcadio.Controllers
 {
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "Administrador,Docente")]
     public class PrestamosController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();

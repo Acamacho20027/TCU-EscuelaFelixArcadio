@@ -104,9 +104,42 @@ namespace EscuelaFelixArcadio.Controllers
                 // Contraseña correcta - resetear contador de intentos fallidos
                 await UserManager.ResetAccessFailedCountAsync(user.Id);
                 
+                // Obtener roles del usuario ANTES de iniciar sesión
+                var roles = await UserManager.GetRolesAsync(user.Id);
+                
                 // Iniciar sesión
                 await SignInManager.SignInAsync(user, model.RememberMe, model.RememberMe);
-                return RedirectToLocal(returnUrl);
+                
+                // Debug: Log de roles para verificar
+                System.Diagnostics.Debug.WriteLine($"Usuario: {user.Email}");
+                System.Diagnostics.Debug.WriteLine($"Roles encontrados: {string.Join(", ", roles)}");
+                
+                // Redirigir según el rol (verificar de forma más explícita)
+                if (roles != null && roles.Any())
+                {
+                    var primerRol = roles.FirstOrDefault();
+                    System.Diagnostics.Debug.WriteLine($"Primer rol: {primerRol}");
+                    
+                    if (primerRol == "Administrador")
+                    {
+                        System.Diagnostics.Debug.WriteLine("Redirigiendo a Inventario (Admin)");
+                        return RedirectToAction("Index", "Inventario");
+                    }
+                    else if (primerRol == "Docente")
+                    {
+                        System.Diagnostics.Debug.WriteLine("Redirigiendo a Inventario (Docente)");
+                        return RedirectToAction("Index", "Inventario");
+                    }
+                    else if (primerRol == "Estudiante")
+                    {
+                        System.Diagnostics.Debug.WriteLine("Redirigiendo a Documento (Estudiante)");
+                        return RedirectToAction("Index", "Documento");
+                    }
+                }
+                
+                // Si no tiene rol o no coincide, ir a Home
+                System.Diagnostics.Debug.WriteLine("Redirigiendo a Home (sin rol específico)");
+                return RedirectToAction("Index", "Home");
             }
             else
             {
@@ -672,12 +705,21 @@ namespace EscuelaFelixArcadio.Controllers
                 return Redirect(returnUrl);
             }
             
-            // Si el usuario es administrador, redirigir al dashboard de administración
+            // Redirigir según el rol del usuario
             if (User.IsInRole("Administrador"))
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Inventario");
+            }
+            else if (User.IsInRole("Docente"))
+            {
+                return RedirectToAction("Index", "Inventario");
+            }
+            else if (User.IsInRole("Estudiante"))
+            {
+                return RedirectToAction("Index", "Documento");
             }
             
+            // Por defecto, redirigir a Home
             return RedirectToAction("Index", "Home");
         }
 
