@@ -91,66 +91,7 @@ body {
 }
 
 /* ===== NAVIGATION MENU ===== */
-.sidebar-nav {
-    padding: 1rem 0;
-}
-
-.nav-section {
-    margin-bottom: 2rem;
-}
-
-.nav-section-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin: 0 1.5rem 1rem;
-    padding: 0;
-}
-
-.nav-menu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.nav-item {
-    margin: 0;
-}
-
-.nav-link {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    color: #64748b;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
-}
-
-.nav-link:hover {
-    background-color: #f8fafc;
-    color: #1e40af;
-    text-decoration: none;
-    border-left-color: #1e40af;
-}
-
-.nav-link.active {
-    background-color: #f8fafc;
-    color: #1e40af;
-    border-left-color: #1e40af;
-    font-weight: 600;
-}
-
-.nav-link i {
-    width: 20px;
-    text-align: center;
-    font-size: 1.1rem;
-}
+/* Los estilos del menú de navegación ahora están en menu-navegacion.css */
 
 /* ===== MAIN CONTENT AREA ===== */
 .admin-main {
@@ -359,11 +300,7 @@ html, body {
 }
 
 /* ===== NAVIGATION SEPARATOR ===== */
-.nav-separator {
-    height: 1px;
-    background: #e2e8f0;
-    margin: 1rem 1.5rem;
-}
+/* El estilo .nav-separator ahora está en menu-navegacion.css */
 
 /* ===== SCROLLBAR STYLING ===== */
 .admin-sidebar::-webkit-scrollbar {

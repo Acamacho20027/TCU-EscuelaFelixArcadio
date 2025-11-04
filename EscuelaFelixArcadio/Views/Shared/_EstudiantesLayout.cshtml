@@ -1,4 +1,6 @@
-﻿<!-- Navigation Menu -->
+﻿<link href="~/Content/menu-navegacion.css?v=@DateTime.Now.Ticks" rel="stylesheet" />
+
+<!-- Navigation Menu -->
 <div class="sidebar-nav">
     @* Sección PLATAFORMA - Solo para Administrador y Docente *@
     @if (User.IsInRole("Administrador") || User.IsInRole("Docente"))
@@ -89,12 +91,76 @@
             </li>
 
             @* Espacios - Para todos los roles autenticados *@
-            <li class="nav-item">
+            <li class="nav-item" id="menu-espacios">
                 <a href="@Url.Action("Index", "Espacios")" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Espacios" ? "active" : "")">
                     <i class="fas fa-building"></i>
-                    <span>Espacios</span>
+                    <span id="texto-espacios">Espacios</span>
                 </a>
             </li>
         </ul>
     </div>
 </div>
+
+<script>
+    // Script agresivo para forzar "Espacios" en el menú
+    (function() {
+        function forzarTextoEspacios() {
+            // Método 1: Por ID
+            var spanEspacios = document.getElementById('texto-espacios');
+            if (spanEspacios) {
+                spanEspacios.textContent = 'Espacios';
+                spanEspacios.innerHTML = 'Espacios';
+            }
+            
+            // Método 2: Por href que contenga "Espacios"
+            var linksEspacios = document.querySelectorAll('a[href*="/Espacios"]');
+            linksEspacios.forEach(function(link) {
+                var span = link.querySelector('span');
+                if (span) {
+                    span.textContent = 'Espacios';
+                    span.innerHTML = 'Espacios';
+                }
+            });
+            
+            // Método 3: Buscar por ícono de edificio y forzar texto
+            var iconosEdificio = document.querySelectorAll('.fa-building');
+            iconosEdificio.forEach(function(icono) {
+                var link = icono.closest('.nav-link');
+                if (link) {
+                    var span = link.querySelector('span');
+                    if (span) {
+                        span.textContent = 'Espacios';
+                        span.innerHTML = 'Espacios';
+                    }
+                }
+            });
+            
+            // Método 4: Buscar cualquier span que diga "Reportes" y tenga ícono de edificio
+            var todosLosSpans = document.querySelectorAll('.nav-link span');
+            todosLosSpans.forEach(function(span) {
+                var link = span.closest('.nav-link');
+                if (link && link.querySelector('.fa-building')) {
+                    span.textContent = 'Espacios';
+                    span.innerHTML = 'Espacios';
+                }
+            });
+        }
+        
+        // Ejecutar inmediatamente
+        forzarTextoEspacios();
+        
+        // Ejecutar múltiples veces
+        setTimeout(forzarTextoEspacios, 100);
+        setTimeout(forzarTextoEspacios, 500);
+        setTimeout(forzarTextoEspacios, 1000);
+        setTimeout(forzarTextoEspacios, 2000);
+        
+        // Ejecutar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', forzarTextoEspacios);
+        }
+        
+        // Ejecutar periódicamente
+        setInterval(forzarTextoEspacios, 2000);
+    })();
+</script>

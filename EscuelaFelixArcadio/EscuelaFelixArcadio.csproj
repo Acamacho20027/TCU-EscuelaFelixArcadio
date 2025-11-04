@@ -265,17 +265,6 @@
     <Content Include="Base de Datos\NumeroSerieProductoActualizado.sql" />
     <Content Include="Base de Datos\ResetearIntentosBloqueo.sql" />
     <Content Include="Base de Datos\VerificarRolesUsuarios.sql" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.dll" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll" />
-    <Content Include="bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll" />
-    <Content Include="bin\roslyn\System.Collections.Immutable.dll" />
-    <Content Include="bin\roslyn\System.IO.FileSystem.dll" />
-    <Content Include="bin\roslyn\System.IO.FileSystem.Primitives.dll" />
-    <Content Include="bin\roslyn\System.Reflection.Metadata.dll" />
-    <Content Include="bin\roslyn\System.Security.Cryptography.Primitives.dll" />
-    <Content Include="bin\roslyn\System.ValueTuple.dll" />
-    <Content Include="bin\roslyn\VBCSCompiler.exe" />
     <Content Include="Content\admin-layout.css" />
     <Content Include="Content\admin-styles.css" />
     <Content Include="Content\auth-pages.css" />
@@ -308,6 +297,7 @@
     <Content Include="Content\images\herramientas-deportivas.jpg" />
     <Content Include="Content\inventario.css" />
     <Content Include="Content\listar-usuarios.css" />
+    <Content Include="Content\menu-navegacion.css" />
     <Content Include="Content\modo-oscuro.css" />
     <Content Include="Content\plantillas.css" />
     <Content Include="Content\prestamos.css" />
@@ -460,11 +450,10 @@
     <Content Include="Views\Administrativo\Usuarios.cshtml" />
     <Content Include="Views\Administrativo\Roles.cshtml" />
     <Content Include="Views\Administrativo\Configuracion.cshtml" />
-    <Content Include="Views\Shared\_MenuNavegacion.cshtml" />
+    <Content Include="Views\Shared\_EstudiantesLayout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="bin\es\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

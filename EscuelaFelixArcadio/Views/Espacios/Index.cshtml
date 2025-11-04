@@ -170,11 +170,11 @@
                         <i class="fas fa-hashtag"></i> ID: @item.IdEspacio
                     </span>
                     <div class="espacios-card-actions">
-                        <a href="@Url.Action("Details", new { id = item.IdEspacio })" class="btn-espacios-action btn-espacios-details">
-                            <i class="fas fa-eye"></i> Detalle
-                        </a>
                         @if (User.IsInRole("Administrador") || User.IsInRole("Docente"))
                         {
+                            <a href="@Url.Action("Details", new { id = item.IdEspacio })" class="btn-espacios-action btn-espacios-details">
+                                <i class="fas fa-eye"></i> Detalle
+                            </a>
                             <a href="@Url.Action("Delete", new { id = item.IdEspacio })" class="btn-espacios-action btn-espacios-delete">
                                 <i class="fas fa-trash-alt"></i>
                             </a>
@@ -445,10 +445,8 @@
                 forzarEstilosInactivos();
             });
 
-            // Forzar estilos cada vez que cambie el contenido
-            $(document).on('DOMNodeInserted', function() {
-                forzarEstilosInactivos();
-            });
+            // Ejecutar periódicamente para asegurar estilos
+            setInterval(forzarEstilosInactivos, 3000);
         });
     </script>
 

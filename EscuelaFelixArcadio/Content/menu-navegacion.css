@@ -1,0 +1,115 @@
+/* ================================================
+   ESTILOS PARA MENU DE NAVEGACION
+   Archivo CSS exclusivo para _MenuNavegacion.cshtml
+   ================================================ */
+
+/* Estilos base del menú de navegación */
+.sidebar-nav {
+    padding: 1rem 0;
+}
+
+.nav-section {
+    margin-bottom: 2rem;
+}
+
+.nav-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 1.5rem 1rem;
+    padding: 0;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-item {
+    margin: 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+    background-color: #f8fafc;
+    color: #1e40af;
+    text-decoration: none;
+    border-left-color: #1e40af;
+}
+
+.nav-link.active {
+    background-color: #f8fafc;
+    color: #1e40af;
+    border-left-color: #1e40af;
+    font-weight: 600;
+}
+
+.nav-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.nav-separator {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 1rem 1.5rem;
+}
+
+/* Forzar actualización y visibilidad de todos los elementos */
+.nav-section .nav-menu li {
+    display: list-item !important;
+    visibility: visible !important;
+}
+
+.nav-section .nav-menu li .nav-link {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+.nav-section .nav-menu li .nav-link span {
+    display: inline-block !important;
+    visibility: visible !important;
+    font-size: 0.95rem !important;
+}
+
+.nav-section .nav-menu li .nav-link i {
+    display: inline-block !important;
+    visibility: visible !important;
+}
+
+/* ===== FORZAR TEXTO "ESPACIOS" CON CSS ===== */
+/* Forzar que el span muestre "Espacios" */
+#texto-espacios::before {
+    content: "Espacios" !important;
+    font-size: 0.95rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+}
+
+#texto-espacios {
+    font-size: 0 !important;
+}
+
+/* Cuando está activo o hover */
+.nav-link:hover #texto-espacios::before,
+.nav-link.active #texto-espacios::before {
+    color: #1e40af !important;
+    font-weight: 600 !important;
+}
+

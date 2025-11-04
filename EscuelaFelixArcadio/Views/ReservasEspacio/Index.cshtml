@@ -191,14 +191,17 @@
                     <span class="reservas-card-id">
                         <i class="fas fa-hashtag"></i> ID: @item.IdReservaEspacio
                     </span>
-                    <div class="reservas-card-actions">
-                        <a href="@Url.Action("Details", new { id = item.IdReservaEspacio })" class="btn-reservas-action btn-reservas-details">
-                            <i class="fas fa-eye"></i> Detalle
-                        </a>
-                        <a href="@Url.Action("Delete", new { id = item.IdReservaEspacio })" class="btn-reservas-action btn-reservas-delete">
-                            <i class="fas fa-trash-alt"></i>
-                        </a>
-                    </div>
+                    @if (User.IsInRole("Administrador") || User.IsInRole("Docente"))
+                    {
+                        <div class="reservas-card-actions">
+                            <a href="@Url.Action("Details", new { id = item.IdReservaEspacio })" class="btn-reservas-action btn-reservas-details">
+                                <i class="fas fa-eye"></i> Detalle
+                            </a>
+                            <a href="@Url.Action("Delete", new { id = item.IdReservaEspacio })" class="btn-reservas-action btn-reservas-delete">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+                    }
                 </div>
             </div>
         }
@@ -340,10 +343,17 @@
                         html += '</div>';
                         html += '<div class="reservas-card-footer">';
                         html += '<span class="reservas-card-id"><i class="fas fa-hashtag"></i> ID: ' + item.IdReservaEspacio + '</span>';
-                        html += '<div class="reservas-card-actions">';
-                        html += '<a href="/ReservasEspacio/Details/' + item.IdReservaEspacio + '" class="btn-reservas-action btn-reservas-details"><i class="fas fa-eye"></i> Detalle</a>';
-                        html += '<a href="/ReservasEspacio/Delete/' + item.IdReservaEspacio + '" class="btn-reservas-action btn-reservas-delete"><i class="fas fa-trash-alt"></i></a>';
-                        html += '</div></div></div>';
+                        
+                        @* Solo mostrar botones para Administrador y Docente *@
+                        var esEstudiante = '@(User.IsInRole("Estudiante") ? "true" : "false")';
+                        if (esEstudiante === 'false') {
+                            html += '<div class="reservas-card-actions">';
+                            html += '<a href="/ReservasEspacio/Details/' + item.IdReservaEspacio + '" class="btn-reservas-action btn-reservas-details"><i class="fas fa-eye"></i> Detalle</a>';
+                            html += '<a href="/ReservasEspacio/Delete/' + item.IdReservaEspacio + '" class="btn-reservas-action btn-reservas-delete"><i class="fas fa-trash-alt"></i></a>';
+                            html += '</div>';
+                        }
+                        
+                        html += '</div></div>';
                     });
                 }
                 
