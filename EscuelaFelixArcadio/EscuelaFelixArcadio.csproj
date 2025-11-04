@@ -308,6 +308,7 @@
     <Content Include="Content\images\herramientas-deportivas.jpg" />
     <Content Include="Content\inventario.css" />
     <Content Include="Content\listar-usuarios.css" />
+    <Content Include="Content\modo-oscuro.css" />
     <Content Include="Content\plantillas.css" />
     <Content Include="Content\prestamos.css" />
     <Content Include="Content\productos.css" />

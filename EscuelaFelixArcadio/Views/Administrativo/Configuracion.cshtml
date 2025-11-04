@@ -35,16 +35,6 @@
 @section Styles {
     <link href="~/Content/configuracion.css?v=2" rel="stylesheet" />
     <link href="~/Content/listar-usuarios.css" rel="stylesheet" />
-    
-    @if (modoOscuro)
-    {
-        <style>
-            body {
-                background-color: #0f172a !important;
-                color: #e2e8f0 !important;
-            }
-        </style>
-    }
 }
 
 <div class="config-container">
@@ -382,16 +372,19 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        alert('Cambios guardados exitosamente');
-                        
                         // Remover el indicador de cambios
                         document.querySelectorAll('.has-changes').forEach(category => {
                             category.classList.remove('has-changes');
                         });
                         
-                        // Si se cambió el modo oscuro, recargar la página
-                        if (configuraciones['ModoOscuro']) {
-                            location.reload();
+                        // Si se cambió el modo oscuro, recargar la página para aplicar los cambios
+                        if ('ModoOscuro' in configuraciones) {
+                            alert('Configuración guardada. Recargando página para aplicar cambios...');
+                            setTimeout(function() {
+                                location.reload();
+                            }, 500);
+                        } else {
+                            alert('Cambios guardados exitosamente');
                         }
                     } else {
                         alert('Error al guardar: ' + response.message);

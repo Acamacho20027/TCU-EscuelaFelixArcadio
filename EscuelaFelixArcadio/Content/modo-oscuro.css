@@ -1,0 +1,95 @@
+/* ================================================
+   MODO OSCURO - ESTILOS EXCLUSIVOS
+   Este archivo se carga solo cuando el modo oscuro está activo
+   ================================================ */
+
+/* Body y fondo general */
+body {
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
+}
+
+/* Sidebar */
+.admin-sidebar {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+.sidebar-header {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Contenido principal */
+.admin-content {
+    background-color: #0f172a !important;
+}
+
+/* Header */
+.admin-header {
+    background: #1e293b !important;
+}
+
+/* Cards y contenedores */
+.config-container,
+.reportes-container,
+.dashboard-card,
+.admin-info-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+/* Navigation links */
+.nav-link {
+    color: #cbd5e1 !important;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background-color: #0f172a !important;
+    color: #3b82f6 !important;
+}
+
+/* Headers y títulos */
+h1, h2, h3, h4 {
+    color: #e2e8f0 !important;
+}
+
+/* Separadores */
+.nav-separator {
+    background: #334155 !important;
+}
+
+/* Títulos de sección */
+.nav-section-title {
+    color: #94a3b8 !important;
+}
+
+/* Logo text */
+.sidebar-logo-title {
+    color: #e2e8f0 !important;
+}
+
+.sidebar-logo-subtitle {
+    color: #94a3b8 !important;
+}
+
+/* User info */
+.admin-user-name {
+    color: #e2e8f0 !important;
+}
+
+/* Scrollbar en modo oscuro */
+.admin-sidebar::-webkit-scrollbar-track {
+    background: #1e293b !important;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+    background: #475569 !important;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+    background: #64748b !important;
+}
+
