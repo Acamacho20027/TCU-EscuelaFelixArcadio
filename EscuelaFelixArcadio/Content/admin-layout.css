@@ -513,46 +513,6 @@ body {
     white-space: nowrap;
 }
 
-/* Corregir Reportes - elemento 2 en sección ADMINISTRACIÓN */
-.nav-section:last-of-type .nav-menu li:nth-child(2) .nav-link span {
-    position: relative;
-    font-size: 0 !important;
-    color: transparent !important;
-}
-
-.nav-section:last-of-type .nav-menu li:nth-child(2) .nav-link span::before {
-    content: "Reportes";
-    position: absolute;
-    left: 0;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    font-size: 0.9rem !important;
-    color: #64748b !important;
-    font-weight: 500 !important;
-    white-space: nowrap;
-}
-/* Corregir Estadísticas - elemento 3 en sección ADMINISTRACIÓN */
-.nav-section:last-of-type .nav-menu li:nth-child(3) .nav-link span {
-    position: relative;
-    font-size: 0 !important;
-    color: transparent !important;
-    display: inline-block !important;
-    vertical-align: middle !important;
-}
-
-.nav-section:last-of-type .nav-menu li:nth-child(3) .nav-link span::before {
-    content: "Estadísticas";
-    position: absolute;
-    left: 0;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    font-size: 0.9rem !important;
-    color: #64748b !important;
-    font-weight: 500 !important;
-    white-space: nowrap;
-}
-
-
 /* ADMINISTRACIÓN - Forzar reemplazo completo */
 .nav-section:last-of-type .nav-section-title {
     position: relative;
@@ -570,4 +530,94 @@ body {
     font-weight: 700 !important;
     letter-spacing: 0.05em !important;
     white-space: nowrap;
+}
+
+/* ===== CORRECIONES PARA VISTA DOCENTE (Por Icono) ===== */
+/* Estas reglas identifican los items por icono, NO por posición */
+/* Funcionan tanto para Administrador como para Docente */
+
+/* Corregir REPORTES - identificado por icono fa-chart-line */
+.nav-link:has(.fa-chart-line) span {
+    position: relative;
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+.nav-link:has(.fa-chart-line) span::before {
+    content: "Reportes";
+    position: absolute;
+    left: 0;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+}
+
+.nav-link:hover:has(.fa-chart-line) span::before,
+.nav-link.active:has(.fa-chart-line) span::before {
+    color: #1e40af !important;
+    font-weight: 600 !important;
+}
+
+/* Corregir ESTADÍSTICAS - identificado por icono fa-chart-bar */
+.nav-link:has(.fa-chart-bar) span {
+    position: relative;
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+.nav-link:has(.fa-chart-bar) span::before {
+    content: "Estadísticas";
+    position: absolute;
+    left: 0;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+}
+
+.nav-link:hover:has(.fa-chart-bar) span::before,
+.nav-link.active:has(.fa-chart-bar) span::before {
+    color: #1e40af !important;
+    font-weight: 600 !important;
+}
+
+/* Corregir DEPORTIVO - identificado por icono fa-running */
+.nav-link:has(.fa-running) span {
+    position: relative;
+    font-size: 0 !important;
+    color: transparent !important;
+}
+
+.nav-link:has(.fa-running) span::before {
+    content: "Deportivo";
+    position: absolute;
+    left: 0;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    white-space: nowrap;
+}
+
+.nav-link:hover:has(.fa-running) span::before,
+.nav-link.active:has(.fa-running) span::before {
+    color: #1e40af !important;
+    font-weight: 600 !important;
+}
+
+/* ===== OCULTAR ADMINISTRATIVO SOLO PARA DOCENTES ===== */
+/* Ocultar el item Administrativo solo cuando el usuario es Docente */
+body.rol-docente .nav-item:has(.fa-users-cog) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
 }

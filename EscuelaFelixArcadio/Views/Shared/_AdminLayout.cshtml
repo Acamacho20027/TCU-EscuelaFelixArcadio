@@ -10,7 +10,7 @@
     @Scripts.Render("~/bundles/modernizr")
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="~/Content/admin-layout.css?v=5" rel="stylesheet" />
+    <link href="~/Content/admin-layout.css?v=7" rel="stylesheet" />
     <link href="~/Content/documento.css?v=1" rel="stylesheet" />
     
     @* Cargar CSS de modo oscuro solo si está activo *@
@@ -21,7 +21,7 @@
     
     @RenderSection("Styles", required: false)
 </head>
-<body>
+<body class="@(User.IsInRole("Administrador") ? "rol-administrador" : User.IsInRole("Docente") ? "rol-docente" : "rol-otro")">
     <div class="admin-container">
         <!-- Sidebar -->
         <nav class="admin-sidebar">
