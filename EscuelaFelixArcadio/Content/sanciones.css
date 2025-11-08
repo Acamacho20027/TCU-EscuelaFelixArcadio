@@ -327,14 +327,19 @@
 /* Card header with sancion info */
 .sanciones-card-header {
     margin-bottom: 1rem;
-    padding-right: 80px;
+    padding-right: 95px;
 }
 
 .sanciones-card-user {
-    font-size: 1.25rem;
+    font-size: 0.75rem !important;
     font-weight: 700;
     color: #0ea5e9;
     margin: 0 0 0.25rem 0;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 50% !important;
+    display: block !important;
 }
 
 .sanciones-card-tipo {

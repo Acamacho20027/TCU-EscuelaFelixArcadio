@@ -74,6 +74,7 @@
         @using (Html.BeginForm("Delete", "Productos", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.IdProducto)
             
             <div class="productos-form-buttons">
                 <button type="submit" class="btn-productos-delete-confirm">

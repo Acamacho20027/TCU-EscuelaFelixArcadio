@@ -1,0 +1,25 @@
+/* ===== FIX ESPECÍFICO PARA SUPERPOSICIÓN DE CORREOS Y ETIQUETAS EN CARDS DE SANCIONES ===== */
+
+/* Limitar el ancho del correo electrónico para que no llegue hasta la etiqueta */
+.sanciones-card .sanciones-card-user {
+    font-size: 1.2rem !important;
+    max-width: 45% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+}
+
+/* Asegurar que la etiqueta de estado tenga suficiente espacio */
+.sanciones-card .sanciones-card-status {
+    position: absolute !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    max-width: 45% !important;
+}
+
+/* Asegurar que el header tenga padding suficiente para la etiqueta */
+.sanciones-card .sanciones-card-header {
+    padding-right: 100px !important;
+}
+

@@ -281,27 +281,54 @@ namespace EscuelaFelixArcadio.Controllers
         // POST: Productos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(int IdProducto)
         {
             try
             {
-                var producto = db.Producto.Find(id);
-                if (producto != null)
+                // Método 1: Intentar usando procedimiento almacenado (si existe)
+                try
                 {
-                    // Soft delete - marcar como eliminado en lugar de eliminar físicamente
-                    producto.Eliminado = true;
-                    db.SaveChanges();
+                    var result = db.Database.SqlQuery<int>("EXEC sp_EliminarProducto @IdProducto", 
+                        new System.Data.SqlClient.SqlParameter("@IdProducto", IdProducto)).FirstOrDefault();
                     
+                    if (result > 0)
+                    {
+                        TempData["SuccessMessage"] = "Producto eliminado exitosamente usando procedimiento almacenado.";
+                        return RedirectToAction("Index");
+                    }
+                }
+                catch
+                {
+                    // Si el procedimiento no existe, continuar con el siguiente método
+                }
+                
+                // Método 2: SQL directo con UPDATE
+                string sql = "UPDATE dbo.Producto SET Eliminado = 1 WHERE IdProducto = @p0";
+                int resultado = db.Database.ExecuteSqlCommand(sql, IdProducto);
+                
+                if (resultado > 0)
+                {
                     TempData["SuccessMessage"] = "Producto eliminado exitosamente.";
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Producto no encontrado.";
+                    // Método 3: Intentar con Entity Framework tradicional
+                    var producto = db.Producto.Find(IdProducto);
+                    if (producto != null)
+                    {
+                        producto.Eliminado = true;
+                        db.SaveChanges();
+                        TempData["SuccessMessage"] = "Producto eliminado exitosamente (EF).";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "No se encontró el producto con ID: " + IdProducto;
+                    }
                 }
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Error al eliminar el producto: " + ex.Message;
+                TempData["ErrorMessage"] = "Error al eliminar el producto: " + ex.Message + " | InnerException: " + (ex.InnerException != null ? ex.InnerException.Message : "No hay inner exception");
             }
             
             return RedirectToAction("Index");

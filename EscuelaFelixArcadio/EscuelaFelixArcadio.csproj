@@ -304,6 +304,7 @@
     <Content Include="Content\productos.css" />
     <Content Include="Content\reportes.css" />
     <Content Include="Content\reservas.css" />
+    <Content Include="Content\sanciones-cards-fix.css" />
     <Content Include="Content\sanciones.css" />
     <Content Include="Content\sports-buttons-fix.css" />
     <Content Include="Content\ver-reporte.css" />
